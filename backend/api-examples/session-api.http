@@ -1,0 +1,81 @@
+### Movie Picker API Collection
+### Base URL
+@baseUrl = http://localhost:8080/api
+
+### 1. Create a New Movie Picker Session
+# @name createSession
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+{
+  "hostName": "Lanz",
+  "maxUsers": 5,
+  "maxSuggestionsPerUser": 3
+}
+
+### Store roomCode from the response above to use in subsequent requests
+@roomCode = {{createSession.response.body.roomCode}}
+
+### 2. Fetch Session Details by Room Code
+GET {{baseUrl}}/sessions/{{roomCode}}
+Accept: application/json
+
+### 3. Join an Existing Session (User 2)
+POST {{baseUrl}}/sessions/join
+Content-Type: application/json
+
+{
+  "roomCode": "{{roomCode}}",
+  "displayName": "Alex"
+}
+
+### 4. Join an Existing Session (User 3)
+POST {{baseUrl}}/sessions/join
+Content-Type: application/json
+
+{
+  "roomCode": "{{roomCode}}",
+  "displayName": "Sarah"
+}
+
+### 5. Transition Session Status to VOTING
+PATCH {{baseUrl}}/sessions/{{roomCode}}/status
+Content-Type: application/json
+
+{
+  "status": "VOTING"
+}
+
+### 6. Transition Session Status to COMPLETED
+PATCH {{baseUrl}}/sessions/{{roomCode}}/status
+Content-Type: application/json
+
+{
+  "status": "COMPLETED"
+}
+
+### -------------------------------------------------------------
+### ERROR TESTING EXAMPLES
+### -------------------------------------------------------------
+
+### 7. ERROR TEST: Duplicate Display Name (HTTP 409 Conflict)
+POST {{baseUrl}}/sessions/join
+Content-Type: application/json
+
+{
+  "roomCode": "{{roomCode}}",
+  "displayName": "Alex"
+}
+
+### 8. ERROR TEST: Non-existent Room Code (HTTP 404 Not Found)
+GET {{baseUrl}}/sessions/INVALID
+Accept: application/json
+
+### 9. ERROR TEST: Invalid Request Payload (HTTP 400 Bad Request)
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+{
+  "hostName": "",
+  "maxUsers": 1
+}

@@ -1,0 +1,129 @@
+{
+	"info": {
+		"_postman_id": "movie-picker-session-api-v1",
+		"name": "Movie Picker - Session API",
+		"description": "Postman Collection for testing Movie Picker Session API endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Session",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"hostName\": \"Lanz\",\n  \"maxUsers\": 5,\n  \"maxSuggestionsPerUser\": 3\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/sessions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"sessions"
+					]
+				}
+			}
+		},
+		{
+			"name": "2. Get Session by Room Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/sessions/:roomCode",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"sessions",
+						":roomCode"
+					],
+					"variable": [
+						{
+							"key": "roomCode",
+							"value": "ENTER_ROOM_CODE_HERE"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "3. Join Session",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roomCode\": \"ENTER_ROOM_CODE_HERE\",\n  \"displayName\": \"Alex\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/sessions/join",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"sessions",
+						"join"
+					]
+				}
+			}
+		},
+		{
+			"name": "4. Update Session Status",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"status\": \"VOTING\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/sessions/:roomCode/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"sessions",
+						":roomCode",
+						"status"
+					],
+					"variable": [
+						{
+							"key": "roomCode",
+							"value": "ENTER_ROOM_CODE_HERE"
+						}
+					]
+				}
+			}
+		}
+	]
+}
