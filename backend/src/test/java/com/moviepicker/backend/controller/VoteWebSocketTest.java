@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -57,7 +57,7 @@ public class VoteWebSocketTest {
     @BeforeEach
     public void setUp() {
         stompClient = new WebSocketStompClient(new StandardWebSocketClient());
-        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        stompClient.setMessageConverter(new JacksonJsonMessageConverter());
 
         voteRepository.deleteAll();
         movieSuggestionRepository.deleteAll();
