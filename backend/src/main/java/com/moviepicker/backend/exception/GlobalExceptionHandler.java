@@ -105,6 +105,28 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MovieSuggestionLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMovieSuggestionLimitExceeded(MovieSuggestionLimitExceededException ex, HttpServletRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmptyMoviePoolException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyMoviePool(EmptyMoviePoolException ex, HttpServletRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(TmdbApiException.class)
     public ResponseEntity<ErrorResponse> handleTmdbApiException(TmdbApiException ex, HttpServletRequest request) {
         ErrorResponse error = ErrorResponse.builder()
