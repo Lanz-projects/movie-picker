@@ -4,6 +4,7 @@ import com.moviepicker.backend.dto.*;
 import com.moviepicker.backend.exception.ResourceNotFoundException;
 import com.moviepicker.backend.model.Session;
 import com.moviepicker.backend.repository.SessionRepository;
+import com.moviepicker.backend.service.ConsensusService;
 import com.moviepicker.backend.service.VoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Controller;
 public class VoteMessageController {
 
     private final VoteService voteService;
+    private final ConsensusService consensusService;
     private final SessionRepository sessionRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -66,5 +68,14 @@ public class VoteMessageController {
         String destination = "/topic/room/" + message.getRoomCode().trim();
         messagingTemplate.convertAndSend(destination, event);
         log.info("Broadcasted {} event to destination='{}'", eventType, destination);
+
+        // If all users finished voting, calculate results and broadcast winner to /topic/room/{roomCode}/results
+        if (progress.isAllUsersCompleted()) {
+            SessionResultsResponse results = consensusService.calculateResults(session.getId());
+            String resultsDestination = destination + "/results";
+            messagingTemplate.convertAndSend(resultsDestination, results);
+            log.info("Broadcasted winning results to destination='{}' (Winner: '{}')",
+                    resultsDestination, results.getWinner() != null ? results.getWinner().getTitle() : "None");
+        }
     }
 }

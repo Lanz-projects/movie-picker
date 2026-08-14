@@ -30,6 +30,9 @@ public class ConsensusControllerTest {
     @MockitoBean
     private ConsensusService consensusService;
 
+    @MockitoBean
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+
     @Test
     public void testCalculateResults_Returns200OK() throws Exception {
         ScoredMovieDto winner = ScoredMovieDto.builder()
