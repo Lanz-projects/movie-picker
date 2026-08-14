@@ -5,3 +5,7 @@
 # Operating System Files
 .DS_Store
 Thumbs.db
+
+# Prototypes & Mockups
+frontend/mockup/
+mockup/
