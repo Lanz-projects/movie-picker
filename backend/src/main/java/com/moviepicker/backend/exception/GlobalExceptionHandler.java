@@ -127,6 +127,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DuplicateVoteException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateVote(DuplicateVoteException ex, HttpServletRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(TmdbApiException.class)
     public ResponseEntity<ErrorResponse> handleTmdbApiException(TmdbApiException ex, HttpServletRequest request) {
         ErrorResponse error = ErrorResponse.builder()
