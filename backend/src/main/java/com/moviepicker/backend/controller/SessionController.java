@@ -1,9 +1,6 @@
 package com.moviepicker.backend.controller;
 
-import com.moviepicker.backend.dto.CreateSessionRequest;
-import com.moviepicker.backend.dto.JoinSessionRequest;
-import com.moviepicker.backend.dto.SessionResponse;
-import com.moviepicker.backend.dto.UpdateSessionStatusRequest;
+import com.moviepicker.backend.dto.*;
 import com.moviepicker.backend.service.SessionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +38,22 @@ public class SessionController {
             @PathVariable String roomCode,
             @Valid @RequestBody UpdateSessionStatusRequest request) {
         SessionResponse response = sessionService.updateSessionStatus(roomCode, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{sessionId}/leave")
+    public ResponseEntity<LeaveSessionResponse> leaveSession(
+            @PathVariable Long sessionId,
+            @Valid @RequestBody LeaveSessionRequest request) {
+        LeaveSessionResponse response = sessionService.leaveSession(sessionId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/room/{roomCode}/leave")
+    public ResponseEntity<LeaveSessionResponse> leaveSessionByRoomCode(
+            @PathVariable String roomCode,
+            @Valid @RequestBody LeaveSessionRequest request) {
+        LeaveSessionResponse response = sessionService.leaveSessionByRoomCode(roomCode, request);
         return ResponseEntity.ok(response);
     }
 }

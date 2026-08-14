@@ -17,17 +17,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.moviepicker.backend.dto.CreateSessionRequest;
-import com.moviepicker.backend.dto.JoinSessionRequest;
-import com.moviepicker.backend.dto.SessionResponse;
-import com.moviepicker.backend.dto.UpdateSessionStatusRequest;
+import com.moviepicker.backend.dto.*;
 import com.moviepicker.backend.exception.DuplicateDisplayNameException;
 import com.moviepicker.backend.exception.InvalidSessionStateException;
 import com.moviepicker.backend.exception.ResourceNotFoundException;
 import com.moviepicker.backend.exception.SessionFullException;
+import com.moviepicker.backend.model.MovieSuggestion;
 import com.moviepicker.backend.model.Session;
 import com.moviepicker.backend.model.SessionStatus;
 import com.moviepicker.backend.model.User;
+import com.moviepicker.backend.repository.MovieSuggestionRepository;
 import com.moviepicker.backend.repository.SessionRepository;
 import com.moviepicker.backend.repository.UserRepository;
 import com.moviepicker.backend.util.RoomCodeGenerator;
@@ -40,6 +39,9 @@ public class SessionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MovieSuggestionRepository movieSuggestionRepository;
 
     @Mock
     private RoomCodeGenerator roomCodeGenerator;
@@ -217,5 +219,99 @@ public class SessionServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(SessionStatus.VOTING);
         verify(sessionRepository, times(1)).save(sampleSession);
+    }
+
+    @Test
+    public void testLeaveSession_NonHostLeaves() {
+        User bobUser = User.builder()
+                .id(11L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(11L).build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(11L)).thenReturn(Optional.of(bobUser));
+        when(movieSuggestionRepository.findByUserId(11L)).thenReturn(List.of());
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
+
+        LeaveSessionResponse response = sessionService.leaveSession(1L, request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getHostName()).isEqualTo("Alice");
+        assertThat(response.getRemainingUserCount()).isEqualTo(1);
+        assertThat(response.getMessage()).contains("User 'Bob' left the session.");
+        verify(userRepository).delete(bobUser);
+    }
+
+    @Test
+    public void testLeaveSession_HostLeaves_SuccessionTransfersHost() {
+        User bobUser = User.builder()
+                .id(11L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now().plusSeconds(1))
+                .build();
+
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(10L).build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser)); // Alice is host
+        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of());
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(bobUser));
+        when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        LeaveSessionResponse response = sessionService.leaveSession(1L, request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getHostName()).isEqualTo("Bob");
+        assertThat(response.getRemainingUserCount()).isEqualTo(1);
+        assertThat(response.getMessage()).contains("Host role transferred to 'Bob'");
+        verify(userRepository).delete(hostUser);
+        verify(sessionRepository).save(sampleSession);
+    }
+
+    @Test
+    public void testLeaveSession_LastUserLeaves_SessionMarkedCompleted() {
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(10L).build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of());
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of()); // No remaining users
+        when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        LeaveSessionResponse response = sessionService.leaveSession(1L, request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SessionStatus.COMPLETED);
+        assertThat(response.getRemainingUserCount()).isEqualTo(0);
+        assertThat(response.getMessage()).contains("marked completed");
+        verify(sessionRepository).save(sampleSession);
+    }
+
+    @Test
+    public void testLeaveSession_DisassociatesMovieSuggestions() {
+        MovieSuggestion suggestion = MovieSuggestion.builder()
+                .id(100L)
+                .session(sampleSession)
+                .user(hostUser)
+                .title("Fight Club")
+                .build();
+
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(10L).build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of(suggestion));
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of());
+        when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        sessionService.leaveSession(1L, request);
+
+        assertThat(suggestion.getUser()).isNull();
+        verify(movieSuggestionRepository).saveAll(List.of(suggestion));
     }
 }

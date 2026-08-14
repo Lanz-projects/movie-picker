@@ -9,4 +9,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findBySessionId(Long sessionId);
     List<User> findBySessionRoomCode(String roomCode);
+    List<User> findBySessionIdOrderByJoinedAtAsc(Long sessionId);
+    List<User> findBySessionRoomCodeOrderByJoinedAtAsc(String roomCode);
 }

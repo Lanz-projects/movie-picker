@@ -1,27 +1,5 @@
 package com.moviepicker.backend.service;
 
-import com.moviepicker.backend.dto.MovieSubmissionDto;
-import com.moviepicker.backend.dto.MovieSuggestionResponse;
-import com.moviepicker.backend.dto.SessionResponse;
-import com.moviepicker.backend.dto.SubmitMoviesRequest;
-import com.moviepicker.backend.exception.EmptyMoviePoolException;
-import com.moviepicker.backend.exception.InvalidSessionStateException;
-import com.moviepicker.backend.exception.MovieSuggestionLimitExceededException;
-import com.moviepicker.backend.exception.ResourceNotFoundException;
-import com.moviepicker.backend.model.MovieSuggestion;
-import com.moviepicker.backend.model.Session;
-import com.moviepicker.backend.model.SessionStatus;
-import com.moviepicker.backend.model.User;
-import com.moviepicker.backend.repository.MovieSuggestionRepository;
-import com.moviepicker.backend.repository.SessionRepository;
-import com.moviepicker.backend.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +7,32 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.moviepicker.backend.dto.MovieSubmissionDto;
+import com.moviepicker.backend.dto.MovieSuggestionResponse;
+import com.moviepicker.backend.dto.SessionResponse;
+import com.moviepicker.backend.dto.SubmitMoviesRequest;
+import com.moviepicker.backend.exception.EmptyMoviePoolException;
+import com.moviepicker.backend.exception.InvalidSessionStateException;
+import com.moviepicker.backend.exception.MovieSuggestionLimitExceededException;
+import com.moviepicker.backend.model.MovieSuggestion;
+import com.moviepicker.backend.model.Session;
+import com.moviepicker.backend.model.SessionStatus;
+import com.moviepicker.backend.model.User;
+import com.moviepicker.backend.repository.MovieSuggestionRepository;
+import com.moviepicker.backend.repository.SessionRepository;
+import com.moviepicker.backend.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class MovieSubmissionServiceTest {

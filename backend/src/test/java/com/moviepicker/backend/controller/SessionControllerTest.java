@@ -2,11 +2,7 @@ package com.moviepicker.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.moviepicker.backend.dto.CreateSessionRequest;
-import com.moviepicker.backend.dto.JoinSessionRequest;
-import com.moviepicker.backend.dto.SessionResponse;
-import com.moviepicker.backend.dto.UpdateSessionStatusRequest;
-import com.moviepicker.backend.dto.UserResponse;
+import com.moviepicker.backend.dto.*;
 import com.moviepicker.backend.exception.DuplicateDisplayNameException;
 import com.moviepicker.backend.exception.GlobalExceptionHandler;
 import com.moviepicker.backend.exception.ResourceNotFoundException;
@@ -174,5 +170,52 @@ public class SessionControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("VOTING"));
+    }
+
+    @Test
+    public void testLeaveSession_Returns200OK() throws Exception {
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(1L).build();
+
+        LeaveSessionResponse leaveResponse = LeaveSessionResponse.builder()
+                .sessionId(100L)
+                .roomCode("ROOM99")
+                .hostName("Bob")
+                .status(SessionStatus.WAITING)
+                .remainingUserCount(1)
+                .message("Host role transferred to 'Bob'")
+                .build();
+
+        when(sessionService.leaveSession(eq(100L), any(LeaveSessionRequest.class))).thenReturn(leaveResponse);
+
+        mockMvc.perform(post("/api/sessions/100/leave")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hostName").value("Bob"))
+                .andExpect(jsonPath("$.remainingUserCount").value(1))
+                .andExpect(jsonPath("$.message").value("Host role transferred to 'Bob'"));
+    }
+
+    @Test
+    public void testLeaveSessionByRoomCode_Returns200OK() throws Exception {
+        LeaveSessionRequest request = LeaveSessionRequest.builder().userId(1L).build();
+
+        LeaveSessionResponse leaveResponse = LeaveSessionResponse.builder()
+                .sessionId(100L)
+                .roomCode("ROOM99")
+                .hostName("Alice")
+                .status(SessionStatus.WAITING)
+                .remainingUserCount(1)
+                .message("User 'Bob' left the session.")
+                .build();
+
+        when(sessionService.leaveSessionByRoomCode(eq("ROOM99"), any(LeaveSessionRequest.class))).thenReturn(leaveResponse);
+
+        mockMvc.perform(post("/api/sessions/room/ROOM99/leave")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomCode").value("ROOM99"))
+                .andExpect(jsonPath("$.message").value("User 'Bob' left the session."));
     }
 }

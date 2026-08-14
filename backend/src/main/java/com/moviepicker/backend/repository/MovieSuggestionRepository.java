@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface MovieSuggestionRepository extends JpaRepository<MovieSuggestion, Long> {
     List<MovieSuggestion> findBySessionId(Long sessionId);
+    List<MovieSuggestion> findByUserId(Long userId);
     long countBySessionIdAndUserId(Long sessionId, Long userId);
     boolean existsBySessionIdAndTmdbId(Long sessionId, Long tmdbId);
 }
