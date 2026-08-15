@@ -4,6 +4,7 @@ import com.moviepicker.backend.dto.MovieSubmissionDto;
 import com.moviepicker.backend.dto.MovieSuggestionResponse;
 import com.moviepicker.backend.dto.SessionResponse;
 import com.moviepicker.backend.dto.SubmitMoviesRequest;
+import com.moviepicker.backend.dto.UserResponse;
 import com.moviepicker.backend.exception.EmptyMoviePoolException;
 import com.moviepicker.backend.exception.InvalidSessionStateException;
 import com.moviepicker.backend.exception.MovieSuggestionLimitExceededException;
@@ -32,6 +33,7 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
     private final SessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final MovieSuggestionRepository movieSuggestionRepository;
+    private final RoomEventPublisher roomEventPublisher;
 
     @Override
     @Transactional
@@ -81,6 +83,22 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
             }
         }
 
+        List<User> users = userRepository.findBySessionId(sessionId);
+        List<MovieSuggestion> allSuggestions = movieSuggestionRepository.findBySessionId(sessionId);
+        long submittedUsersCount = allSuggestions.stream()
+                .map(s -> s.getUser() != null ? s.getUser().getId() : null)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .count();
+
+        roomEventPublisher.publishDeckSubmitted(
+                session.getRoomCode(),
+                user.getId(),
+                user.getDisplayName(),
+                (int) submittedUsersCount,
+                users.size()
+        );
+
         return savedSuggestions.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -116,6 +134,11 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
         session.setStatus(SessionStatus.VOTING);
         Session updatedSession = sessionRepository.save(session);
         List<User> users = userRepository.findBySessionId(sessionId);
+        List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        roomEventPublisher.publishStageChanged(session.getRoomCode(), updatedSession.getStatus(), userResponses);
 
         return SessionResponse.fromEntity(updatedSession, users);
     }

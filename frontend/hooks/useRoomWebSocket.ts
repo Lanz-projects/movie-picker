@@ -6,12 +6,18 @@ import type { RoomProgressEvent, SessionResultsResponse } from "@/types";
 
 export interface UseRoomWebSocketOptions {
   roomCode?: string;
+  userId?: number;
+  displayName?: string;
+  onRoomEvent?: (event: RoomProgressEvent) => void;
   onProgress?: (event: RoomProgressEvent) => void;
   onResults?: (results: SessionResultsResponse) => void;
 }
 
 export function useRoomWebSocket({
   roomCode,
+  userId,
+  displayName,
+  onRoomEvent,
   onProgress,
   onResults,
 }: UseRoomWebSocketOptions) {
@@ -25,12 +31,18 @@ export function useRoomWebSocket({
     const cleanCode = roomCode.trim();
 
     stompService.connect({
-      onConnect: () => setIsConnected(true),
+      onConnect: () => {
+        setIsConnected(true);
+        if (userId && displayName) {
+          stompService.registerPresence(cleanCode, userId, displayName);
+        }
+      },
       onDisconnect: () => setIsConnected(false),
       onError: () => setIsConnected(false),
     });
 
     const unsubRoom = stompService.subscribeToRoom(cleanCode, (event: RoomProgressEvent) => {
+      onRoomEvent?.(event);
       onProgress?.(event);
     });
 
@@ -46,7 +58,8 @@ export function useRoomWebSocket({
       unsubResults();
       setIsConnected(false);
     };
-  }, [roomCode, onProgress, onResults]);
+  }, [roomCode, userId, displayName, onRoomEvent, onProgress, onResults]);
 
   return { isConnected };
 }
+

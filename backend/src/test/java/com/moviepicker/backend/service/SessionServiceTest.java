@@ -46,6 +46,9 @@ public class SessionServiceTest {
     @Mock
     private RoomCodeGenerator roomCodeGenerator;
 
+    @Mock
+    private RoomEventPublisher roomEventPublisher;
+
     @InjectMocks
     private SessionServiceImpl sessionService;
 

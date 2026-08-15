@@ -190,6 +190,21 @@ describe("StompClientService", () => {
     });
   });
 
+  it("publishes presence registration to /app/room/register", () => {
+    service.connect();
+
+    service.registerPresence("ABCD", 10, "Alice");
+
+    expect(mockPublish).toHaveBeenCalledWith({
+      destination: "/app/room/register",
+      body: JSON.stringify({
+        roomCode: "ABCD",
+        userId: 10,
+        displayName: "Alice",
+      }),
+    });
+  });
+
   it("cleans up active subscriptions on disconnect", () => {
     service.connect();
     service.subscribeToRoom("ABCD", vi.fn());

@@ -30,6 +30,7 @@ public class SessionServiceImpl implements SessionService {
     private final UserRepository userRepository;
     private final MovieSuggestionRepository movieSuggestionRepository;
     private final RoomCodeGenerator roomCodeGenerator;
+    private final RoomEventPublisher roomEventPublisher;
 
     private static final int MAX_ROOM_CODE_RETRIES = 5;
 
@@ -92,9 +93,15 @@ public class SessionServiceImpl implements SessionService {
                 .session(session)
                 .displayName(request.getDisplayName().trim())
                 .build();
-        userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
 
         List<User> updatedUsers = userRepository.findBySessionId(session.getId());
+        List<UserResponse> userResponses = updatedUsers.stream()
+                .map(UserResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        roomEventPublisher.publishUserJoined(session.getRoomCode(), savedUser.getId(), savedUser.getDisplayName(), session.getHostName(), userResponses);
+
         return SessionResponse.fromEntity(session, updatedUsers);
     }
 
@@ -106,6 +113,12 @@ public class SessionServiceImpl implements SessionService {
         Session updatedSession = sessionRepository.save(session);
 
         List<User> users = userRepository.findBySessionId(updatedSession.getId());
+        List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        roomEventPublisher.publishStageChanged(session.getRoomCode(), updatedSession.getStatus(), userResponses);
+
         return SessionResponse.fromEntity(updatedSession, users);
     }
 
@@ -159,7 +172,7 @@ public class SessionServiceImpl implements SessionService {
                 .map(UserResponse::fromEntity)
                 .collect(Collectors.toList());
 
-        return LeaveSessionResponse.builder()
+        LeaveSessionResponse response = LeaveSessionResponse.builder()
                 .sessionId(session.getId())
                 .roomCode(session.getRoomCode())
                 .hostName(session.getHostName())
@@ -168,6 +181,10 @@ public class SessionServiceImpl implements SessionService {
                 .remainingUsers(userResponses)
                 .message(message)
                 .build();
+
+        roomEventPublisher.publishUserLeft(session.getRoomCode(), response);
+
+        return response;
     }
 
     @Override

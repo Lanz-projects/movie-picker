@@ -15,12 +15,15 @@ vi.mock("@/lib/api");
 vi.mock("@/lib/websocket", () => {
   return {
     stompService: {
-      connect: vi.fn(),
+      connect: vi.fn(({ onConnect }: { onConnect?: () => void }) => {
+        onConnect?.();
+      }),
       disconnect: vi.fn(),
       isConnected: vi.fn().mockReturnValue(true),
       subscribeToRoom: vi.fn().mockReturnValue(vi.fn()),
       subscribeToResults: vi.fn().mockReturnValue(vi.fn()),
       publishVote: vi.fn(),
+      registerPresence: vi.fn(),
     },
   };
 });
@@ -341,5 +344,144 @@ describe("SessionContext & useSession Hook", () => {
 
     expect(result.current.results).toEqual(incomingResults);
     expect(result.current.stage).toBe("WINNER");
+  });
+
+  it("updates room roster immediately when USER_JOINED arrives over WebSocket", async () => {
+    let roomProgressHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomProgressHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    expect(stompService.registerPresence).toHaveBeenCalledWith("MVE8", 10, "Alice");
+
+    // Incoming USER_JOINED event
+    act(() => {
+      roomProgressHandler?.({
+        eventType: "USER_JOINED",
+        roomCode: "MVE8",
+        userId: 11,
+        userDisplayName: "Bob",
+        hostName: "Alice",
+        sessionStatus: "WAITING",
+        users: [
+          { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+          { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+        ],
+      });
+    });
+
+    expect(result.current.session?.users).toHaveLength(2);
+    expect(result.current.session?.users[1].displayName).toBe("Bob");
+  });
+
+  it("updates room roster and host when USER_LEFT arrives over WebSocket", async () => {
+    let roomProgressHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomProgressHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("MVE8", "Bob");
+    });
+
+    expect(result.current.isHost).toBe(false);
+
+    // Host Alice leaves -> Bob becomes host
+    act(() => {
+      roomProgressHandler?.({
+        eventType: "USER_LEFT",
+        roomCode: "MVE8",
+        hostName: "Bob",
+        sessionStatus: "WAITING",
+        users: [{ id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" }],
+      });
+    });
+
+    expect(result.current.session?.users).toHaveLength(1);
+    expect(result.current.session?.hostName).toBe("Bob");
+    expect(result.current.isHost).toBe(true);
+  });
+
+  it("transitions stages immediately when STAGE_CHANGED arrives over WebSocket", async () => {
+    let roomProgressHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomProgressHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("MVE8", "Bob");
+    });
+
+    expect(result.current.stage).toBe("LOBBY");
+
+    // Advance to SUGGESTING
+    act(() => {
+      roomProgressHandler?.({
+        eventType: "STAGE_CHANGED",
+        roomCode: "MVE8",
+        sessionStatus: "SUGGESTING",
+      });
+    });
+
+    expect(result.current.stage).toBe("SEARCH");
+    expect(result.current.session?.status).toBe("SUGGESTING");
   });
 });

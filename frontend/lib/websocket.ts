@@ -157,6 +157,26 @@ export class StompClientService {
     }
   }
 
+  public registerPresence(roomCode: string, userId: number, displayName: string): void {
+    if (!this.client || !this.client.connected) {
+      console.warn("[STOMP] Client not connected. Cannot register presence for:", displayName);
+      return;
+    }
+
+    try {
+      this.client.publish({
+        destination: "/app/room/register",
+        body: JSON.stringify({
+          roomCode: roomCode.trim(),
+          userId,
+          displayName: displayName.trim(),
+        }),
+      });
+    } catch (err) {
+      console.error("[STOMP] Failed to register presence on /app/room/register:", err);
+    }
+  }
+
   public disconnect(): void {
     this.activeSubscriptions.forEach((sub) => sub.unsubscribe());
     this.activeSubscriptions.clear();

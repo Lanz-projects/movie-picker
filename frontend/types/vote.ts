@@ -1,6 +1,16 @@
+import type { UserResponse, SessionStatus } from "./session";
+
 export type VoteType = "LIKE" | "PASS" | "SUPERLIKE";
 
-export type RoomEventType = "VOTE_CAST" | "USER_COMPLETED" | "ALL_VOTING_COMPLETED";
+export type RoomEventType =
+  | "USER_JOINED"
+  | "USER_LEFT"
+  | "HOST_CHANGED"
+  | "STAGE_CHANGED"
+  | "DECK_SUBMITTED"
+  | "VOTE_CAST"
+  | "USER_COMPLETED"
+  | "ALL_VOTING_COMPLETED";
 
 export interface CastVoteRequest {
   userId: number;
@@ -73,11 +83,19 @@ export interface VoteMessageDto {
 export interface RoomProgressEvent {
   eventType: RoomEventType;
   roomCode: string;
-  userId: number;
-  userDisplayName: string;
-  movieSuggestionId: number;
-  tmdbId: number;
-  movieTitle: string;
-  voteType: VoteType;
-  progress: VotingProgressResponse;
+  userId?: number;
+  userDisplayName?: string;
+  hostName?: string;
+  sessionStatus?: SessionStatus;
+  users?: UserResponse[];
+  submittedUserCount?: number;
+  totalUserCount?: number;
+  message?: string;
+
+  // Voting fields
+  movieSuggestionId?: number;
+  tmdbId?: number;
+  movieTitle?: string;
+  voteType?: VoteType;
+  progress?: VotingProgressResponse;
 }

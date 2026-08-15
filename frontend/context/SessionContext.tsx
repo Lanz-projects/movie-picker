@@ -83,20 +83,78 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     return currentUser.displayName === session.hostName;
   }, [currentUser, session]);
 
-  const handleRoomProgress = React.useCallback((event: RoomProgressEvent) => {
-    if (event.progress) {
-      setProgress(event.progress);
-    }
-  }, []);
-
   const handleResults = React.useCallback((incomingResults: SessionResultsResponse) => {
     setResults(incomingResults);
     setStage("WINNER");
   }, []);
 
+  const handleRoomEvent = React.useCallback(
+    async (event: RoomProgressEvent) => {
+      // 1. Roster and presence updates
+      if (
+        event.eventType === "USER_JOINED" ||
+        event.eventType === "USER_LEFT" ||
+        event.eventType === "HOST_CHANGED"
+      ) {
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            users: event.users || prev.users,
+            hostName: event.hostName || prev.hostName,
+            status: event.sessionStatus || prev.status,
+          };
+        });
+      }
+
+      // 2. Stage transitions
+      if (event.eventType === "STAGE_CHANGED") {
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            status: event.sessionStatus || prev.status,
+            users: event.users || prev.users,
+            hostName: event.hostName || prev.hostName,
+          };
+        });
+
+        if (event.sessionStatus === "SUGGESTING") {
+          setStage("SEARCH");
+        } else if (event.sessionStatus === "VOTING") {
+          if (session?.id) {
+            try {
+              const movies = await apiGetSessionMovies(session.id);
+              setMovieDeck(movies);
+              const initialProgress = await apiGetProgress(session.roomCode);
+              setProgress(initialProgress);
+            } catch (err) {
+              console.error("[SessionContext] Failed to load movies on VOTING stage start:", err);
+            }
+          }
+          setStage("SWIPER");
+        } else if (event.sessionStatus === "WAITING") {
+          setMovieDeck([]);
+          clearMyDeckSelection();
+          setProgress(null);
+          setResults(null);
+          setStage("LOBBY");
+        }
+      }
+
+      // 3. Voting progress
+      if (event.progress) {
+        setProgress(event.progress);
+      }
+    },
+    [session?.id, session?.roomCode, clearMyDeckSelection]
+  );
+
   const { isConnected } = useRoomWebSocket({
     roomCode: session?.roomCode,
-    onProgress: handleRoomProgress,
+    userId: currentUser?.id,
+    displayName: currentUser?.displayName,
+    onRoomEvent: handleRoomEvent,
     onResults: handleResults,
   });
 
@@ -197,7 +255,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const refreshed = await apiGetSession(session.roomCode);
       setSession(refreshed);
 
-      // Auto-advance guest when host advances stage
       if (refreshed.status === "SUGGESTING" && stage === "LOBBY") {
         setStage("SEARCH");
       } else if (refreshed.status === "VOTING" && (stage === "LOBBY" || stage === "SEARCH")) {
@@ -209,21 +266,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       // Background refresh failure ignored
     }
   }, [session, stage]);
-
-  /**
-   * Periodic state synchronizer while in Lobby or Search stages
-   */
-  React.useEffect(() => {
-    if (!session?.roomCode || (stage !== "LOBBY" && stage !== "SEARCH")) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      refreshSession();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [session?.roomCode, stage, refreshSession]);
 
   const advanceToSearch = React.useCallback(async () => {
     if (!session) return;

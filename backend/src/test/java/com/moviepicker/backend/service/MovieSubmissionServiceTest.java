@@ -46,6 +46,9 @@ public class MovieSubmissionServiceTest {
     @Mock
     private MovieSuggestionRepository movieSuggestionRepository;
 
+    @Mock
+    private RoomEventPublisher roomEventPublisher;
+
     @InjectMocks
     private MovieSubmissionServiceImpl movieSubmissionService;
 
