@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Clapperboard, Copy, Check, Users, Crown, Wifi } from "lucide-react";
+import { Clapperboard, Copy, Check, Users, Crown, Wifi, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +94,17 @@ export function Header({
                     </Badge>
                   ) : null}
                 </div>
+              ) : null}
+
+              {/* Leave Room Action */}
+              {onLeaveRoom ? (
+                <button
+                  onClick={onLeaveRoom}
+                  title="Leave Room"
+                  className="p-1.5 rounded-lg text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
               ) : null}
 
               {/* Connection Dot */}
