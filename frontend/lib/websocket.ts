@@ -14,26 +14,30 @@ export interface WebSocketCallbacks {
   onError?: (error: unknown) => void;
 }
 
+interface QueuedSubscription {
+  destination: string;
+  callback: (message: IMessage) => void;
+}
+
 export class StompClientService {
   private client: Client | null = null;
   private isConnecting: boolean = false;
   private activeSubscriptions: Map<string, StompSubscription> = new Map();
+  private pendingSubscriptions: Map<string, QueuedSubscription> = new Map();
   private callbacks: WebSocketCallbacks = {};
 
-  /**
-   * Initializes and activates the STOMP connection with SockJS fallback.
-   */
   public connect(callbacks: WebSocketCallbacks = {}): void {
-    if (this.client?.active) {
-      if (callbacks.onConnect) callbacks.onConnect();
+    this.callbacks = { ...this.callbacks, ...callbacks };
+
+    if (this.client?.connected) {
+      this.callbacks.onConnect?.();
       return;
     }
 
-    if (this.isConnecting) {
+    if (this.isConnecting && this.client?.active) {
       return;
     }
 
-    this.callbacks = callbacks;
     this.isConnecting = true;
 
     this.client = new Client({
@@ -43,37 +47,39 @@ export class StompClientService {
       heartbeatOutgoing: 4000,
       onConnect: () => {
         this.isConnecting = false;
-        if (this.callbacks.onConnect) {
-          this.callbacks.onConnect();
-        }
+        this.callbacks.onConnect?.();
+        this.flushPendingSubscriptions();
       },
       onDisconnect: () => {
         this.isConnecting = false;
-        if (this.callbacks.onDisconnect) {
-          this.callbacks.onDisconnect();
-        }
+        this.callbacks.onDisconnect?.();
       },
       onStompError: (frame) => {
         this.isConnecting = false;
-        if (this.callbacks.onError) {
-          this.callbacks.onError(frame);
-        }
+        this.callbacks.onError?.(frame);
       },
       onWebSocketError: (event) => {
         this.isConnecting = false;
-        if (this.callbacks.onError) {
-          this.callbacks.onError(event);
-        }
+        this.callbacks.onError?.(event);
       },
     });
 
     this.client.activate();
   }
 
-  /**
-   * Subscribes to room progress events (votes cast, user finished, all finished).
-   * Topic: /topic/room/{roomCode}
-   */
+  private flushPendingSubscriptions(): void {
+    if (!this.client || !this.client.connected) return;
+
+    this.pendingSubscriptions.forEach(({ destination, callback }) => {
+      if (!this.activeSubscriptions.has(destination)) {
+        const sub = this.client?.subscribe(destination, callback);
+        if (sub) {
+          this.activeSubscriptions.set(destination, sub);
+        }
+      }
+    });
+  }
+
   public subscribeToRoom(
     roomCode: string,
     onProgressEvent: (event: RoomProgressEvent) => void
@@ -89,10 +95,6 @@ export class StompClientService {
     });
   }
 
-  /**
-   * Subscribes to automatic consensus results and winner announcements.
-   * Topic: /topic/room/{roomCode}/results
-   */
   public subscribeToResults(
     roomCode: string,
     onResultsEvent: (results: SessionResultsResponse) => void
@@ -108,29 +110,30 @@ export class StompClientService {
     });
   }
 
-  /**
-   * Generic subscription helper tracking active subscriptions.
-   */
   private subscribe(
     destination: string,
     callback: (message: IMessage) => void
   ): () => void {
-    if (!this.client || !this.client.connected) {
-      // If client not yet connected, register when connected or queue
-      console.warn(`[STOMP] Client is not connected. Subscription to ${destination} deferred.`);
-    }
+    this.pendingSubscriptions.set(destination, { destination, callback });
 
-    if (this.activeSubscriptions.has(destination)) {
-      this.activeSubscriptions.get(destination)?.unsubscribe();
-      this.activeSubscriptions.delete(destination);
-    }
+    if (this.client && this.client.connected) {
+      if (this.activeSubscriptions.has(destination)) {
+        this.activeSubscriptions.get(destination)?.unsubscribe();
+        this.activeSubscriptions.delete(destination);
+      }
 
-    const subscription = this.client?.subscribe(destination, callback);
-    if (subscription) {
-      this.activeSubscriptions.set(destination, subscription);
+      try {
+        const subscription = this.client.subscribe(destination, callback);
+        if (subscription) {
+          this.activeSubscriptions.set(destination, subscription);
+        }
+      } catch (err) {
+        console.warn(`[STOMP] Failed to subscribe to ${destination}, queued for reconnect:`, err);
+      }
     }
 
     return () => {
+      this.pendingSubscriptions.delete(destination);
       if (this.activeSubscriptions.has(destination)) {
         this.activeSubscriptions.get(destination)?.unsubscribe();
         this.activeSubscriptions.delete(destination);
@@ -138,52 +141,38 @@ export class StompClientService {
     };
   }
 
-  /**
-   * Publishes a swipe vote to /app/vote.
-   */
   public publishVote(payload: VoteMessageDto): void {
     if (!this.client || !this.client.connected) {
-      throw new Error("[STOMP] Cannot publish vote: WebSocket is not connected.");
+      console.warn("[STOMP] Client not connected. Cannot publish vote payload:", payload);
+      return;
     }
 
-    this.client.publish({
-      destination: "/app/vote",
-      body: JSON.stringify(payload),
-    });
+    try {
+      this.client.publish({
+        destination: "/app/vote",
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error("[STOMP] Failed to publish vote to /app/vote:", err);
+    }
   }
 
-  /**
-   * Checks if WebSocket client is currently connected.
-   */
-  public isConnected(): boolean {
-    return !!this.client?.connected;
-  }
-
-  /**
-   * Gracefully tears down all subscriptions and closes the socket connection.
-   */
   public disconnect(): void {
-    this.activeSubscriptions.forEach((sub) => {
-      try {
-        sub.unsubscribe();
-      } catch {
-        // Ignore during teardown
-      }
-    });
+    this.activeSubscriptions.forEach((sub) => sub.unsubscribe());
     this.activeSubscriptions.clear();
+    this.pendingSubscriptions.clear();
 
-    if (this.client) {
-      try {
-        this.client.deactivate();
-      } catch {
-        // Ignore during teardown
-      }
-      this.client = null;
+    if (this.client?.active) {
+      this.client.deactivate();
     }
-
+    this.client = null;
     this.isConnecting = false;
+    this.callbacks = {};
+  }
+
+  public isConnected(): boolean {
+    return Boolean(this.client?.connected);
   }
 }
 
-// Export singleton instance
 export const stompService = new StompClientService();

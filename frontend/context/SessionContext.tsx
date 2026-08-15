@@ -176,7 +176,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      await apiLeaveSession(session.roomCode, currentUser.displayName);
+      await apiLeaveSession(session.roomCode, currentUser.id);
     } catch {
       // Graceful exit
     } finally {
@@ -196,10 +196,34 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       const refreshed = await apiGetSession(session.roomCode);
       setSession(refreshed);
+
+      // Auto-advance guest when host advances stage
+      if (refreshed.status === "SUGGESTING" && stage === "LOBBY") {
+        setStage("SEARCH");
+      } else if (refreshed.status === "VOTING" && (stage === "LOBBY" || stage === "SEARCH")) {
+        const movies = await apiGetSessionMovies(refreshed.id);
+        setMovieDeck(movies);
+        setStage("SWIPER");
+      }
     } catch {
       // Background refresh failure ignored
     }
-  }, [session]);
+  }, [session, stage]);
+
+  /**
+   * Periodic state synchronizer while in Lobby or Search stages
+   */
+  React.useEffect(() => {
+    if (!session?.roomCode || (stage !== "LOBBY" && stage !== "SEARCH")) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      refreshSession();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [session?.roomCode, stage, refreshSession]);
 
   const advanceToSearch = React.useCallback(async () => {
     if (!session) return;

@@ -141,7 +141,7 @@ describe("SessionContext & useSession Hook", () => {
       await result.current.leaveRoom();
     });
 
-    expect(api.leaveSessionByRoomCode).toHaveBeenCalledWith("MVE8", "Alice");
+    expect(api.leaveSessionByRoomCode).toHaveBeenCalledWith("MVE8", 10);
     expect(stompService.disconnect).toHaveBeenCalled();
     expect(result.current.session).toBeNull();
     expect(result.current.stage).toBe("SETUP");

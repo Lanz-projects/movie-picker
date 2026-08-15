@@ -17,7 +17,7 @@ export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps)
   const [nameError, setNameError] = React.useState<string | null>(null);
 
   const handleRoomCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uppercase = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+    const uppercase = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     setRoomCode(uppercase);
     if (codeError) setCodeError(null);
   };
@@ -26,8 +26,8 @@ export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps)
     e.preventDefault();
     let hasError = false;
 
-    if (!roomCode || roomCode.length !== 4) {
-      setCodeError("Room code must be exactly 4 characters.");
+    if (!roomCode || roomCode.length !== 6) {
+      setCodeError("Room code must be exactly 6 characters.");
       hasError = true;
     }
 
@@ -54,16 +54,16 @@ export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps)
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5">
-          4-Letter Room Code
+          6-Character Room Code
         </label>
         <Input
-          placeholder="MVE8"
+          placeholder="e.g. MVE892"
           value={roomCode}
           onChange={handleRoomCodeChange}
           leftIcon={<KeyRound className="h-4 w-4 text-text-muted" />}
           error={codeError || undefined}
           disabled={isLoading}
-          maxLength={4}
+          maxLength={6}
           className="font-mono uppercase tracking-widest text-base font-bold text-center sm:text-left"
           autoFocus
         />

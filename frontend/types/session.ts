@@ -30,7 +30,7 @@ export interface JoinSessionRequest {
 }
 
 export interface LeaveSessionRequest {
-  displayName: string;
+  userId: number;
 }
 
 export interface LeaveSessionResponse {

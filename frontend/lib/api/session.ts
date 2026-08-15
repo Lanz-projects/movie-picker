@@ -53,10 +53,10 @@ export async function updateSessionStatus(
 
 export async function leaveSessionByRoomCode(
   roomCode: string,
-  displayName: string
+  userId: number
 ): Promise<LeaveSessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
-  const body: LeaveSessionRequest = { displayName: displayName.trim() };
+  const body: LeaveSessionRequest = { userId };
   return request<LeaveSessionResponse>(`/api/sessions/room/${code}/leave`, {
     method: "POST",
     body: JSON.stringify(body),

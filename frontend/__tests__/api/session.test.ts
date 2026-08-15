@@ -142,13 +142,13 @@ describe("Session API Client", () => {
       json: async () => mockResponse,
     } as unknown as Response);
 
-    const result = await leaveSessionByRoomCode("ABCD", "Bob");
+    const result = await leaveSessionByRoomCode("ABCD", 11);
 
     expect(global.fetch).toHaveBeenCalledWith(
       "http://localhost:8080/api/sessions/room/ABCD/leave",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ displayName: "Bob" }),
+        body: JSON.stringify({ userId: 11 }),
       })
     );
     expect(result.sessionClosed).toBe(false);

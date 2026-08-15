@@ -52,7 +52,7 @@ describe("SetupScreen Component", () => {
     const joinTab = screen.getByRole("button", { name: /join with code/i });
     await user.click(joinTab);
 
-    expect(screen.getByPlaceholderText(/mve8/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/mve892/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /join cinema room/i })
     ).toBeInTheDocument();
@@ -174,7 +174,7 @@ describe("SetupScreen Component", () => {
     const user = userEvent.setup({ delay: null });
     const mockSession: SessionResponse = {
       id: 1,
-      roomCode: "ABCD",
+      roomCode: "MVE892",
       hostName: "HostUser",
       status: "WAITING",
       maxUsers: 10,
@@ -193,19 +193,19 @@ describe("SetupScreen Component", () => {
     // Switch to Join tab
     await user.click(screen.getByRole("button", { name: /join with code/i }));
 
-    const codeInput = screen.getByPlaceholderText(/mve8/i);
+    const codeInput = screen.getByPlaceholderText(/mve892/i);
     const nameInput = screen.getByPlaceholderText(/e\.g\. alex/i);
     const submitButton = screen.getByRole("button", { name: /join cinema room/i });
 
     // Type lowercase code (should auto-uppercase)
-    await user.type(codeInput, "abcd");
-    expect(codeInput).toHaveValue("ABCD");
+    await user.type(codeInput, "mve892");
+    expect(codeInput).toHaveValue("MVE892");
 
     await user.type(nameInput, "Alex");
     await user.click(submitButton);
 
     expect(api.joinSession).toHaveBeenCalledWith({
-      roomCode: "ABCD",
+      roomCode: "MVE892",
       displayName: "Alex",
     });
   });
