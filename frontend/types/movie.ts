@@ -1,28 +1,25 @@
 export interface MovieDto {
-  id: number;
+  tmdbId: number;
   title: string;
   overview: string;
   posterPath: string | null;
-  releaseDate: string;
+  releaseYear: number | null;
   voteAverage: number;
-  voteCount: number;
 }
 
 export interface MovieSearchResponse {
-  results: MovieDto[];
   page: number;
   totalPages: number;
   totalResults: number;
+  movies: MovieDto[];
 }
 
 export interface MovieSubmissionDto {
   tmdbId: number;
   title: string;
-  overview: string;
-  posterPath: string | null;
-  releaseDate: string;
-  voteAverage: number;
-  voteCount: number;
+  overview?: string | null;
+  posterPath?: string | null;
+  releaseYear?: number | null;
 }
 
 export interface SubmitMoviesRequest {
@@ -33,12 +30,11 @@ export interface SubmitMoviesRequest {
 export interface MovieSuggestionResponse {
   id: number;
   tmdbId: number;
+  userId: number;
+  userDisplayName: string;
   title: string;
-  overview: string;
+  overview: string | null;
   posterPath: string | null;
-  releaseDate: string;
-  voteAverage: number;
-  voteCount: number;
-  suggestedByUserId: number;
-  suggestedByUserDisplayName: string;
+  releaseYear: number | null;
+  suggestedAt: string;
 }

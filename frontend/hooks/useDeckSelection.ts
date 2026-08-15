@@ -11,7 +11,7 @@ export function useDeckSelection(maxSuggestions = 5) {
     (movie: MovieDto) => {
       setDeckError(null);
       setMyDeckSelection((prev) => {
-        if (prev.some((m) => m.tmdbId === movie.id)) {
+        if (prev.some((m) => m.tmdbId === movie.tmdbId)) {
           return prev;
         }
         if (prev.length >= maxSuggestions) {
@@ -21,13 +21,11 @@ export function useDeckSelection(maxSuggestions = 5) {
         return [
           ...prev,
           {
-            tmdbId: movie.id,
+            tmdbId: movie.tmdbId,
             title: movie.title,
             overview: movie.overview,
             posterPath: movie.posterPath,
-            releaseDate: movie.releaseDate,
-            voteAverage: movie.voteAverage,
-            voteCount: movie.voteCount,
+            releaseYear: movie.releaseYear,
           },
         ];
       });

@@ -169,13 +169,12 @@ describe("SessionContext & useSession Hook", () => {
 
     act(() => {
       result.current.addToDeck({
-        id: 27205,
+        tmdbId: 27205,
         title: "Inception",
         overview: "Overview",
         posterPath: "/inception.jpg",
-        releaseDate: "2010-07-15",
+        releaseYear: 2010,
         voteAverage: 8.4,
-        voteCount: 35000,
       });
     });
 
@@ -185,13 +184,12 @@ describe("SessionContext & useSession Hook", () => {
     // Deduplication test: adding same movie again does not duplicate
     act(() => {
       result.current.addToDeck({
-        id: 27205,
+        tmdbId: 27205,
         title: "Inception",
         overview: "Overview",
         posterPath: "/inception.jpg",
-        releaseDate: "2010-07-15",
+        releaseYear: 2010,
         voteAverage: 8.4,
-        voteCount: 35000,
       });
     });
 

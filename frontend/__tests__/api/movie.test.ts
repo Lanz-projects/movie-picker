@@ -18,15 +18,14 @@ describe("Movie API Client", () => {
 
   it("searchMovies properly encodes query string and page parameter", async () => {
     const mockResponse: MovieSearchResponse = {
-      results: [
+      movies: [
         {
-          id: 27205,
+          tmdbId: 27205,
           title: "Inception",
           overview: "A thief who steals corporate secrets...",
           posterPath: "/inception.jpg",
-          releaseDate: "2010-07-15",
+          releaseYear: 2010,
           voteAverage: 8.4,
-          voteCount: 35000,
         },
       ],
       page: 1,
@@ -45,7 +44,7 @@ describe("Movie API Client", () => {
       "http://localhost:8080/api/movies/search?query=Inception%20%26%20Interstellar&page=2",
       expect.objectContaining({ method: "GET" })
     );
-    expect(result.results[0].title).toBe("Inception");
+    expect(result.movies[0].title).toBe("Inception");
   });
 
   it("submitMovies sends POST with movies payload", async () => {
@@ -56,11 +55,10 @@ describe("Movie API Client", () => {
         title: "Inception",
         overview: "Overview",
         posterPath: "/poster.jpg",
-        releaseDate: "2010-07-15",
-        voteAverage: 8.4,
-        voteCount: 35000,
-        suggestedByUserId: 10,
-        suggestedByUserDisplayName: "Alice",
+        releaseYear: 2010,
+        userId: 10,
+        userDisplayName: "Alice",
+        suggestedAt: "2026-08-14T00:00:00",
       },
     ];
 
@@ -77,9 +75,7 @@ describe("Movie API Client", () => {
           title: "Inception",
           overview: "Overview",
           posterPath: "/poster.jpg",
-          releaseDate: "2010-07-15",
-          voteAverage: 8.4,
-          voteCount: 35000,
+          releaseYear: 2010,
         },
       ],
     });
@@ -89,6 +85,7 @@ describe("Movie API Client", () => {
       expect.objectContaining({ method: "POST" })
     );
     expect(result).toHaveLength(1);
+    expect(result[0].userDisplayName).toBe("Alice");
   });
 
   it("getSessionMovies sends GET and returns suggestions", async () => {
