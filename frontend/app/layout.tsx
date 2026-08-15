@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
+import { SessionProvider } from "@/context/SessionContext";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -43,7 +44,7 @@ export default function RootLayout({
       className={`${outfit.variable} ${inter.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col cinema-ambient-bg text-text-main bg-bg-base font-sans selection:bg-brand-indigo/30 selection:text-white">
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
