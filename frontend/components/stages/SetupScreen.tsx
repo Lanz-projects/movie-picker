@@ -37,7 +37,7 @@ export function SetupScreen() {
     <StageContainer maxWidth="md">
       {/* Cinema Hero Title */}
       <div className="flex flex-col items-center text-center mb-8">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-indigo to-brand-violet text-white shadow-xl shadow-brand-indigo/30 mb-4 animate-bounce duration-1000">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-xl shadow-brand-indigo/30 mb-4 animate-bounce duration-1000">
           <Clapperboard className="h-7 w-7" />
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-white">
