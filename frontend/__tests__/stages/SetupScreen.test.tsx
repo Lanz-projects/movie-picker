@@ -46,10 +46,11 @@ describe("SetupScreen Component", () => {
   });
 
   it("switches to Join with Code tab when clicked", async () => {
+    const user = userEvent.setup({ delay: null });
     renderSetupScreen();
 
     const joinTab = screen.getByRole("button", { name: /join with code/i });
-    await userEvent.click(joinTab);
+    await user.click(joinTab);
 
     expect(screen.getByPlaceholderText(/mve8/i)).toBeInTheDocument();
     expect(
@@ -58,6 +59,7 @@ describe("SetupScreen Component", () => {
   });
 
   it("validates host nickname and submits create room request", async () => {
+    const user = userEvent.setup({ delay: null });
     const mockSession: SessionResponse = {
       id: 1,
       roomCode: "MVE8",
@@ -76,14 +78,14 @@ describe("SetupScreen Component", () => {
     const submitButton = screen.getByRole("button", { name: /create cinema room/i });
 
     // Submit empty
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
     expect(screen.getByText(/please enter your nickname\./i)).toBeInTheDocument();
 
     // Type nickname
     const nameInput = screen.getByPlaceholderText(/e\.g\. lanz, sarah/i);
-    await userEvent.type(nameInput, "Lanz");
+    await user.type(nameInput, "Lanz");
 
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     expect(api.createSession).toHaveBeenCalledWith({
       hostName: "Lanz",
@@ -93,6 +95,7 @@ describe("SetupScreen Component", () => {
   });
 
   it("updates max players and suggestions using stepper buttons", async () => {
+    const user = userEvent.setup({ delay: null });
     const mockSession: SessionResponse = {
       id: 1,
       roomCode: "MVE8",
@@ -110,17 +113,17 @@ describe("SetupScreen Component", () => {
 
     // Increase max players from 10 to 11
     const increasePlayersBtn = screen.getByRole("button", { name: /increase max players/i });
-    await userEvent.click(increasePlayersBtn);
+    await user.click(increasePlayersBtn);
 
     // Decrease movies per player from 5 to 4
     const decreaseMoviesBtn = screen.getByRole("button", { name: /decrease movies per player/i });
-    await userEvent.click(decreaseMoviesBtn);
+    await user.click(decreaseMoviesBtn);
 
     const nameInput = screen.getByPlaceholderText(/e\.g\. lanz, sarah/i);
-    await userEvent.type(nameInput, "Lanz");
+    await user.type(nameInput, "Lanz");
 
     const submitButton = screen.getByRole("button", { name: /create cinema room/i });
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     expect(api.createSession).toHaveBeenCalledWith({
       hostName: "Lanz",
@@ -130,6 +133,7 @@ describe("SetupScreen Component", () => {
   });
 
   it("allows directly typing numbers into max players and suggestions inputs", async () => {
+    const user = userEvent.setup({ delay: null });
     const mockSession: SessionResponse = {
       id: 1,
       roomCode: "MVE8",
@@ -146,18 +150,18 @@ describe("SetupScreen Component", () => {
     renderSetupScreen();
 
     const maxPlayersInput = screen.getByLabelText(/max players input/i);
-    await userEvent.clear(maxPlayersInput);
-    await userEvent.type(maxPlayersInput, "16");
+    await user.clear(maxPlayersInput);
+    await user.type(maxPlayersInput, "16");
 
     const maxSuggestionsInput = screen.getByLabelText(/movies per player input/i);
-    await userEvent.clear(maxSuggestionsInput);
-    await userEvent.type(maxSuggestionsInput, "8");
+    await user.clear(maxSuggestionsInput);
+    await user.type(maxSuggestionsInput, "8");
 
     const nameInput = screen.getByPlaceholderText(/e\.g\. lanz, sarah/i);
-    await userEvent.type(nameInput, "Lanz");
+    await user.type(nameInput, "Lanz");
 
     const submitButton = screen.getByRole("button", { name: /create cinema room/i });
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     expect(api.createSession).toHaveBeenCalledWith({
       hostName: "Lanz",
@@ -167,6 +171,7 @@ describe("SetupScreen Component", () => {
   });
 
   it("validates join room code mask, auto-uppercases, and submits join request", async () => {
+    const user = userEvent.setup({ delay: null });
     const mockSession: SessionResponse = {
       id: 1,
       roomCode: "ABCD",
@@ -186,18 +191,18 @@ describe("SetupScreen Component", () => {
     renderSetupScreen();
 
     // Switch to Join tab
-    await userEvent.click(screen.getByRole("button", { name: /join with code/i }));
+    await user.click(screen.getByRole("button", { name: /join with code/i }));
 
     const codeInput = screen.getByPlaceholderText(/mve8/i);
     const nameInput = screen.getByPlaceholderText(/e\.g\. alex/i);
     const submitButton = screen.getByRole("button", { name: /join cinema room/i });
 
     // Type lowercase code (should auto-uppercase)
-    await userEvent.type(codeInput, "abcd");
+    await user.type(codeInput, "abcd");
     expect(codeInput).toHaveValue("ABCD");
 
-    await userEvent.type(nameInput, "Alex");
-    await userEvent.click(submitButton);
+    await user.type(nameInput, "Alex");
+    await user.click(submitButton);
 
     expect(api.joinSession).toHaveBeenCalledWith({
       roomCode: "ABCD",
@@ -206,6 +211,7 @@ describe("SetupScreen Component", () => {
   });
 
   it("displays server error banner when room creation or join fails", async () => {
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.createSession).mockRejectedValue(
       new Error("Room creation failed due to database error.")
     );
@@ -213,10 +219,10 @@ describe("SetupScreen Component", () => {
     renderSetupScreen();
 
     const nameInput = screen.getByPlaceholderText(/e\.g\. lanz, sarah/i);
-    await userEvent.type(nameInput, "Lanz");
+    await user.type(nameInput, "Lanz");
 
     const submitButton = screen.getByRole("button", { name: /create cinema room/i });
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(
@@ -226,7 +232,7 @@ describe("SetupScreen Component", () => {
 
     // Dismiss error button
     const dismissButton = screen.getByTitle(/dismiss error/i);
-    await userEvent.click(dismissButton);
+    await user.click(dismissButton);
 
     expect(
       screen.queryByText(/room creation failed due to database error\./i)
