@@ -74,6 +74,7 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
 
     const currentReqId = ++activeRequestIdRef.current;
     setIsLoading(true);
+    setIsSearchingMore(false);
     setError(null);
 
     const timer = setTimeout(async () => {
