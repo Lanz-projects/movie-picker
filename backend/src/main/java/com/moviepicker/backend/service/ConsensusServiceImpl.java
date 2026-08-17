@@ -90,9 +90,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         for (MovieSuggestion movie : movies) {
             List<Vote> votes = voteRepository.findBySessionIdAndMovieSuggestionId(session.getId(), movie.getId());
 
-            long yesVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.YES).count();
+            long yesVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.YES || v.getVoteType() == VoteType.LIKE).count();
             long superlikeVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.SUPERLIKE).count();
-            long noVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.NO).count();
+            long noVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.NO || v.getVoteType() == VoteType.PASS).count();
             long skipVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.SKIP).count();
 
             int score = (int) ((yesVotes * 1) + (superlikeVotes * 2));
