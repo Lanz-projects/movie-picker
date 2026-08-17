@@ -4,6 +4,7 @@ import * as React from "react";
 import { Header } from "@/components/layout/Header";
 import { SetupScreen } from "@/components/stages/SetupScreen";
 import { LobbyScreen } from "@/components/stages/LobbyScreen";
+import { SearchScreen } from "@/components/stages/SearchScreen";
 import { useSession } from "@/context/SessionContext";
 
 export default function Home() {
@@ -24,6 +25,7 @@ export default function Home() {
       {/* Dynamic Stage Rendering */}
       {stage === "SETUP" && <SetupScreen />}
       {stage === "LOBBY" && <LobbyScreen />}
+      {stage === "SEARCH" && <SearchScreen />}
     </div>
   );
 }

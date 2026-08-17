@@ -23,9 +23,18 @@ export function MovieDetailsModal({
   onToggleDeck,
   disabled = false,
 }: MovieDetailsModalProps) {
-  // Listen for Escape key
+  const [imageError, setImageError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImageError(false);
+  }, [movie?.posterPath, movie?.tmdbId]);
+
+  // Lock body scroll and listen for Escape key
   React.useEffect(() => {
     if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -34,16 +43,20 @@ export function MovieDetailsModal({
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen || !movie) {
     return null;
   }
 
-  const posterUrl = movie.posterPath
-    ? `https://image.tmdb.org/t/p/w500${movie.posterPath}`
-    : null;
+  const posterUrl =
+    !imageError && movie.posterPath
+      ? `https://image.tmdb.org/t/p/w500${movie.posterPath}`
+      : null;
 
   const formattedRating =
     movie.voteAverage && movie.voteAverage > 0
@@ -80,6 +93,7 @@ export function MovieDetailsModal({
               <img
                 src={posterUrl}
                 alt={movie.title}
+                onError={() => setImageError(true)}
                 className="h-full w-full object-cover"
               />
             ) : (

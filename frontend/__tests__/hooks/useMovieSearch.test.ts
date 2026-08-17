@@ -276,4 +276,26 @@ describe("useMovieSearch", () => {
     expect(result.current.totalResults).toBe(0);
     expect(result.current.hasSearched).toBe(false);
   });
+
+  it("clears error state when clearError is called", async () => {
+    mockSearchMovies.mockRejectedValueOnce(new Error("Network error"));
+
+    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
+
+    act(() => {
+      result.current.setQuery("Crash");
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(result.current.error).toBe("Network error");
+
+    act(() => {
+      result.current.clearError();
+    });
+
+    expect(result.current.error).toBeNull();
+  });
 });

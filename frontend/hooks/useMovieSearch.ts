@@ -22,6 +22,7 @@ export interface UseMovieSearchReturn {
   hasSearched: boolean;
   loadMore: () => Promise<void>;
   clearSearch: () => void;
+  clearError: () => void;
 }
 
 export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSearchReturn {
@@ -42,6 +43,10 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
   // Keep track of the current query string for loadMore
   const currentQueryRef = React.useRef<string>(initialQuery);
   currentQueryRef.current = query;
+
+  const clearError = React.useCallback(() => {
+    setError(null);
+  }, []);
 
   const clearSearch = React.useCallback(() => {
     activeRequestIdRef.current += 1;
@@ -153,5 +158,6 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
     hasSearched,
     loadMore,
     clearSearch,
+    clearError,
   };
 }

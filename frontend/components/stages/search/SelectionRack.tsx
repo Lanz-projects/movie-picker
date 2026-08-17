@@ -7,6 +7,61 @@ import { Badge } from "@/components/ui/Badge";
 import type { MovieSubmissionDto } from "@/types";
 import { cn } from "@/lib/utils";
 
+interface SelectionRackItemProps {
+  movie: MovieSubmissionDto;
+  hasSubmitted: boolean;
+  onRemoveMovie: (tmdbId: number) => void;
+}
+
+function SelectionRackItem({
+  movie,
+  hasSubmitted,
+  onRemoveMovie,
+}: SelectionRackItemProps) {
+  const [imageError, setImageError] = React.useState(false);
+
+  const posterSrc =
+    !imageError && movie.posterPath
+      ? `https://image.tmdb.org/t/p/w200${movie.posterPath}`
+      : null;
+
+  return (
+    <div
+      className="group relative h-20 w-14 sm:h-24 sm:w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-bg-elevated shadow-md"
+      title={movie.title}
+    >
+      {posterSrc ? (
+        <img
+          src={posterSrc}
+          alt={movie.title}
+          onError={() => setImageError(true)}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center p-1 text-center text-text-muted">
+          <Film className="h-5 w-5 mb-1 opacity-50" />
+          <span className="text-[9px] line-clamp-2 leading-tight">
+            {movie.title}
+          </span>
+        </div>
+      )}
+
+      {/* Remove Overlay Button */}
+      {!hasSubmitted ? (
+        <button
+          type="button"
+          onClick={() => onRemoveMovie(movie.tmdbId)}
+          aria-label={`Remove ${movie.title} from deck`}
+          className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/80 text-white opacity-80 hover:bg-brand-coral hover:opacity-100 transition-all cursor-pointer shadow-sm"
+          title="Remove from deck"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export interface SelectionRackProps {
   selectedMovies: MovieSubmissionDto[];
   maxSuggestions: number;
@@ -65,47 +120,14 @@ export function SelectionRack({
 
       {/* Thumbnails Row: Active Picks + Placeholder Slots */}
       <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 py-1">
-        {selectedMovies.map((movie) => {
-          const posterSrc = movie.posterPath
-            ? `https://image.tmdb.org/t/p/w200${movie.posterPath}`
-            : null;
-
-          return (
-            <div
-              key={movie.tmdbId}
-              className="group relative h-20 w-14 sm:h-24 sm:w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-bg-elevated shadow-md"
-              title={movie.title}
-            >
-              {posterSrc ? (
-                <img
-                  src={posterSrc}
-                  alt={movie.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center p-1 text-center text-text-muted">
-                  <Film className="h-5 w-5 mb-1 opacity-50" />
-                  <span className="text-[9px] line-clamp-2 leading-tight">
-                    {movie.title}
-                  </span>
-                </div>
-              )}
-
-              {/* Remove Overlay Button */}
-              {!hasSubmitted ? (
-                <button
-                  type="button"
-                  onClick={() => onRemoveMovie(movie.tmdbId)}
-                  aria-label={`Remove ${movie.title} from deck`}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/80 text-white opacity-80 hover:bg-brand-coral hover:opacity-100 transition-all cursor-pointer shadow-sm"
-                  title="Remove from deck"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              ) : null}
-            </div>
-          );
-        })}
+        {selectedMovies.map((movie) => (
+          <SelectionRackItem
+            key={movie.tmdbId}
+            movie={movie}
+            hasSubmitted={hasSubmitted}
+            onRemoveMovie={onRemoveMovie}
+          />
+        ))}
 
         {/* Empty Placeholder Slots */}
         {Array.from({ length: emptySlotsCount }).map((_, index) => (

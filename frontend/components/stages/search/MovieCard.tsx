@@ -16,7 +16,7 @@ export interface MovieCardProps {
   className?: string;
 }
 
-export function MovieCard({
+export const MovieCard = React.memo(function MovieCard({
   movie,
   isInDeck,
   onToggleDeck,
@@ -171,4 +171,4 @@ export function MovieCard({
       </div>
     </div>
   );
-}
+});
