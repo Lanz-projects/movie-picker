@@ -73,7 +73,7 @@ public class SessionServiceImpl implements SessionService {
     public SessionResponse joinSession(JoinSessionRequest request) {
         Session session = findSessionByRoomCodeOrThrow(request.getRoomCode());
 
-        if (session.getStatus() != SessionStatus.WAITING) {
+        if (session.getStatus() != SessionStatus.WAITING && session.getStatus() != SessionStatus.SUGGESTING) {
             throw new InvalidSessionStateException("Cannot join session in " + session.getStatus() + " state");
         }
 

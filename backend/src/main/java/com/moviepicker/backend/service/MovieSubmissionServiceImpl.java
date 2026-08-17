@@ -41,7 +41,7 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
 
-        if (session.getStatus() != SessionStatus.WAITING) {
+        if (session.getStatus() != SessionStatus.WAITING && session.getStatus() != SessionStatus.SUGGESTING) {
             throw new InvalidSessionStateException("Cannot submit movies when session is in " + session.getStatus() + " status");
         }
 
@@ -122,7 +122,7 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
 
-        if (session.getStatus() != SessionStatus.WAITING) {
+        if (session.getStatus() != SessionStatus.WAITING && session.getStatus() != SessionStatus.SUGGESTING) {
             throw new InvalidSessionStateException("Cannot start voting when session is in " + session.getStatus() + " status");
         }
 
