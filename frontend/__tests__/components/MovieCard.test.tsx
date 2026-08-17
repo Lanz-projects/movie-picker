@@ -130,4 +130,22 @@ describe("MovieCard", () => {
     fireEvent.click(addButton);
     expect(mockOnToggleDeck).not.toHaveBeenCalled();
   });
+
+  it("triggers onSelectMovie when the info button is clicked", () => {
+    render(
+      <MovieCard
+        movie={mockMovie}
+        isInDeck={false}
+        onToggleDeck={mockOnToggleDeck}
+        onSelectMovie={mockOnSelectMovie}
+      />
+    );
+
+    const infoButton = screen.getByRole("button", { name: /View details for Fight Club/i });
+    fireEvent.click(infoButton);
+
+    expect(mockOnSelectMovie).toHaveBeenCalledTimes(1);
+    expect(mockOnSelectMovie).toHaveBeenCalledWith(mockMovie);
+    expect(mockOnToggleDeck).not.toHaveBeenCalled();
+  });
 });
