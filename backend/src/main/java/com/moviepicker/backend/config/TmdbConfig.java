@@ -21,6 +21,6 @@ public class TmdbConfig {
     @Bean
     @ConditionalOnMissingBean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("movieSearches");
+        return new ConcurrentMapCacheManager("movieSearches", "movieDetails");
     }
 }

@@ -4,6 +4,7 @@ import {
   submitMovies,
   getSessionMovies,
   startVoting,
+  getMovieDetails,
 } from "@/lib/api/movie";
 import type {
   MovieSearchResponse,
@@ -127,5 +128,36 @@ describe("Movie API Client", () => {
       expect.objectContaining({ method: "POST" })
     );
     expect(result.status).toBe("VOTING");
+  });
+
+  it("getMovieDetails sends GET to /api/movies/{tmdbId}", async () => {
+    const mockDetails = {
+      tmdbId: 27205,
+      title: "Inception",
+      overview: "A thief...",
+      posterPath: "/poster.jpg",
+      directors: ["Christopher Nolan"],
+      topCast: ["Leonardo DiCaprio"],
+      genres: ["Action", "Sci-Fi"],
+      runtime: 148,
+      formattedRuntime: "2h 28m",
+      contentRating: "PG-13",
+      voteAverage: 8.4,
+      streamingProviders: [],
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockDetails,
+    } as unknown as Response);
+
+    const result = await getMovieDetails(27205);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8080/api/movies/27205",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(result.title).toBe("Inception");
+    expect(result.directors).toContain("Christopher Nolan");
   });
 });

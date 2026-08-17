@@ -87,6 +87,19 @@ function SearchTestWrapper({ isHost = true }: { isHost?: boolean }) {
 describe("SearchScreen Stage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(movieApi.getMovieDetails).mockResolvedValue({
+      tmdbId: 550,
+      title: "Fight Club",
+      overview: "An insomniac office worker...",
+      posterPath: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+      backdropPath: null,
+      releaseYear: 1999,
+      voteAverage: 8.4,
+      genres: ["Drama", "Thriller"],
+      directors: ["David Fincher"],
+      topCast: ["Brad Pitt", "Edward Norton"],
+      streamingProviders: [],
+    });
   });
 
   const renderSearchScreen = async (isHost = true) => {

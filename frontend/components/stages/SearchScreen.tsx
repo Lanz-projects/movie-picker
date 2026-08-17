@@ -9,7 +9,7 @@ import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { AlertCircle, X, Sparkles } from "lucide-react";
-import type { MovieDto } from "@/types";
+import type { MovieDto, MovieSubmissionDto } from "@/types";
 
 export interface SearchScreenProps {
   debounceMs?: number;
@@ -71,8 +71,23 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     [selectedMovieIds, removeFromDeck, addToDeck]
   );
 
-  const handleSelectMovie = React.useCallback((movie: MovieDto) => {
-    setSelectedMovieForModal(movie);
+  const handleSelectMovie = React.useCallback((movie: MovieDto | MovieSubmissionDto) => {
+    const movieDto: MovieDto = {
+      tmdbId: movie.tmdbId,
+      title: movie.title,
+      overview: movie.overview || "",
+      posterPath: movie.posterPath || null,
+      backdropPath: movie.backdropPath || null,
+      releaseYear: movie.releaseYear || null,
+      releaseDate: "releaseDate" in movie ? movie.releaseDate : null,
+      voteAverage: "voteAverage" in movie && typeof (movie as MovieDto).voteAverage === "number"
+        ? (movie as MovieDto).voteAverage
+        : 0,
+      voteCount: "voteCount" in movie ? movie.voteCount : undefined,
+      genres: movie.genres || [],
+      originalLanguage: movie.originalLanguage,
+    };
+    setSelectedMovieForModal(movieDto);
     setIsModalOpen(true);
   }, []);
 
@@ -122,9 +137,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
   return (
     <StageContainer
       maxWidth="xl"
-      className="pb-44 sm:pb-48"
+      className="pb-56 sm:pb-64"
     >
-      <div className="flex flex-col items-center gap-6 w-full animate-stage-in">
+      <div className="flex flex-col items-center gap-6 w-full">
         {/* Stage Header */}
         <div className="text-center max-w-xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-indigo/10 border border-brand-indigo/30 text-brand-indigo text-xs font-bold mb-3">
@@ -134,7 +149,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             Nominate Your Movie Picks
           </h1>
           <p className="mt-1.5 text-xs sm:text-sm text-text-secondary">
-            Search TMDB to pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles for the room deck. When everyone submits, the host starts swiping!
+            Search TMDB to pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles for the room deck. Click any card to inspect full details!
           </p>
         </div>
 
@@ -189,16 +204,20 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           onLoadMore={loadMore}
           isDeckFull={isDeckFull}
         />
+
+        {/* Extra Bottom Spacer for Scroll Clearance */}
+        <div className="h-20 sm:h-24 w-full pointer-events-none" aria-hidden="true" />
       </div>
 
-      {/* Floating Bottom Selection Rack */}
-      <div className="fixed inset-x-0 bottom-0 z-40 p-3 sm:p-4 bg-gradient-to-t from-bg-base via-bg-base/95 to-transparent backdrop-blur-sm pointer-events-none">
-        <div className="max-w-4xl mx-auto pointer-events-auto">
+      {/* Floating Collapsible Bottom Selection Rack */}
+      <div className="fixed inset-x-0 bottom-3 sm:bottom-4 z-40 px-3 sm:px-4 pointer-events-none flex justify-center">
+        <div className="w-full max-w-4xl pointer-events-auto">
           <SelectionRack
             selectedMovies={myDeckSelection}
             maxSuggestions={maxSuggestions}
             onRemoveMovie={removeFromDeck}
             onSubmitDeck={handleSubmitDeck}
+            onSelectMovie={handleSelectMovie}
             isSubmitting={isSubmitting || isSessionLoading}
             hasSubmitted={hasSubmitted}
             isHost={isHost}

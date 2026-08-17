@@ -4,6 +4,7 @@ import type {
   SubmitMoviesRequest,
   MovieSuggestionResponse,
   SessionResponse,
+  MovieDetailsDto,
 } from "@/types";
 
 export async function searchMovies(
@@ -18,6 +19,14 @@ export async function searchMovies(
       method: "GET",
     }
   );
+}
+
+export async function getMovieDetails(
+  tmdbId: number
+): Promise<MovieDetailsDto> {
+  return request<MovieDetailsDto>(`/api/movies/${tmdbId}`, {
+    method: "GET",
+  });
 }
 
 export async function submitMovies(
