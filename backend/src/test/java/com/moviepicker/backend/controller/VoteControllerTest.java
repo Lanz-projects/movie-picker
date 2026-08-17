@@ -8,6 +8,9 @@ import com.moviepicker.backend.dto.VotingProgressResponse;
 import com.moviepicker.backend.exception.DuplicateVoteException;
 import com.moviepicker.backend.exception.GlobalExceptionHandler;
 import com.moviepicker.backend.model.VoteType;
+import com.moviepicker.backend.repository.SessionRepository;
+import com.moviepicker.backend.service.ConsensusService;
+import com.moviepicker.backend.service.RoomEventPublisher;
 import com.moviepicker.backend.service.VoteService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,15 @@ public class VoteControllerTest {
     @MockitoBean
     private VoteService voteService;
 
+    @MockitoBean
+    private ConsensusService consensusService;
+
+    @MockitoBean
+    private SessionRepository sessionRepository;
+
+    @MockitoBean
+    private RoomEventPublisher roomEventPublisher;
+
     @Test
     public void testCastVote_Returns201Created() throws Exception {
         CastVoteRequest request = CastVoteRequest.builder()
@@ -59,7 +71,24 @@ public class VoteControllerTest {
                 .votedAt(LocalDateTime.now())
                 .build();
 
+        com.moviepicker.backend.model.Session sampleSession = com.moviepicker.backend.model.Session.builder()
+                .id(1L)
+                .roomCode("SWIPE1")
+                .hostName("Alice")
+                .status(com.moviepicker.backend.model.SessionStatus.VOTING)
+                .build();
+
         when(voteService.castVote(eq(1L), any(CastVoteRequest.class))).thenReturn(voteResponse);
+        when(sessionRepository.findById(1L)).thenReturn(java.util.Optional.of(sampleSession));
+        when(voteService.getVotingProgress(1L)).thenReturn(VotingProgressResponse.builder()
+                .sessionId(1L)
+                .roomCode("SWIPE1")
+                .totalMovies(1)
+                .totalUsers(1)
+                .completedUserCount(1)
+                .allUsersCompleted(true)
+                .users(List.of())
+                .build());
 
         mockMvc.perform(post("/api/sessions/1/votes")
                         .contentType(MediaType.APPLICATION_JSON)

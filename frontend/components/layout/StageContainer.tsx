@@ -27,7 +27,7 @@ export function StageContainer({
   return (
     <main
       className={cn(
-        "flex flex-1 w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8 animate-stage-in",
+        "flex flex-1 w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8",
         className
       )}
       {...props}

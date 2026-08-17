@@ -22,6 +22,7 @@ describe("SelectionRack", () => {
   const mockOnRemoveMovie = vi.fn();
   const mockOnSubmitDeck = vi.fn();
   const mockOnStartVoting = vi.fn();
+  const mockOnSelectMovie = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,6 +35,7 @@ describe("SelectionRack", () => {
         maxSuggestions={3}
         onRemoveMovie={mockOnRemoveMovie}
         onSubmitDeck={mockOnSubmitDeck}
+        onSelectMovie={mockOnSelectMovie}
       />
     );
 
@@ -41,6 +43,49 @@ describe("SelectionRack", () => {
     expect(screen.getByRole("img", { name: "Inception" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Interstellar" })).toBeInTheDocument();
     expect(screen.getByText("Pick")).toBeInTheDocument(); // 1 empty placeholder
+  });
+
+  it("calls onSelectMovie when a movie thumbnail is clicked", () => {
+    render(
+      <SelectionRack
+        selectedMovies={mockSelectedMovies}
+        maxSuggestions={3}
+        onRemoveMovie={mockOnRemoveMovie}
+        onSubmitDeck={mockOnSubmitDeck}
+        onSelectMovie={mockOnSelectMovie}
+      />
+    );
+
+    const movieItem = screen.getByRole("button", { name: "View details for Inception" });
+    fireEvent.click(movieItem);
+
+    expect(mockOnSelectMovie).toHaveBeenCalledWith(mockSelectedMovies[0]);
+  });
+
+  it("toggles collapse and expand states", () => {
+    render(
+      <SelectionRack
+        selectedMovies={mockSelectedMovies}
+        maxSuggestions={3}
+        onRemoveMovie={mockOnRemoveMovie}
+        onSubmitDeck={mockOnSubmitDeck}
+        onSelectMovie={mockOnSelectMovie}
+      />
+    );
+
+    // Click Hide button
+    const hideBtn = screen.getByRole("button", { name: "Minimize movie selection deck" });
+    fireEvent.click(hideBtn);
+
+    // Verify collapsed view is visible
+    expect(screen.getByRole("button", { name: "Expand movie selection deck" })).toBeInTheDocument();
+
+    // Click Expand
+    const expandBtn = screen.getByRole("button", { name: "Expand movie selection deck" });
+    fireEvent.click(expandBtn);
+
+    // Verify expanded view is restored
+    expect(screen.getByText("2 / 3 Picked")).toBeInTheDocument();
   });
 
   it("calls onRemoveMovie when delete button on thumbnail is clicked", () => {

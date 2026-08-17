@@ -1,6 +1,7 @@
 package com.moviepicker.backend.client;
 
 import com.moviepicker.backend.config.TmdbProperties;
+import com.moviepicker.backend.dto.tmdb.TmdbMovieDetailsResponse;
 import com.moviepicker.backend.dto.tmdb.TmdbSearchResponse;
 import com.moviepicker.backend.exception.TmdbApiException;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,41 @@ public class TmdbClientImpl implements TmdbClient {
         } catch (RestClientException e) {
             log.error("Error communicating with TMDB API: {}", e.getMessage(), e);
             throw new TmdbApiException("Failed to communicate with TMDB API: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public TmdbMovieDetailsResponse getMovieDetails(Long tmdbId) {
+        if (tmdbId == null) {
+            return null;
+        }
+
+        try {
+            return restClient.get()
+                    .uri(uriBuilder -> {
+                        uriBuilder.path("/movie/{id}")
+                                .queryParam("append_to_response", "credits,watch/providers,release_dates");
+
+                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
+                            uriBuilder.queryParam("api_key", properties.getKey());
+                        }
+                        return uriBuilder.build(tmdbId);
+                    })
+                    .headers(headers -> {
+                        if (StringUtils.hasText(properties.getAccessToken())) {
+                            headers.setBearerAuth(properties.getAccessToken());
+                        }
+                    })
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = new String(response.getBody().readAllBytes());
+                        log.error("TMDB API returned error status for movie id {}: {} - {}", tmdbId, response.getStatusCode(), errorBody);
+                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
+                    })
+                    .body(TmdbMovieDetailsResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error fetching details for movie id {} from TMDB: {}", tmdbId, e.getMessage(), e);
+            throw new TmdbApiException("Failed to fetch movie details from TMDB: " + e.getMessage(), e);
         }
     }
 }

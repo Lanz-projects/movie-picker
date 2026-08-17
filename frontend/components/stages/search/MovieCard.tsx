@@ -55,6 +55,11 @@ export const MovieCard = React.memo(function MovieCard({
     }
   };
 
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelectMovie?.(movie);
+  };
+
   const formattedRating =
     movie.voteAverage && movie.voteAverage > 0
       ? movie.voteAverage.toFixed(1)
@@ -85,7 +90,7 @@ export const MovieCard = React.memo(function MovieCard({
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center p-4 text-center text-text-muted">
-            <Film className="h-10 w-10 mb-2 opacity-50 text-text-secondary" />
+            <Film className="h-10 w-10 mb-2 opacity-50 text-brand-indigo" />
             <span className="text-xs font-semibold text-text-secondary line-clamp-2">
               {movie.title}
             </span>
@@ -131,19 +136,31 @@ export const MovieCard = React.memo(function MovieCard({
             {movie.title}
           </h3>
 
-          {movie.overview ? (
+          {movie.overview && movie.overview.trim().length > 0 ? (
             <p className="mt-1 text-xs text-text-secondary line-clamp-2 leading-relaxed">
               {movie.overview}
             </p>
           ) : (
             <p className="mt-1 text-xs text-text-muted italic">
-              No description available.
+              Click to view movie details.
             </p>
           )}
         </div>
 
-        {/* Action Button */}
-        <div className="mt-3 pt-1">
+        {/* Action Row: Info Trigger + Add/In Deck Button */}
+        <div className="mt-3 pt-1 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleInfoClick}
+            aria-label={`View details for ${movie.title}`}
+            className="flex-shrink-0 h-8 px-2.5 text-text-muted hover:text-text-main border border-border-subtle hover:border-brand-indigo/50 hover:bg-brand-indigo/10"
+            title="View full movie details"
+          >
+            <Info className="h-3.5 w-3.5 text-brand-indigo" />
+          </Button>
+
           {isInDeck ? (
             <Button
               type="button"
@@ -151,7 +168,7 @@ export const MovieCard = React.memo(function MovieCard({
               size="sm"
               onClick={handleActionClick}
               disabled={disabled}
-              className="w-full bg-brand-emerald/15 border-brand-emerald/40 text-brand-emerald hover:bg-brand-coral/15 hover:border-brand-coral/40 hover:text-brand-coral transition-colors"
+              className="flex-1 h-8 bg-brand-emerald/15 border-brand-emerald/40 text-brand-emerald hover:bg-brand-coral/15 hover:border-brand-coral/40 hover:text-brand-coral transition-colors"
             >
               <Check className="h-3.5 w-3.5 mr-1" /> In Deck
             </Button>
@@ -162,7 +179,7 @@ export const MovieCard = React.memo(function MovieCard({
               size="sm"
               onClick={handleActionClick}
               disabled={disabled}
-              className="w-full"
+              className="flex-1 h-8"
             >
               <Plus className="h-3.5 w-3.5 mr-1" /> Add to Deck
             </Button>
