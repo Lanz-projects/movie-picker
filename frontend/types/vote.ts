@@ -47,32 +47,6 @@ export interface VotingProgressResponse {
   users: UserVotingProgressDto[];
 }
 
-export interface ScoredMovieDto {
-  movieSuggestionId: number;
-  tmdbId: number;
-  title: string;
-  posterPath: string | null;
-  overview: string;
-  releaseYear?: number | null;
-  score: number;
-  yesVotes: number;
-  superlikeVotes: number;
-  noVotes: number;
-  skipVotes: number;
-  matchPercentage: number;
-  isUnanimous: boolean;
-}
-
-export interface SessionResultsResponse {
-  sessionId: number;
-  roomCode: string;
-  totalParticipants: number;
-  totalMovies: number;
-  winner: ScoredMovieDto | null;
-  rankedMovies: ScoredMovieDto[];
-  calculatedAt?: string;
-}
-
 export interface VoteMessageDto {
   roomCode: string;
   userId: number;
@@ -92,7 +66,6 @@ export interface RoomProgressEvent {
   totalUserCount?: number;
   message?: string;
 
-  // Voting fields
   movieSuggestionId?: number;
   tmdbId?: number;
   movieTitle?: string;

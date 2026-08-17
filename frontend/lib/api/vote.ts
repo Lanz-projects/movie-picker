@@ -3,7 +3,6 @@ import type {
   CastVoteRequest,
   VoteResponse,
   VotingProgressResponse,
-  SessionResultsResponse,
 } from "@/types";
 
 export async function castVote(
@@ -22,18 +21,6 @@ export async function getVotingProgressByRoomCode(
   const code = encodeURIComponent(roomCode.trim());
   return request<VotingProgressResponse>(
     `/api/sessions/room/${code}/votes/progress`,
-    {
-      method: "GET",
-    }
-  );
-}
-
-export async function getResultsByRoomCode(
-  roomCode: string
-): Promise<SessionResultsResponse> {
-  const code = encodeURIComponent(roomCode.trim());
-  return request<SessionResultsResponse>(
-    `/api/sessions/room/${code}/results`,
     {
       method: "GET",
     }
