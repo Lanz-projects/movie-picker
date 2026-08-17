@@ -49,7 +49,7 @@ describe("MovieDetailsModal", () => {
     expect(screen.getByRole("heading", { name: "Inception" })).toBeInTheDocument();
     expect(screen.getByText("2010")).toBeInTheDocument();
     expect(screen.getByText("8.4 / 10")).toBeInTheDocument();
-    expect(screen.getByText(mockMovie.overview)).toBeInTheDocument();
+    expect(screen.getByText(mockMovie.overview!)).toBeInTheDocument();
   });
 
   it("calls onClose when Close button is clicked", () => {
