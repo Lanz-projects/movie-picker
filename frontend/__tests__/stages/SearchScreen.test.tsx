@@ -284,7 +284,7 @@ describe("SearchScreen Stage Component", () => {
     });
 
     // Start voting CTA should be visible for host
-    const startVotingBtn = screen.getByRole("button", { name: /start voting phase/i });
+    const startVotingBtn = screen.getByRole("button", { name: /start voting/i });
     expect(startVotingBtn).toBeInTheDocument();
 
     await user.click(startVotingBtn);

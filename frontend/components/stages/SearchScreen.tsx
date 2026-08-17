@@ -6,6 +6,7 @@ import { SearchBar } from "./search/SearchBar";
 import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
+import { NominationsReadinessPill } from "./search/NominationsReadinessPill";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { AlertCircle, X, Sparkles } from "lucide-react";
@@ -21,6 +22,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     isHost,
     myDeckSelection,
     hasSubmittedDeck,
+    submissionProgress,
     addToDeck,
     removeFromDeck,
     submitMyDeck,
@@ -136,6 +138,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     : false;
 
   const effectiveError = sessionError || searchError;
+  const totalRoomUsers = session?.users?.length || 1;
 
   return (
     <StageContainer
@@ -155,6 +158,14 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             Search TMDB to pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles for the room deck. Click any card to inspect full details!
           </p>
         </div>
+
+        {/* Live Room Readiness Indicator */}
+        <NominationsReadinessPill
+          users={session?.users || []}
+          readyUserIds={submissionProgress?.readyUserIds || []}
+          submittedCount={submissionProgress?.submittedCount || 0}
+          totalCount={submissionProgress?.totalCount || totalRoomUsers}
+        />
 
         {/* Search Bar Input */}
         <div className="w-full max-w-2xl mx-auto">
@@ -226,6 +237,8 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             isHost={isHost}
             onStartVoting={handleStartVoting}
             isStartingVoting={isStartingVoting}
+            readyCount={submissionProgress?.submittedCount}
+            totalUsersCount={submissionProgress?.totalCount || totalRoomUsers}
           />
         </div>
       </div>

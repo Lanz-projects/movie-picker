@@ -19,6 +19,8 @@ export interface SelectionRackProps {
   isHost?: boolean;
   onStartVoting?: () => void;
   isStartingVoting?: boolean;
+  readyCount?: number;
+  totalUsersCount?: number;
   defaultExpanded?: boolean;
   className?: string;
 }
@@ -34,6 +36,8 @@ export const SelectionRack = React.memo(function SelectionRack({
   isHost = false,
   onStartVoting,
   isStartingVoting = false,
+  readyCount,
+  totalUsersCount,
   defaultExpanded = true,
   className,
 }: SelectionRackProps) {
@@ -269,7 +273,11 @@ export const SelectionRack = React.memo(function SelectionRack({
                     </>
                   ) : (
                     <>
-                      Start Voting Phase
+                      {readyCount !== undefined && totalUsersCount !== undefined && totalUsersCount > 0
+                        ? readyCount >= totalUsersCount
+                          ? "Start Voting (All Ready)"
+                          : `Start Voting (${readyCount}/${totalUsersCount} Ready)`
+                        : "Start Voting Phase"}
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}
