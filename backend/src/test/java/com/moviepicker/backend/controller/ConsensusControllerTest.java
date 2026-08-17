@@ -39,6 +39,8 @@ public class ConsensusControllerTest {
                 .movieSuggestionId(100L)
                 .tmdbId(550L)
                 .title("Fight Club")
+                .suggestedBy("Alice")
+                .positiveVoters(List.of("Alice", "Bob"))
                 .score(3)
                 .yesVotes(1)
                 .superlikeVotes(1)
@@ -62,6 +64,8 @@ public class ConsensusControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.roomCode").value("WINNER"))
                 .andExpect(jsonPath("$.winner.title").value("Fight Club"))
+                .andExpect(jsonPath("$.winner.suggestedBy").value("Alice"))
+                .andExpect(jsonPath("$.winner.positiveVoters[0]").value("Alice"))
                 .andExpect(jsonPath("$.winner.isUnanimous").value(true));
     }
 

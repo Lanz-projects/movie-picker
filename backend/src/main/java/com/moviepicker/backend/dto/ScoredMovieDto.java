@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,6 +21,7 @@ public class ScoredMovieDto {
     private String posterPath;
     private String overview;
     private Integer releaseYear;
+    private String suggestedBy;
     private int score;
     private long yesVotes;
     private long superlikeVotes;
@@ -27,4 +31,10 @@ public class ScoredMovieDto {
 
     @JsonProperty("isUnanimous")
     private boolean isUnanimous;
+
+    @Builder.Default
+    private List<String> positiveVoters = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> superlikers = new ArrayList<>();
 }
