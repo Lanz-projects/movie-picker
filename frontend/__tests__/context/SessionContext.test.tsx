@@ -484,4 +484,167 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.stage).toBe("SEARCH");
     expect(result.current.session?.status).toBe("SUGGESTING");
   });
+
+  it("fetchConsensusResults calls getResultsByRoomCode and transitions to WINNER", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "VOTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const mockResults: SessionResultsResponse = {
+      sessionId: 1,
+      roomCode: "MVE8",
+      totalParticipants: 1,
+      totalMovies: 3,
+      winner: {
+        movieSuggestionId: 100,
+        tmdbId: 550,
+        title: "Fight Club",
+        posterPath: "/fc.jpg",
+        overview: "Overview",
+        score: 3,
+        yesVotes: 1,
+        superlikeVotes: 1,
+        noVotes: 0,
+        skipVotes: 0,
+        matchPercentage: 100,
+        isUnanimous: true,
+      },
+      rankedMovies: [],
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.getResultsByRoomCode).mockResolvedValue(mockResults);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.fetchConsensusResults();
+    });
+
+    expect(api.getResultsByRoomCode).toHaveBeenCalledWith("MVE8");
+    expect(result.current.results).toEqual(mockResults);
+    expect(result.current.stage).toBe("WINNER");
+  });
+
+  it("fetchConsensusResults falls back to calculateResults when getResultsByRoomCode throws", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "VOTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const mockResults: SessionResultsResponse = {
+      sessionId: 1,
+      roomCode: "MVE8",
+      totalParticipants: 1,
+      totalMovies: 1,
+      winner: null,
+      rankedMovies: [],
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.getResultsByRoomCode).mockRejectedValue(new Error("Not calculated yet"));
+    vi.mocked(api.calculateResults).mockResolvedValue(mockResults);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.fetchConsensusResults();
+    });
+
+    expect(api.getResultsByRoomCode).toHaveBeenCalledWith("MVE8");
+    expect(api.calculateResults).toHaveBeenCalledWith(1);
+    expect(result.current.results).toEqual(mockResults);
+    expect(result.current.stage).toBe("WINNER");
+  });
+
+  it("playAgain updates session status to SUGGESTING and transitions back to SEARCH", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "COMPLETED",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const updatedSession: SessionResponse = {
+      ...mockSession,
+      status: "SUGGESTING",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.updateSessionStatus).mockResolvedValue(updatedSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.playAgain();
+    });
+
+    expect(api.updateSessionStatus).toHaveBeenCalledWith("MVE8", "SUGGESTING");
+    expect(result.current.stage).toBe("SEARCH");
+    expect(result.current.results).toBeNull();
+  });
+
+  it("resetToLobby updates session status to WAITING and resets stage to LOBBY", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "COMPLETED",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const updatedSession: SessionResponse = {
+      ...mockSession,
+      status: "WAITING",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.updateSessionStatus).mockResolvedValue(updatedSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.resetToLobby();
+    });
+
+    expect(api.updateSessionStatus).toHaveBeenCalledWith("MVE8", "WAITING");
+    expect(result.current.stage).toBe("LOBBY");
+    expect(result.current.results).toBeNull();
+  });
 });
