@@ -32,6 +32,12 @@ import type {
 
 export type GameStage = "SETUP" | "LOBBY" | "SEARCH" | "SWIPER" | "WINNER";
 
+export interface DeckSubmissionProgress {
+  submittedCount: number;
+  totalCount: number;
+  readyUserIds: number[];
+}
+
 export interface SessionContextType {
   session: SessionResponse | null;
   currentUser: UserResponse | null;
@@ -39,6 +45,8 @@ export interface SessionContextType {
   stage: GameStage;
   movieDeck: MovieSuggestionResponse[];
   myDeckSelection: MovieSubmissionDto[];
+  hasSubmittedDeck: boolean;
+  submissionProgress: DeckSubmissionProgress;
   progress: VotingProgressResponse | null;
   results: SessionResultsResponse | null;
   isConnected: boolean;
@@ -73,6 +81,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [results, setResults] = React.useState<SessionResultsResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [hasSubmittedDeck, setHasSubmittedDeck] = React.useState<boolean>(false);
+  const [submissionProgress, setSubmissionProgress] = React.useState<DeckSubmissionProgress>({
+    submittedCount: 0,
+    totalCount: 0,
+    readyUserIds: [],
+  });
 
   const {
     myDeckSelection,
@@ -143,9 +157,24 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (event.sessionStatus === "SUGGESTING") {
+          setHasSubmittedDeck(false);
+          setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
           setStage("SEARCH");
         } else if (event.sessionStatus === "VOTING") {
           if (session?.id) {
+            // Auto-commit participant nominations if unsubmitted
+            if (currentUser && myDeckSelection.length > 0 && !hasSubmittedDeck) {
+              try {
+                await apiSubmitMovies(session.id, {
+                  userId: currentUser.id,
+                  movies: myDeckSelection,
+                });
+                setHasSubmittedDeck(true);
+              } catch (err) {
+                console.warn("[SessionContext] Participant auto-submit on STAGE_CHANGED failed:", err);
+              }
+            }
+
             try {
               const movies = await apiGetSessionMovies(session.id);
               setMovieDeck(movies);
@@ -163,18 +192,42 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         } else if (event.sessionStatus === "WAITING") {
           setMovieDeck([]);
           clearMyDeckSelection();
+          setHasSubmittedDeck(false);
+          setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
           setProgress(null);
           setResults(null);
           setStage("LOBBY");
         }
       }
 
-      // 3. Voting progress
+      // 3. Deck submission progress event
+      if (event.eventType === "DECK_SUBMITTED") {
+        setSubmissionProgress((prev) => ({
+          submittedCount: event.submittedUserCount ?? prev.submittedCount + 1,
+          totalCount: event.totalUserCount ?? prev.totalCount,
+          readyUserIds: event.userId
+            ? Array.from(new Set([...prev.readyUserIds, event.userId]))
+            : prev.readyUserIds,
+        }));
+        if (event.userId === currentUser?.id) {
+          setHasSubmittedDeck(true);
+        }
+      }
+
+      // 4. Voting progress
       if (event.progress) {
         setProgress(event.progress);
       }
     },
-    [session?.id, session?.roomCode, clearMyDeckSelection, fetchConsensusResults]
+    [
+      session?.id,
+      session?.roomCode,
+      currentUser,
+      myDeckSelection,
+      hasSubmittedDeck,
+      clearMyDeckSelection,
+      fetchConsensusResults,
+    ]
   );
 
   const { isConnected } = useRoomWebSocket({
@@ -208,6 +261,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(newSession);
         setCurrentUser(me);
+        setHasSubmittedDeck(false);
+        setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
         setStage("LOBBY");
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Failed to create room.";
@@ -240,6 +295,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(joinedSession);
         setCurrentUser(me);
+        setHasSubmittedDeck(false);
+        setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
         setStage("LOBBY");
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Failed to join room.";
@@ -256,6 +313,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     if (!session || !currentUser) {
       setSession(null);
       setCurrentUser(null);
+      setHasSubmittedDeck(false);
+      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setStage("SETUP");
       return;
     }
@@ -270,6 +329,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setCurrentUser(null);
       setMovieDeck([]);
       clearMyDeckSelection();
+      setHasSubmittedDeck(false);
+      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setProgress(null);
       setResults(null);
       setStage("SETUP");
@@ -303,6 +364,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       const updated = await apiUpdateStatus(session.roomCode, "SUGGESTING");
       setSession(updated);
+      setHasSubmittedDeck(false);
+      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setStage("SEARCH");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to start movie search.";
@@ -327,6 +390,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         userId: currentUser.id,
         movies: myDeckSelection,
       });
+      setHasSubmittedDeck(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to submit movies.";
       setError(message);
@@ -341,6 +405,19 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
+      // Auto-commit host's unsubmitted nominations if present
+      if (currentUser && myDeckSelection.length > 0 && !hasSubmittedDeck) {
+        try {
+          await apiSubmitMovies(session.id, {
+            userId: currentUser.id,
+            movies: myDeckSelection,
+          });
+          setHasSubmittedDeck(true);
+        } catch (err) {
+          console.warn("[SessionContext] Host auto-submit warning:", err);
+        }
+      }
+
       const updated = await apiStartVoting(session.id);
       setSession(updated);
 
@@ -358,7 +435,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session, currentUser, myDeckSelection, hasSubmittedDeck]);
 
   const castSwipeVote = React.useCallback(
     async (movieSuggestionId: number, voteType: VoteType) => {
@@ -397,6 +474,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(updated);
       setMovieDeck([]);
       clearMyDeckSelection();
+      setHasSubmittedDeck(false);
+      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setProgress(null);
       setResults(null);
       setStage("SEARCH");
@@ -416,6 +495,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(updated);
       setMovieDeck([]);
       clearMyDeckSelection();
+      setHasSubmittedDeck(false);
+      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setProgress(null);
       setResults(null);
       setStage("LOBBY");
@@ -433,6 +514,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     stage,
     movieDeck,
     myDeckSelection,
+    hasSubmittedDeck,
+    submissionProgress,
     progress,
     results,
     isConnected,

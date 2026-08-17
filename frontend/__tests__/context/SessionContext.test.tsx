@@ -647,4 +647,192 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.stage).toBe("LOBBY");
     expect(result.current.results).toBeNull();
   });
+
+  it("submitMyDeck submits selections and sets hasSubmittedDeck to true", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "SUGGESTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.submitMovies).mockResolvedValue([]);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    act(() => {
+      result.current.addToDeck({
+        tmdbId: 550,
+        title: "Fight Club",
+        overview: "Overview",
+        posterPath: "/fc.jpg",
+        releaseYear: 1999,
+        voteAverage: 8.4,
+      });
+    });
+
+    expect(result.current.hasSubmittedDeck).toBe(false);
+
+    await act(async () => {
+      await result.current.submitMyDeck();
+    });
+
+    expect(api.submitMovies).toHaveBeenCalledWith(1, {
+      userId: 10,
+      movies: [
+        expect.objectContaining({
+          tmdbId: 550,
+          title: "Fight Club",
+        }),
+      ],
+    });
+    expect(result.current.hasSubmittedDeck).toBe(true);
+  });
+
+  it("startVotingDeck auto-commits host unsubmitted deck before starting voting", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "SUGGESTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const votingSession: SessionResponse = {
+      ...mockSession,
+      status: "VOTING",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.submitMovies).mockResolvedValue([]);
+    vi.mocked(api.startVoting).mockResolvedValue(votingSession);
+    vi.mocked(api.getSessionMovies).mockResolvedValue([]);
+    vi.mocked(api.getVotingProgressByRoomCode).mockResolvedValue({
+      sessionId: 1,
+      roomCode: "MVE8",
+      totalMovies: 1,
+      totalUsers: 1,
+      completedUserCount: 0,
+      allUsersCompleted: false,
+      users: [],
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    // Add movie to rack without calling submitMyDeck
+    act(() => {
+      result.current.addToDeck({
+        tmdbId: 550,
+        title: "Fight Club",
+        overview: "Overview",
+        posterPath: "/fc.jpg",
+        releaseYear: 1999,
+        voteAverage: 8.4,
+      });
+    });
+
+    await act(async () => {
+      await result.current.startVotingDeck();
+    });
+
+    // Host deck was auto-submitted
+    expect(api.submitMovies).toHaveBeenCalledWith(1, {
+      userId: 10,
+      movies: [
+        expect.objectContaining({
+          tmdbId: 550,
+          title: "Fight Club",
+        }),
+      ],
+    });
+    expect(api.startVoting).toHaveBeenCalledWith(1);
+    expect(result.current.stage).toBe("SWIPER");
+    expect(result.current.hasSubmittedDeck).toBe(true);
+  });
+
+  it("updates submissionProgress and marks user ready when DECK_SUBMITTED arrives", async () => {
+    let roomHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "SUGGESTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("MVE8", "Bob");
+    });
+
+    expect(result.current.submissionProgress).toEqual({
+      submittedCount: 0,
+      totalCount: 0,
+      readyUserIds: [],
+    });
+
+    // Alice submits
+    await act(async () => {
+      roomHandler?.({
+        eventType: "DECK_SUBMITTED",
+        roomCode: "MVE8",
+        userId: 10,
+        userDisplayName: "Alice",
+        submittedUserCount: 1,
+        totalUserCount: 2,
+      });
+    });
+
+    expect(result.current.submissionProgress.submittedCount).toBe(1);
+    expect(result.current.submissionProgress.totalCount).toBe(2);
+    expect(result.current.submissionProgress.readyUserIds).toContain(10);
+    expect(result.current.hasSubmittedDeck).toBe(false);
+
+    // Bob (current user) submits
+    await act(async () => {
+      roomHandler?.({
+        eventType: "DECK_SUBMITTED",
+        roomCode: "MVE8",
+        userId: 11,
+        userDisplayName: "Bob",
+        submittedUserCount: 2,
+        totalUserCount: 2,
+      });
+    });
+
+    expect(result.current.submissionProgress.submittedCount).toBe(2);
+    expect(result.current.submissionProgress.readyUserIds).toContain(11);
+    expect(result.current.hasSubmittedDeck).toBe(true);
+  });
 });
+

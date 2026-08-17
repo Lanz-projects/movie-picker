@@ -20,6 +20,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     session,
     isHost,
     myDeckSelection,
+    hasSubmittedDeck,
     addToDeck,
     removeFromDeck,
     submitMyDeck,
@@ -51,6 +52,8 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
   const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [isStartingVoting, setIsStartingVoting] = React.useState<boolean>(false);
+
+  const isActuallySubmitted = hasSubmitted || hasSubmittedDeck;
 
   const selectedMovieIds = React.useMemo(
     () => myDeckSelection.map((m) => m.tmdbId),
@@ -219,7 +222,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             onSubmitDeck={handleSubmitDeck}
             onSelectMovie={handleSelectMovie}
             isSubmitting={isSubmitting || isSessionLoading}
-            hasSubmitted={hasSubmitted}
+            hasSubmitted={isActuallySubmitted}
             isHost={isHost}
             onStartVoting={handleStartVoting}
             isStartingVoting={isStartingVoting}
