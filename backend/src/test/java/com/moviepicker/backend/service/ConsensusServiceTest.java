@@ -107,11 +107,15 @@ public class ConsensusServiceTest {
         assertThat(response.getWinner().getScore()).isEqualTo(2);
         assertThat(response.getWinner().getMatchPercentage()).isEqualTo(100.0);
         assertThat(response.getWinner().isUnanimous()).isTrue();
+        assertThat(response.getWinner().getSuggestedBy()).isEqualTo("Alice");
+        assertThat(response.getWinner().getPositiveVoters()).containsExactlyInAnyOrder("Alice", "Bob");
 
         assertThat(response.getRankedMovies().get(1).getTitle()).isEqualTo("Pulp Fiction");
         assertThat(response.getRankedMovies().get(1).getScore()).isEqualTo(1);
         assertThat(response.getRankedMovies().get(1).getMatchPercentage()).isEqualTo(50.0);
         assertThat(response.getRankedMovies().get(1).isUnanimous()).isFalse();
+        assertThat(response.getRankedMovies().get(1).getSuggestedBy()).isEqualTo("Bob");
+        assertThat(response.getRankedMovies().get(1).getPositiveVoters()).containsExactly("Alice");
 
         assertThat(session.getStatus()).isEqualTo(SessionStatus.COMPLETED);
         verify(sessionRepository).save(session);

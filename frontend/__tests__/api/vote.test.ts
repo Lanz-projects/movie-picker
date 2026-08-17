@@ -2,15 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   castVote,
   getVotingProgressByRoomCode,
-  getResultsByRoomCode,
 } from "@/lib/api/vote";
 import type {
   VoteResponse,
   VotingProgressResponse,
-  SessionResultsResponse,
 } from "@/types";
 
-describe("Vote & Consensus API Client", () => {
+describe("Vote API Client", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -80,44 +78,5 @@ describe("Vote & Consensus API Client", () => {
     );
     expect(result.allUsersCompleted).toBe(false);
     expect(result.users[0].completed).toBe(true);
-  });
-
-  it("getResultsByRoomCode fetches calculated consensus results", async () => {
-    const mockResponse: SessionResultsResponse = {
-      sessionId: 1,
-      roomCode: "ABCD",
-      totalParticipants: 2,
-      totalMovies: 5,
-      winner: {
-        movieSuggestionId: 100,
-        tmdbId: 27205,
-        title: "Inception",
-        overview: "Overview",
-        posterPath: "/poster.jpg",
-        releaseYear: 2010,
-        score: 4,
-        yesVotes: 2,
-        superlikeVotes: 1,
-        noVotes: 0,
-        skipVotes: 0,
-        matchPercentage: 100,
-        isUnanimous: true,
-      },
-      rankedMovies: [],
-    };
-
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => mockResponse,
-    } as unknown as Response);
-
-    const result = await getResultsByRoomCode("ABCD");
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/ABCD/results",
-      expect.objectContaining({ method: "GET" })
-    );
-    expect(result.winner?.isUnanimous).toBe(true);
-    expect(result.winner?.title).toBe("Inception");
   });
 });

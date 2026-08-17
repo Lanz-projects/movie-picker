@@ -96,13 +96,29 @@ public class ConsensusServiceImpl implements ConsensusService {
             long skipVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.SKIP).count();
 
             int score = (int) ((yesVotes * 1) + (superlikeVotes * 2));
-            long positiveVoters = yesVotes + superlikeVotes;
+            long positiveVotersCount = yesVotes + superlikeVotes;
 
             double matchPercentage = totalParticipants > 0
-                    ? Math.round(((double) positiveVoters / totalParticipants) * 1000.0) / 10.0
+                    ? Math.round(((double) positiveVotersCount / totalParticipants) * 1000.0) / 10.0
                     : 0.0;
 
-            boolean isUnanimous = totalParticipants > 0 && positiveVoters == totalParticipants;
+            boolean isUnanimous = totalParticipants > 0 && positiveVotersCount == totalParticipants;
+
+            List<String> positiveVoters = votes.stream()
+                    .filter(v -> v.getVoteType() == VoteType.YES || v.getVoteType() == VoteType.LIKE || v.getVoteType() == VoteType.SUPERLIKE)
+                    .map(v -> v.getUser() != null ? v.getUser().getDisplayName() : null)
+                    .filter(org.springframework.util.StringUtils::hasText)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+
+            List<String> superlikers = votes.stream()
+                    .filter(v -> v.getVoteType() == VoteType.SUPERLIKE)
+                    .map(v -> v.getUser() != null ? v.getUser().getDisplayName() : null)
+                    .filter(org.springframework.util.StringUtils::hasText)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+
+            String suggestedBy = movie.getUser() != null ? movie.getUser().getDisplayName() : null;
 
             scoredMovies.add(ScoredMovieDto.builder()
                     .movieSuggestionId(movie.getId())
@@ -111,6 +127,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                     .posterPath(movie.getPosterPath())
                     .overview(movie.getOverview())
                     .releaseYear(movie.getReleaseYear())
+                    .suggestedBy(suggestedBy)
                     .score(score)
                     .yesVotes(yesVotes)
                     .superlikeVotes(superlikeVotes)
@@ -118,6 +135,8 @@ public class ConsensusServiceImpl implements ConsensusService {
                     .skipVotes(skipVotes)
                     .matchPercentage(matchPercentage)
                     .isUnanimous(isUnanimous)
+                    .positiveVoters(positiveVoters)
+                    .superlikers(superlikers)
                     .build());
         }
 

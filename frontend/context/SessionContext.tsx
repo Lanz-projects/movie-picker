@@ -12,6 +12,8 @@ import {
   startVoting as apiStartVoting,
   castVote as apiCastVote,
   getVotingProgressByRoomCode as apiGetProgress,
+  getResultsByRoomCode as apiGetResultsByRoomCode,
+  calculateResults as apiCalculateResults,
 } from "@/lib/api";
 import { stompService } from "@/lib/websocket";
 import { useDeckSelection } from "@/hooks/useDeckSelection";
@@ -54,6 +56,8 @@ export interface SessionContextType {
   submitMyDeck: () => Promise<void>;
   startVotingDeck: () => Promise<void>;
   castSwipeVote: (movieSuggestionId: number, voteType: VoteType) => Promise<void>;
+  fetchConsensusResults: () => Promise<void>;
+  playAgain: () => Promise<void>;
   resetToLobby: () => Promise<void>;
   clearError: () => void;
 }
@@ -87,6 +91,25 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setResults(incomingResults);
     setStage("WINNER");
   }, []);
+
+  const fetchConsensusResults = React.useCallback(async () => {
+    if (!session?.roomCode) return;
+    try {
+      const data = await apiGetResultsByRoomCode(session.roomCode);
+      setResults(data);
+      setStage("WINNER");
+    } catch {
+      try {
+        if (session.id) {
+          const calcData = await apiCalculateResults(session.id);
+          setResults(calcData);
+          setStage("WINNER");
+        }
+      } catch (err: unknown) {
+        console.error("[SessionContext] Failed to fetch consensus results:", err);
+      }
+    }
+  }, [session?.roomCode, session?.id]);
 
   const handleRoomEvent = React.useCallback(
     async (event: RoomProgressEvent) => {
@@ -133,6 +156,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             }
           }
           setStage("SWIPER");
+        } else if (event.sessionStatus === "COMPLETED") {
+          if (session?.roomCode) {
+            fetchConsensusResults();
+          }
         } else if (event.sessionStatus === "WAITING") {
           setMovieDeck([]);
           clearMyDeckSelection();
@@ -147,7 +174,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setProgress(event.progress);
       }
     },
-    [session?.id, session?.roomCode, clearMyDeckSelection]
+    [session?.id, session?.roomCode, clearMyDeckSelection, fetchConsensusResults]
   );
 
   const { isConnected } = useRoomWebSocket({
@@ -261,11 +288,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const movies = await apiGetSessionMovies(refreshed.id);
         setMovieDeck(movies);
         setStage("SWIPER");
+      } else if (refreshed.status === "COMPLETED" && stage !== "WINNER") {
+        fetchConsensusResults();
       }
     } catch {
       // Background refresh failure ignored
     }
-  }, [session, stage]);
+  }, [session, stage, fetchConsensusResults]);
 
   const advanceToSearch = React.useCallback(async () => {
     if (!session) return;
@@ -359,6 +388,27 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     [session, currentUser]
   );
 
+  const playAgain = React.useCallback(async () => {
+    if (!session) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updated = await apiUpdateStatus(session.roomCode, "SUGGESTING");
+      setSession(updated);
+      setMovieDeck([]);
+      clearMyDeckSelection();
+      setProgress(null);
+      setResults(null);
+      setStage("SEARCH");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to restart session.";
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session, clearMyDeckSelection]);
+
   const resetToLobby = React.useCallback(async () => {
     if (!session) return;
     try {
@@ -399,6 +449,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     submitMyDeck,
     startVotingDeck,
     castSwipeVote,
+    fetchConsensusResults,
+    playAgain,
     resetToLobby,
     clearError,
   };

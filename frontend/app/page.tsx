@@ -6,6 +6,7 @@ import { SetupScreen } from "@/components/stages/SetupScreen";
 import { LobbyScreen } from "@/components/stages/LobbyScreen";
 import { SearchScreen } from "@/components/stages/SearchScreen";
 import { SwiperScreen } from "@/components/stages/SwiperScreen";
+import { WinnerScreen } from "@/components/stages/WinnerScreen";
 import { useSession } from "@/context/SessionContext";
 
 export default function Home() {
@@ -28,6 +29,7 @@ export default function Home() {
       {stage === "LOBBY" && <LobbyScreen />}
       {stage === "SEARCH" && <SearchScreen />}
       {stage === "SWIPER" && <SwiperScreen />}
+      {stage === "WINNER" && <WinnerScreen />}
     </div>
   );
 }
