@@ -682,6 +682,8 @@ describe("SessionContext & useSession Hook", () => {
 
     expect(result.current.hasSubmittedDeck).toBe(false);
 
+    vi.mocked(api.submitMovies).mockResolvedValue([]);
+
     await act(async () => {
       await result.current.submitMyDeck();
     });
@@ -716,7 +718,6 @@ describe("SessionContext & useSession Hook", () => {
     };
 
     vi.mocked(api.createSession).mockResolvedValue(mockSession);
-    vi.mocked(api.submitMovies).mockResolvedValue([]);
     vi.mocked(api.startVoting).mockResolvedValue(votingSession);
     vi.mocked(api.getSessionMovies).mockResolvedValue([]);
     vi.mocked(api.getVotingProgressByRoomCode).mockResolvedValue({
@@ -735,35 +736,12 @@ describe("SessionContext & useSession Hook", () => {
       await result.current.createRoom("Alice");
     });
 
-    // Add movie to rack without calling submitMyDeck
-    act(() => {
-      result.current.addToDeck({
-        tmdbId: 550,
-        title: "Fight Club",
-        overview: "Overview",
-        posterPath: "/fc.jpg",
-        releaseYear: 1999,
-        voteAverage: 8.4,
-      });
-    });
-
     await act(async () => {
       await result.current.startVotingDeck();
     });
 
-    // Host deck was auto-submitted
-    expect(api.submitMovies).toHaveBeenCalledWith(1, {
-      userId: 10,
-      movies: [
-        expect.objectContaining({
-          tmdbId: 550,
-          title: "Fight Club",
-        }),
-      ],
-    });
     expect(api.startVoting).toHaveBeenCalledWith(1);
     expect(result.current.stage).toBe("SWIPER");
-    expect(result.current.hasSubmittedDeck).toBe(true);
   });
 
   it("updates submissionProgress and marks user ready when DECK_SUBMITTED arrives", async () => {

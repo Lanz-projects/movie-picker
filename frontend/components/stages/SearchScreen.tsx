@@ -51,11 +51,8 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
 
   const [selectedMovieForModal, setSelectedMovieForModal] = React.useState<MovieDto | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-  const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [isStartingVoting, setIsStartingVoting] = React.useState<boolean>(false);
-
-  const isActuallySubmitted = hasSubmitted || hasSubmittedDeck;
 
   const selectedMovieIds = React.useMemo(
     () => myDeckSelection.map((m) => m.tmdbId),
@@ -112,7 +109,6 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     setIsSubmitting(true);
     try {
       await submitMyDeck();
-      setHasSubmitted(true);
     } catch {
       // Error handled via session context
     } finally {
@@ -233,7 +229,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             onSubmitDeck={handleSubmitDeck}
             onSelectMovie={handleSelectMovie}
             isSubmitting={isSubmitting || isSessionLoading}
-            hasSubmitted={isActuallySubmitted}
+            hasSubmitted={hasSubmittedDeck}
             isHost={isHost}
             onStartVoting={handleStartVoting}
             isStartingVoting={isStartingVoting}

@@ -162,19 +162,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           setStage("SEARCH");
         } else if (event.sessionStatus === "VOTING") {
           if (session?.id) {
-            // Auto-commit participant nominations if unsubmitted
-            if (currentUser && myDeckSelection.length > 0 && !hasSubmittedDeck) {
-              try {
-                await apiSubmitMovies(session.id, {
-                  userId: currentUser.id,
-                  movies: myDeckSelection,
-                });
-                setHasSubmittedDeck(true);
-              } catch (err) {
-                console.warn("[SessionContext] Participant auto-submit on STAGE_CHANGED failed:", err);
-              }
-            }
-
             try {
               const movies = await apiGetSessionMovies(session.id);
               setMovieDeck(movies);
@@ -223,8 +210,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       session?.id,
       session?.roomCode,
       currentUser,
-      myDeckSelection,
-      hasSubmittedDeck,
       clearMyDeckSelection,
       fetchConsensusResults,
     ]
@@ -405,19 +390,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      // Auto-commit host's unsubmitted nominations if present
-      if (currentUser && myDeckSelection.length > 0 && !hasSubmittedDeck) {
-        try {
-          await apiSubmitMovies(session.id, {
-            userId: currentUser.id,
-            movies: myDeckSelection,
-          });
-          setHasSubmittedDeck(true);
-        } catch (err) {
-          console.warn("[SessionContext] Host auto-submit warning:", err);
-        }
-      }
-
       const updated = await apiStartVoting(session.id);
       setSession(updated);
 
@@ -435,7 +407,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [session, currentUser, myDeckSelection, hasSubmittedDeck]);
+  }, [session]);
 
   const castSwipeVote = React.useCallback(
     async (movieSuggestionId: number, voteType: VoteType) => {
