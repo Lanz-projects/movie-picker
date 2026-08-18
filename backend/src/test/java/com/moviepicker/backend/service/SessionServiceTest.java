@@ -438,4 +438,87 @@ public class SessionServiceTest {
                 .isInstanceOf(InvalidSessionStateException.class)
                 .hasMessageContaining("Host cannot kick themselves");
     }
+
+    @Test
+    public void testKickUser_PermanentBan_AddsToBannedList() {
+        User guestUser = User.builder()
+                .id(20L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now().plusMinutes(1))
+                .build();
+
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(10L)
+                .targetUserId(20L)
+                .banPermanently(true)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser));
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
+
+        LeaveSessionResponse response = sessionService.kickUser("ROOM12", request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getMessage()).contains("permanently banned");
+        assertThat(sampleSession.getBannedDisplayNames()).contains("bob");
+        assertThat(sampleSession.getKickCounts().get("bob")).isEqualTo(1);
+        verify(sessionRepository).save(sampleSession);
+    }
+
+    @Test
+    public void testJoinSession_WhenPermanentlyBanned_ThrowsException() {
+        sampleSession.getBannedDisplayNames().add("bob");
+
+        JoinSessionRequest request = JoinSessionRequest.builder()
+                .roomCode("ROOM12")
+                .displayName("Bob")
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+
+        assertThatThrownBy(() -> sessionService.joinSession(request))
+                .isInstanceOf(InvalidSessionStateException.class)
+                .hasMessageContaining("permanently banned");
+    }
+
+    @Test
+    public void testJoinSession_WhenKickedFromActiveRound_ThrowsException() {
+        sampleSession.setStatus(SessionStatus.SUGGESTING);
+        sampleSession.getRoundKickedDisplayNames().add("bob");
+
+        JoinSessionRequest request = JoinSessionRequest.builder()
+                .roomCode("ROOM12")
+                .displayName("Bob")
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+
+        assertThatThrownBy(() -> sessionService.joinSession(request))
+                .isInstanceOf(InvalidSessionStateException.class)
+                .hasMessageContaining("removed from this round");
+    }
+
+    @Test
+    public void testJoinSession_WhenKickedFromRound_CanRejoinWhenWaiting() {
+        sampleSession.setStatus(SessionStatus.WAITING);
+        sampleSession.getRoundKickedDisplayNames().add("bob");
+
+        JoinSessionRequest request = JoinSessionRequest.builder()
+                .roomCode("ROOM12")
+                .displayName("Bob")
+                .build();
+
+        User bobUser = User.builder().id(20L).displayName("Bob").session(sampleSession).build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findBySessionId(1L)).thenReturn(List.of(hostUser));
+        when(userRepository.save(any(User.class))).thenReturn(bobUser);
+
+        SessionResponse response = sessionService.joinSession(request);
+
+        assertThat(response).isNotNull();
+    }
 }

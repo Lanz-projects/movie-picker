@@ -11,7 +11,7 @@ export interface MemberRosterProps {
   hostName: string;
   currentUserId?: number;
   isHost?: boolean;
-  onKickUser?: (userId: number, displayName: string) => void;
+  onKickUser?: (userId: number, banPermanently?: boolean) => void;
 }
 
 export function MemberRoster({
@@ -23,13 +23,9 @@ export function MemberRoster({
 }: MemberRosterProps) {
   const [confirmKickId, setConfirmKickId] = React.useState<number | null>(null);
 
-  const handleKickClick = (userId: number, displayName: string) => {
-    if (confirmKickId === userId) {
-      onKickUser?.(userId, displayName);
-      setConfirmKickId(null);
-    } else {
-      setConfirmKickId(userId);
-    }
+  const handleKick = (userId: number, banPermanently = false) => {
+    onKickUser?.(userId, banPermanently);
+    setConfirmKickId(null);
   };
 
   return (
@@ -50,6 +46,7 @@ export function MemberRoster({
           const isMe = user.id === currentUserId;
           const initials = user.displayName.slice(0, 2).toUpperCase();
           const isConfirming = confirmKickId === user.id;
+          const priorKicks = user.kickCount || 0;
 
           return (
             <div
@@ -63,9 +60,16 @@ export function MemberRoster({
                 </div>
 
                 <div className="truncate">
-                  <p className="text-sm font-semibold text-text-main truncate">
-                    {user.displayName}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold text-text-main truncate">
+                      {user.displayName}
+                    </p>
+                    {priorKicks > 0 && (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-brand-amber/20 text-brand-amber border border-brand-amber/30">
+                        Strike {priorKicks}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[10px] text-text-muted">
                     {isUserHost ? "Room Leader" : "Member"}
                   </p>
@@ -95,22 +99,52 @@ export function MemberRoster({
                   </Badge>
                 )}
 
-                {/* Host Moderation: Kick Guest */}
+                {/* Host Moderation: Kick / Ban Guest */}
                 {isHost && !isUserHost && onKickUser && (
-                  <button
-                    type="button"
-                    aria-label={`Kick ${user.displayName}`}
-                    onClick={() => handleKickClick(user.id, user.displayName)}
-                    onMouseLeave={() => isConfirming && setConfirmKickId(null)}
-                    className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all duration-200 cursor-pointer ${
-                      isConfirming
-                        ? "bg-brand-rose text-white border-brand-rose shadow-[0_0_16px_rgba(244,63,94,0.5)] animate-pulse"
-                        : "bg-bg-surface/60 border-border-subtle text-text-muted hover:text-brand-rose hover:bg-brand-rose/20 hover:border-brand-rose/60 hover:shadow-[0_0_14px_rgba(244,63,94,0.35)] hover:scale-105 active:scale-95"
-                    }`}
-                  >
-                    <UserX className="h-3.5 w-3.5" />
-                    {isConfirming ? "Confirm?" : "Kick"}
-                  </button>
+                  <div className="flex items-center gap-1">
+                    {isConfirming ? (
+                      priorKicks >= 1 ? (
+                        <>
+                          <button
+                            type="button"
+                            aria-label={`Kick ${user.displayName} for round`}
+                            onClick={() => handleKick(user.id, false)}
+                            className="text-[11px] font-bold px-2 py-1 rounded-lg bg-brand-amber text-black hover:bg-brand-amber/90 transition-all cursor-pointer"
+                          >
+                            Kick Round
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Ban ${user.displayName} permanently`}
+                            onClick={() => handleKick(user.id, true)}
+                            className="text-[11px] font-bold px-2 py-1 rounded-lg bg-brand-rose text-white shadow-[0_0_12px_rgba(244,63,94,0.5)] animate-pulse hover:bg-brand-rose/90 transition-all cursor-pointer"
+                          >
+                            Ban Perm
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-label={`Confirm Kick ${user.displayName}`}
+                          onClick={() => handleKick(user.id, false)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-brand-rose text-white border-brand-rose shadow-[0_0_16px_rgba(244,63,94,0.5)] animate-pulse cursor-pointer"
+                        >
+                          <UserX className="h-3.5 w-3.5" />
+                          Confirm?
+                        </button>
+                      )
+                    ) : (
+                      <button
+                        type="button"
+                        aria-label={`Kick ${user.displayName}`}
+                        onClick={() => setConfirmKickId(user.id)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border border-border-subtle bg-bg-surface/60 text-text-muted hover:text-brand-rose hover:bg-brand-rose/20 hover:border-brand-rose/60 hover:shadow-[0_0_14px_rgba(244,63,94,0.35)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+                      >
+                        <UserX className="h-3.5 w-3.5" />
+                        Kick
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -12,7 +12,7 @@ export interface NominationsReadinessPillProps {
   totalCount: number;
   hostName?: string;
   isHost?: boolean;
-  onKickUser?: (userId: number, displayName: string) => void;
+  onKickUser?: (userId: number, banPermanently?: boolean) => void;
   className?: string;
 }
 
@@ -85,8 +85,8 @@ export const NominationsReadinessPill = React.memo(function NominationsReadiness
                     type="button"
                     title={`Remove ${user.displayName}`}
                     aria-label={`Remove ${user.displayName}`}
-                    onClick={() => onKickUser(user.id, user.displayName)}
-                    className="ml-0.5 p-0.5 rounded-full text-text-muted hover:text-brand-rose hover:bg-brand-rose/20 transition-colors"
+                    onClick={() => onKickUser(user.id, false)}
+                    className="ml-0.5 p-0.5 rounded-full text-text-muted hover:text-brand-rose hover:bg-brand-rose/20 transition-colors cursor-pointer"
                   >
                     <X className="h-2.5 w-2.5" />
                   </button>

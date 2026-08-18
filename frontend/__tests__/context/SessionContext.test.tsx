@@ -845,7 +845,7 @@ describe("SessionContext & useSession Hook", () => {
       await result.current.kickUser(11);
     });
 
-    expect(api.kickUser).toHaveBeenCalledWith("MVE8", 10, 11);
+    expect(api.kickUser).toHaveBeenCalledWith("MVE8", 10, 11, false);
     expect(result.current.session?.users).toHaveLength(1);
     expect(result.current.session?.users[0].displayName).toBe("Alice");
   });
@@ -957,6 +957,67 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.session?.users).toHaveLength(2);
     expect(result.current.session?.users.map((u) => u.displayName)).toEqual(["Alice", "Bob"]);
     expect(result.current.kickedNotice).toBeNull();
+  });
+
+  it("joinRoom during SUGGESTING stage sets stage to SEARCH instead of LOBBY", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "SUGGESTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("MVE8", "Bob");
+    });
+
+    expect(result.current.stage).toBe("SEARCH");
+  });
+
+  it("kickUser with banPermanently passes flag to api.kickUser", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.kickUser).mockResolvedValue({
+      message: "User Bob was permanently banned from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.kickUser(11, true);
+    });
+
+    expect(api.kickUser).toHaveBeenCalledWith("MVE8", 10, 11, true);
   });
 });
 

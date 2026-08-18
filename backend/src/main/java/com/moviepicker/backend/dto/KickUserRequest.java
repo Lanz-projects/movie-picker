@@ -17,4 +17,6 @@ public class KickUserRequest {
 
     @NotNull(message = "Target user ID is required")
     private Long targetUserId;
+
+    private Boolean banPermanently;
 }

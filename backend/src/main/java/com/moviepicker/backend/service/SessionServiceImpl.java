@@ -82,6 +82,21 @@ public class SessionServiceImpl implements SessionService {
             throw new InvalidSessionStateException("Cannot join session in " + session.getStatus() + " state");
         }
 
+        String cleanName = request.getDisplayName().trim();
+
+        // 1. Check permanent ban list
+        if (session.getBannedDisplayNames() != null && session.getBannedDisplayNames().stream()
+                .anyMatch(name -> name.equalsIgnoreCase(cleanName))) {
+            throw new InvalidSessionStateException("You have been permanently banned from this session by the host.");
+        }
+
+        // 2. Check current-round lockout
+        if (session.getStatus() != SessionStatus.WAITING &&
+                session.getRoundKickedDisplayNames() != null &&
+                session.getRoundKickedDisplayNames().stream().anyMatch(name -> name.equalsIgnoreCase(cleanName))) {
+            throw new InvalidSessionStateException("You were removed from this round. You can rejoin once the host returns to the lobby.");
+        }
+
         List<User> existingUsers = userRepository.findBySessionId(session.getId());
 
         if (existingUsers.size() >= session.getMaxUsers()) {
@@ -89,20 +104,20 @@ public class SessionServiceImpl implements SessionService {
         }
 
         boolean nameExists = existingUsers.stream()
-                .anyMatch(u -> u.getDisplayName().equalsIgnoreCase(request.getDisplayName().trim()));
+                .anyMatch(u -> u.getDisplayName().equalsIgnoreCase(cleanName));
         if (nameExists) {
             throw new DuplicateDisplayNameException("Display name '" + request.getDisplayName() + "' is already taken in this session");
         }
 
         User newUser = User.builder()
                 .session(session)
-                .displayName(request.getDisplayName().trim())
+                .displayName(cleanName)
                 .build();
         User savedUser = userRepository.save(newUser);
 
         List<User> updatedUsers = userRepository.findBySessionId(session.getId());
         List<UserResponse> userResponses = updatedUsers.stream()
-                .map(UserResponse::fromEntity)
+                .map(u -> UserResponse.fromEntity(u, session.getKickCounts() != null ? session.getKickCounts().getOrDefault(u.getDisplayName().trim().toLowerCase(), 0) : 0))
                 .collect(Collectors.toList());
 
         roomEventPublisher.publishUserJoined(session.getRoomCode(), savedUser.getId(), savedUser.getDisplayName(), session.getHostName(), userResponses);
@@ -115,11 +130,16 @@ public class SessionServiceImpl implements SessionService {
     public SessionResponse updateSessionStatus(String roomCode, UpdateSessionStatusRequest request) {
         Session session = findSessionByRoomCodeOrThrow(roomCode);
         session.setStatus(request.getStatus());
+
+        if (request.getStatus() == SessionStatus.WAITING && session.getRoundKickedDisplayNames() != null) {
+            session.getRoundKickedDisplayNames().clear();
+        }
+
         Session updatedSession = sessionRepository.save(session);
 
         List<User> users = userRepository.findBySessionId(updatedSession.getId());
         List<UserResponse> userResponses = users.stream()
-                .map(UserResponse::fromEntity)
+                .map(u -> UserResponse.fromEntity(u, updatedSession.getKickCounts() != null ? updatedSession.getKickCounts().getOrDefault(u.getDisplayName().trim().toLowerCase(), 0) : 0))
                 .collect(Collectors.toList());
 
         roomEventPublisher.publishStageChanged(session.getRoomCode(), updatedSession.getStatus(), userResponses);
@@ -234,6 +254,32 @@ public class SessionServiceImpl implements SessionService {
 
         String kickedUserName = targetUser.getDisplayName();
         Long kickedUserId = targetUser.getId();
+        String cleanKickedName = kickedUserName.trim().toLowerCase();
+
+        // Track kick counts and bans
+        if (session.getKickCounts() == null) {
+            session.setKickCounts(new java.util.HashMap<>());
+        }
+        int kickCount = session.getKickCounts().getOrDefault(cleanKickedName, 0) + 1;
+        session.getKickCounts().put(cleanKickedName, kickCount);
+
+        boolean isPermanentBan = Boolean.TRUE.equals(request.getBanPermanently());
+        if (isPermanentBan) {
+            if (session.getBannedDisplayNames() == null) {
+                session.setBannedDisplayNames(new java.util.HashSet<>());
+            }
+            session.getBannedDisplayNames().add(cleanKickedName);
+            log.info("User '{}' (id={}) was permanently banned from session id={} (roomCode={}) by host '{}'",
+                    kickedUserName, kickedUserId, session.getId(), session.getRoomCode(), hostUser.getDisplayName());
+        } else {
+            if (session.getRoundKickedDisplayNames() == null) {
+                session.setRoundKickedDisplayNames(new java.util.HashSet<>());
+            }
+            session.getRoundKickedDisplayNames().add(cleanKickedName);
+            log.info("User '{}' (id={}) was kicked from round in session id={} (roomCode={}, kickCount={}) by host '{}'",
+                    kickedUserName, kickedUserId, session.getId(), session.getRoomCode(), kickCount, hostUser.getDisplayName());
+        }
+        sessionRepository.save(session);
 
         // 1. Delete all votes cast by the target user in this session
         List<Vote> userVotes = voteRepository.findBySessionIdAndUserId(session.getId(), targetUser.getId());
@@ -255,12 +301,12 @@ public class SessionServiceImpl implements SessionService {
 
         List<User> remainingUsers = userRepository.findBySessionIdOrderByJoinedAtAsc(session.getId());
         List<UserResponse> userResponses = remainingUsers.stream()
-                .map(UserResponse::fromEntity)
+                .map(u -> UserResponse.fromEntity(u, session.getKickCounts().getOrDefault(u.getDisplayName().trim().toLowerCase(), 0)))
                 .collect(Collectors.toList());
 
-        String message = "User '" + kickedUserName + "' was removed from the session by the host.";
-        log.info("User '{}' (id={}) was kicked from session id={} (roomCode={}) by host '{}'",
-                kickedUserName, kickedUserId, session.getId(), session.getRoomCode(), hostUser.getDisplayName());
+        String message = isPermanentBan
+                ? "User '" + kickedUserName + "' was permanently banned from the session by the host."
+                : "User '" + kickedUserName + "' was removed from the session by the host.";
 
         LeaveSessionResponse response = LeaveSessionResponse.builder()
                 .sessionId(session.getId())

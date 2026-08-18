@@ -19,7 +19,13 @@ vi.mock("@/lib/websocket", () => ({
 }));
 
 // Helper component to initialize SessionContext in LOBBY state for testing
-function LobbyTestHostWrapper({ isHost = true }: { isHost?: boolean }) {
+function LobbyTestHostWrapper({
+  isHost = true,
+  customSession,
+}: {
+  isHost?: boolean;
+  customSession?: SessionResponse;
+}) {
   const { createRoom, joinRoom } = useSession();
 
   const mockHostSession: SessionResponse = {
@@ -37,11 +43,12 @@ function LobbyTestHostWrapper({ isHost = true }: { isHost?: boolean }) {
   };
 
   const handleInit = async () => {
+    const sessionToUse = customSession || mockHostSession;
     if (isHost) {
-      vi.mocked(api.createSession).mockResolvedValue(mockHostSession);
+      vi.mocked(api.createSession).mockResolvedValue(sessionToUse);
       await createRoom("Alice");
     } else {
-      vi.mocked(api.joinSession).mockResolvedValue(mockHostSession);
+      vi.mocked(api.joinSession).mockResolvedValue(sessionToUse);
       await joinRoom("MVE892", "Bob");
     }
   };
@@ -61,11 +68,11 @@ describe("LobbyScreen Component", () => {
     vi.clearAllMocks();
   });
 
-  const renderLobbyScreen = async (isHost = true) => {
+  const renderLobbyScreen = async (isHost = true, customSession?: SessionResponse) => {
     const user = userEvent.setup({ delay: null });
     const view = render(
       <SessionProvider>
-        <LobbyTestHostWrapper isHost={isHost} />
+        <LobbyTestHostWrapper isHost={isHost} customSession={customSession} />
       </SessionProvider>
     );
 
@@ -83,28 +90,24 @@ describe("LobbyScreen Component", () => {
     expect(screen.getByText(/2 \/ 10 players/i)).toBeInTheDocument();
 
     const copyButton = screen.getByRole("button", { name: /copy room code/i });
-    await user.click(copyButton);
+    expect(copyButton).toBeInTheDocument();
 
+    await user.click(copyButton);
     expect(screen.getByText(/copied to clipboard!/i)).toBeInTheDocument();
   });
 
   it("renders real-time member roster with Host crown and (You) badges", async () => {
     await renderLobbyScreen(true);
 
-    expect(screen.getByText(/joined members \(2\)/i)).toBeInTheDocument();
+    expect(screen.getByText("Joined Members (2)")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Bob")).toBeInTheDocument();
-
-    // Alice is host and current user
     expect(screen.getByText("Host")).toBeInTheDocument();
     expect(screen.getByText("You")).toBeInTheDocument();
   });
 
   it("renders 'Start Adding Movies' CTA for host and advances to search stage", async () => {
     const { user } = await renderLobbyScreen(true);
-
-    const startBtn = screen.getByRole("button", { name: /start adding movies/i });
-    expect(startBtn).toBeInTheDocument();
 
     const updatedSession: SessionResponse = {
       id: 1,
@@ -115,27 +118,26 @@ describe("LobbyScreen Component", () => {
       maxSuggestionsPerUser: 5,
       users: [
         { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
-        { id: 11, displayName: "Bob", isHost: false, joinedAt: "2026-08-14T00:01:00" },
       ],
       createdAt: "2026-08-14T00:00:00",
     };
 
     vi.mocked(api.updateSessionStatus).mockResolvedValue(updatedSession);
 
-    await user.click(startBtn);
+    const startButton = screen.getByRole("button", { name: /start adding movies/i });
+    expect(startButton).toBeInTheDocument();
 
+    await user.click(startButton);
     expect(api.updateSessionStatus).toHaveBeenCalledWith("MVE892", "SUGGESTING");
   });
 
   it("renders waiting indicator for guest and hides start button", async () => {
     await renderLobbyScreen(false);
 
+    expect(screen.getByText(/waiting for host/i)).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /start adding movies/i })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/waiting for host to start movie selection\.\.\./i)
-    ).toBeInTheDocument();
   });
 
   it("invokes leaveRoom when clicking Leave Room button", async () => {
@@ -171,7 +173,47 @@ describe("LobbyScreen Component", () => {
 
     // Second click triggers kick API
     await user.click(kickBobBtn);
-    expect(api.kickUser).toHaveBeenCalledWith("MVE892", 10, 11);
+    expect(api.kickUser).toHaveBeenCalledWith("MVE892", 10, 11, false);
+  });
+
+  it("renders Strike badge and gives host option to Ban Permanently for repeat offenders", async () => {
+    const mockSessionWithRepeatOffender: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", isHost: false, joinedAt: "2026-08-14T00:01:00", kickCount: 1 },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.kickUser).mockResolvedValue({
+      message: "User Bob was permanently banned from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    });
+
+    const { user } = await renderLobbyScreen(true, mockSessionWithRepeatOffender);
+
+    // Verify Strike badge renders
+    expect(screen.getByText(/strike 1/i)).toBeInTheDocument();
+
+    const kickBobBtn = screen.getByRole("button", { name: /kick bob/i });
+    await user.click(kickBobBtn);
+
+    // Host sees both Kick Round and Ban Perm
+    const kickRoundBtn = screen.getByRole("button", { name: /kick bob for round/i });
+    const banPermBtn = screen.getByRole("button", { name: /ban bob permanently/i });
+    expect(kickRoundBtn).toBeInTheDocument();
+    expect(banPermBtn).toBeInTheDocument();
+
+    // Click Ban Perm
+    await user.click(banPermBtn);
+    expect(api.kickUser).toHaveBeenCalledWith("MVE892", 10, 11, true);
   });
 
   it("does not render kick button when user is a guest", async () => {

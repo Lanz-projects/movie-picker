@@ -45,6 +45,25 @@ public class Session {
     @Version
     private Long version;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "session_banned_users", joinColumns = @JoinColumn(name = "session_id"))
+    @Column(name = "display_name")
+    @Builder.Default
+    private java.util.Set<String> bannedDisplayNames = new java.util.HashSet<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "session_round_kicked_users", joinColumns = @JoinColumn(name = "session_id"))
+    @Column(name = "display_name")
+    @Builder.Default
+    private java.util.Set<String> roundKickedDisplayNames = new java.util.HashSet<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "session_kick_counts", joinColumns = @JoinColumn(name = "session_id"))
+    @MapKeyColumn(name = "display_name")
+    @Column(name = "kick_count")
+    @Builder.Default
+    private java.util.Map<String, Integer> kickCounts = new java.util.HashMap<>();
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

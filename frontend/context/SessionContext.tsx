@@ -59,7 +59,7 @@ export interface SessionContextType {
   createRoom: (hostName: string, maxUsers?: number, maxSuggestions?: number) => Promise<void>;
   joinRoom: (roomCode: string, displayName: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
-  kickUser: (targetUserId: number) => Promise<void>;
+  kickUser: (targetUserId: number, banPermanently?: boolean) => Promise<void>;
   dismissKickedNotice: () => void;
   refreshSession: () => Promise<void>;
   advanceToSearch: () => Promise<void>;
@@ -336,7 +336,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setCurrentUser(me);
         setHasSubmittedDeck(false);
         setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
-        setStage("LOBBY");
+        
+        if (joinedSession.status === "SUGGESTING") {
+          setStage("SEARCH");
+        } else if (joinedSession.status === "VOTING") {
+          setStage("SWIPER");
+        } else if (joinedSession.status === "COMPLETED") {
+          setStage("WINNER");
+        } else {
+          setStage("LOBBY");
+        }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Failed to join room.";
         setError(message);
@@ -532,12 +541,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [session, clearMyDeckSelection]);
 
   const kickUser = React.useCallback(
-    async (targetUserId: number) => {
+    async (targetUserId: number, banPermanently?: boolean) => {
       if (!session?.roomCode || !currentUser?.id) return;
       setIsLoading(true);
       setError(null);
       try {
-        await apiKickUser(session.roomCode, currentUser.id, targetUserId);
+        const isPermanent = banPermanently === true;
+        await apiKickUser(session.roomCode, currentUser.id, targetUserId, isPermanent);
         setSession((prev) => {
           if (!prev) return prev;
           return {

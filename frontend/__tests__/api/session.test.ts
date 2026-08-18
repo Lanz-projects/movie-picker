@@ -219,4 +219,28 @@ describe("Session API Client", () => {
     );
     expect(result.message).toContain("Bob");
   });
+
+  it("kickUser with banPermanently sends flag in POST body", async () => {
+    const mockResponse: LeaveSessionResponse = {
+      message: "User Bob was permanently banned from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    } as unknown as Response);
+
+    const result = await kickUser("ABCD", 10, 11, true);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8080/api/sessions/room/ABCD/kick",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ hostUserId: 10, targetUserId: 11, banPermanently: true }),
+      })
+    );
+    expect(result.message).toContain("permanently banned");
+  });
 });

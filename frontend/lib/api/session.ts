@@ -66,11 +66,13 @@ export async function leaveSessionByRoomCode(
 export async function kickUser(
   roomCode: string,
   hostUserId: number,
-  targetUserId: number
+  targetUserId: number,
+  banPermanently?: boolean
 ): Promise<LeaveSessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
+  const body: KickUserRequest = { hostUserId, targetUserId, banPermanently };
   return request<LeaveSessionResponse>(`/api/sessions/room/${code}/kick`, {
     method: "POST",
-    body: JSON.stringify({ hostUserId, targetUserId }),
+    body: JSON.stringify(body),
   });
 }

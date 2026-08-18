@@ -5,6 +5,7 @@ export interface UserResponse {
   displayName: string;
   isHost?: boolean;
   joinedAt: string;
+  kickCount?: number;
 }
 
 export interface SessionResponse {
@@ -42,6 +43,7 @@ export interface LeaveSessionResponse {
 export interface KickUserRequest {
   hostUserId: number;
   targetUserId: number;
+  banPermanently?: boolean;
 }
 
 export interface UpdateSessionStatusRequest {
