@@ -5,9 +5,11 @@ import { StageContainer } from "@/components/layout/StageContainer";
 import { RoomCodeCard } from "./lobby/RoomCodeCard";
 import { MemberRoster } from "./lobby/MemberRoster";
 import { LobbyControls } from "./lobby/LobbyControls";
+import { QRCodeModal } from "@/components/ui/QRCodeModal";
 import { useSession } from "@/context/SessionContext";
 
 export function LobbyScreen() {
+  const [isQrModalOpen, setIsQrModalOpen] = React.useState(false);
   const {
     session,
     currentUser,
@@ -30,6 +32,7 @@ export function LobbyScreen() {
           roomCode={session.roomCode}
           memberCount={session.users.length}
           maxUsers={session.maxUsers}
+          onOpenQrCode={() => setIsQrModalOpen(true)}
         />
 
         {/* 2. Real-Time Joined Member Roster */}
@@ -47,6 +50,13 @@ export function LobbyScreen() {
           onStartSearch={advanceToSearch}
           onLeaveRoom={leaveRoom}
           isLoading={isLoading}
+        />
+
+        {/* 4. Interactive QR Code Modal */}
+        <QRCodeModal
+          isOpen={isQrModalOpen}
+          roomCode={session.roomCode}
+          onClose={() => setIsQrModalOpen(false)}
         />
       </div>
     </StageContainer>

@@ -7,6 +7,13 @@ import * as api from "@/lib/api";
 import type { SessionResponse } from "@/types";
 
 vi.mock("@/lib/api");
+vi.mock("qrcode", () => ({
+  default: {
+    toCanvas: vi.fn((_canvas, _url, _options, callback) => {
+      if (callback) callback(null);
+    }),
+  },
+}));
 vi.mock("@/lib/websocket", () => ({
   stompService: {
     connect: vi.fn(),
@@ -100,6 +107,10 @@ describe("LobbyScreen Component", () => {
     const writeSpy = vi.spyOn(navigator.clipboard, "writeText");
     const { user } = await renderLobbyScreen(true);
 
+    // Expand options drawer
+    const toggleBtn = screen.getByRole("button", { name: /toggle invite options/i });
+    await user.click(toggleBtn);
+
     const shareButton = screen.getByRole("button", { name: /share invite link/i });
     expect(shareButton).toBeInTheDocument();
 
@@ -107,7 +118,7 @@ describe("LobbyScreen Component", () => {
     expect(writeSpy).toHaveBeenCalledWith(
       expect.stringContaining("/?join=MVE892")
     );
-    expect(screen.getByText(/invite link copied!/i)).toBeInTheDocument();
+    expect(screen.getByText(/link copied!/i)).toBeInTheDocument();
   });
 
   it("invokes navigator.share when available on device", async () => {
@@ -115,6 +126,10 @@ describe("LobbyScreen Component", () => {
     Object.assign(navigator, { share: mockShare });
 
     const { user } = await renderLobbyScreen(true);
+
+    // Expand options drawer
+    const toggleBtn = screen.getByRole("button", { name: /toggle invite options/i });
+    await user.click(toggleBtn);
 
     const shareButton = screen.getByRole("button", { name: /share invite link/i });
     await user.click(shareButton);
@@ -127,6 +142,25 @@ describe("LobbyScreen Component", () => {
 
     // @ts-expect-error - clean up mock
     delete navigator.share;
+  });
+
+  it("opens and closes QR Code dialog when clicking Show QR button", async () => {
+    const { user } = await renderLobbyScreen(true);
+
+    // Expand options drawer
+    const toggleBtn = screen.getByRole("button", { name: /toggle invite options/i });
+    await user.click(toggleBtn);
+
+    const qrButton = screen.getByRole("button", { name: /show qr code/i });
+    expect(qrButton).toBeInTheDocument();
+
+    await user.click(qrButton);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /scan to join room/i })).toBeInTheDocument();
+
+    const closeButton = screen.getByRole("button", { name: /close qr code dialog/i });
+    await user.click(closeButton);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("renders real-time member roster with Host crown and (You) badges", async () => {

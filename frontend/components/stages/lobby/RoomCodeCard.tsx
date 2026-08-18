@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Copy, Check, Users, Share2, QrCode } from "lucide-react";
+import { Copy, Check, Users, Share2, QrCode, ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/utils";
 
 export interface RoomCodeCardProps {
   roomCode: string;
@@ -20,6 +21,7 @@ export function RoomCodeCard({
 }: RoomCodeCardProps) {
   const [copiedCode, setCopiedCode] = React.useState(false);
   const [copiedLink, setCopiedLink] = React.useState(false);
+  const [isInviteOptionsOpen, setIsInviteOptionsOpen] = React.useState(false);
 
   const getInviteUrl = React.useCallback(() => {
     if (typeof window === "undefined") return "";
@@ -110,7 +112,7 @@ export function RoomCodeCard({
         </button>
       </div>
 
-      <p className="text-xs text-text-secondary mb-4">
+      <p className="text-xs text-text-secondary mb-3">
         {copiedCode ? (
           <span className="text-emerald-400 font-semibold">
             Room code copied!
@@ -120,38 +122,64 @@ export function RoomCodeCard({
         )}
       </p>
 
-      {/* Action Bar: Share Link & QR Code */}
-      <div className="pt-3 border-t border-border-subtle/60 flex items-center justify-center gap-2.5">
+      {/* Collapsible Invite Options Hub */}
+      <div className="pt-3 border-t border-border-subtle/60 flex flex-col items-center">
         <button
           type="button"
-          onClick={handleShareLink}
-          aria-label="Share invite link"
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-cyan/40 text-xs sm:text-sm font-semibold text-text-main hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
+          onClick={() => setIsInviteOptionsOpen((prev) => !prev)}
+          aria-expanded={isInviteOptionsOpen}
+          aria-label="Toggle invite options"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text-main hover:bg-bg-surface transition-all cursor-pointer active:scale-98"
         >
-          {copiedLink ? (
-            <>
-              <Check className="h-4 w-4 text-emerald-400" />
-              <span className="text-emerald-400">Invite Link Copied!</span>
-            </>
-          ) : (
-            <>
-              <Share2 className="h-4 w-4 text-brand-cyan" />
-              <span>Share Invite Link</span>
-            </>
-          )}
+          <Share2 className="h-3.5 w-3.5 text-brand-cyan" />
+          <span>
+            {isInviteOptionsOpen
+              ? "Hide Invite Options"
+              : "More Ways to Invite (Link & QR)"}
+          </span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 transition-transform duration-200",
+              isInviteOptionsOpen && "rotate-180"
+            )}
+          />
         </button>
 
-        {onOpenQrCode && (
-          <button
-            type="button"
-            onClick={onOpenQrCode}
-            aria-label="Show QR Code"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-violet/40 text-xs sm:text-sm font-semibold text-text-muted hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
-            title="Scan QR Code to join"
-          >
-            <QrCode className="h-4 w-4 text-brand-violet" />
-            <span className="hidden sm:inline">QR Code</span>
-          </button>
+        {/* Revealed 50/50 Action Bar */}
+        {isInviteOptionsOpen && (
+          <div className="mt-3 w-full grid grid-cols-2 gap-2.5 animate-scale-up">
+            <button
+              type="button"
+              onClick={handleShareLink}
+              aria-label="Share invite link"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-cyan/40 text-xs sm:text-sm font-semibold text-text-main hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-emerald-400 truncate">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4 text-brand-cyan shrink-0" />
+                  <span className="truncate">Share Link</span>
+                </>
+              )}
+            </button>
+
+            {onOpenQrCode ? (
+              <button
+                type="button"
+                onClick={onOpenQrCode}
+                aria-label="Show QR Code"
+                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-violet/40 text-xs sm:text-sm font-semibold text-text-main hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
+                title="Scan QR Code to join"
+              >
+                <QrCode className="h-4 w-4 text-brand-violet shrink-0" />
+                <span className="truncate">Show QR</span>
+              </button>
+            ) : null}
+          </div>
         )}
       </div>
     </Card>
