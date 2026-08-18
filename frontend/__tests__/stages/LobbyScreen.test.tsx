@@ -93,7 +93,40 @@ describe("LobbyScreen Component", () => {
     expect(copyButton).toBeInTheDocument();
 
     await user.click(copyButton);
-    expect(screen.getByText(/copied to clipboard!/i)).toBeInTheDocument();
+    expect(screen.getByText(/room code copied!/i)).toBeInTheDocument();
+  });
+
+  it("copies deep-link invite URL when Share Invite Link is clicked", async () => {
+    const writeSpy = vi.spyOn(navigator.clipboard, "writeText");
+    const { user } = await renderLobbyScreen(true);
+
+    const shareButton = screen.getByRole("button", { name: /share invite link/i });
+    expect(shareButton).toBeInTheDocument();
+
+    await user.click(shareButton);
+    expect(writeSpy).toHaveBeenCalledWith(
+      expect.stringContaining("/?join=MVE892")
+    );
+    expect(screen.getByText(/invite link copied!/i)).toBeInTheDocument();
+  });
+
+  it("invokes navigator.share when available on device", async () => {
+    const mockShare = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { share: mockShare });
+
+    const { user } = await renderLobbyScreen(true);
+
+    const shareButton = screen.getByRole("button", { name: /share invite link/i });
+    await user.click(shareButton);
+
+    expect(mockShare).toHaveBeenCalledWith({
+      title: "Join Movie Picker",
+      text: "Join my Movie Picker room (MVE892) to pick what we watch!",
+      url: expect.stringContaining("/?join=MVE892"),
+    });
+
+    // @ts-expect-error - clean up mock
+    delete navigator.share;
   });
 
   it("renders real-time member roster with Host crown and (You) badges", async () => {

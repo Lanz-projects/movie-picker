@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Copy, Check, Users } from "lucide-react";
+import { Copy, Check, Users, Share2, QrCode } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -9,20 +9,56 @@ export interface RoomCodeCardProps {
   roomCode: string;
   memberCount: number;
   maxUsers: number;
+  onOpenQrCode?: () => void;
 }
 
 export function RoomCodeCard({
   roomCode,
   memberCount,
   maxUsers,
+  onOpenQrCode,
 }: RoomCodeCardProps) {
-  const [copied, setCopied] = React.useState(false);
+  const [copiedCode, setCopiedCode] = React.useState(false);
+  const [copiedLink, setCopiedLink] = React.useState(false);
 
-  const handleCopy = async () => {
+  const getInviteUrl = React.useCallback(() => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}/?join=${encodeURIComponent(roomCode)}`;
+  }, [roomCode]);
+
+  const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(roomCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // Fallback
+    }
+  };
+
+  const handleShareLink = async () => {
+    const inviteUrl = getInviteUrl();
+    if (!inviteUrl) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join Movie Picker",
+          text: `Join my Movie Picker room (${roomCode}) to pick what we watch!`,
+          url: inviteUrl,
+        });
+        return;
+      } catch (err: unknown) {
+        if ((err as Error)?.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
     } catch {
       // Fallback
     }
@@ -61,12 +97,12 @@ export function RoomCodeCard({
 
         <button
           type="button"
-          onClick={handleCopy}
+          onClick={handleCopyCode}
           aria-label="Copy room code"
           className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated hover:border-brand-violet/40 transition-all cursor-pointer active:scale-95 shadow-md shadow-black/30"
           title="Copy room code"
         >
-          {copied ? (
+          {copiedCode ? (
             <Check className="h-5 w-5 text-emerald-400" />
           ) : (
             <Copy className="h-5 w-5" />
@@ -74,15 +110,50 @@ export function RoomCodeCard({
         </button>
       </div>
 
-      <p className="text-xs text-text-secondary">
-        {copied ? (
+      <p className="text-xs text-text-secondary mb-4">
+        {copiedCode ? (
           <span className="text-emerald-400 font-semibold">
-            Copied to clipboard!
+            Room code copied!
           </span>
         ) : (
-          "Tap the copy button to share your code"
+          "Tap copy to share code directly"
         )}
       </p>
+
+      {/* Action Bar: Share Link & QR Code */}
+      <div className="pt-3 border-t border-border-subtle/60 flex items-center justify-center gap-2.5">
+        <button
+          type="button"
+          onClick={handleShareLink}
+          aria-label="Share invite link"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-cyan/40 text-xs sm:text-sm font-semibold text-text-main hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
+        >
+          {copiedLink ? (
+            <>
+              <Check className="h-4 w-4 text-emerald-400" />
+              <span className="text-emerald-400">Invite Link Copied!</span>
+            </>
+          ) : (
+            <>
+              <Share2 className="h-4 w-4 text-brand-cyan" />
+              <span>Share Invite Link</span>
+            </>
+          )}
+        </button>
+
+        {onOpenQrCode && (
+          <button
+            type="button"
+            onClick={onOpenQrCode}
+            aria-label="Show QR Code"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle hover:border-brand-violet/40 text-xs sm:text-sm font-semibold text-text-muted hover:text-white transition-all cursor-pointer shadow-sm active:scale-98"
+            title="Scan QR Code to join"
+          >
+            <QrCode className="h-4 w-4 text-brand-violet" />
+            <span className="hidden sm:inline">QR Code</span>
+          </button>
+        )}
+      </div>
     </Card>
   );
 }
