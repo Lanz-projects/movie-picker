@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import { Clapperboard, Sparkles, KeyRound, AlertCircle, X } from "lucide-react";
 import { StageContainer } from "@/components/layout/StageContainer";
 import { Card } from "@/components/ui/Card";
@@ -9,9 +10,21 @@ import { JoinRoomForm } from "./forms/JoinRoomForm";
 import { useSession } from "@/context/SessionContext";
 import { cn } from "@/lib/utils";
 
-export function SetupScreen() {
-  const [activeTab, setActiveTab] = React.useState<"host" | "join">("host");
+function SetupScreenContent() {
+  const searchParams = useSearchParams();
+  const joinParam = searchParams?.get("join") || searchParams?.get("code") || searchParams?.get("room") || "";
+  const initialRoomCode = joinParam.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+
+  const [activeTab, setActiveTab] = React.useState<"host" | "join">(
+    initialRoomCode ? "join" : "host"
+  );
   const { createRoom, joinRoom, isLoading, error, clearError } = useSession();
+
+  React.useEffect(() => {
+    if (initialRoomCode) {
+      setActiveTab("join");
+    }
+  }, [initialRoomCode]);
 
   const handleHostSubmit = async (
     hostName: string,
@@ -107,9 +120,21 @@ export function SetupScreen() {
         {activeTab === "host" ? (
           <HostRoomForm onSubmit={handleHostSubmit} isLoading={isLoading} />
         ) : (
-          <JoinRoomForm onSubmit={handleJoinSubmit} isLoading={isLoading} />
+          <JoinRoomForm
+            onSubmit={handleJoinSubmit}
+            isLoading={isLoading}
+            initialRoomCode={initialRoomCode}
+          />
         )}
       </Card>
     </StageContainer>
+  );
+}
+
+export function SetupScreen() {
+  return (
+    <React.Suspense fallback={null}>
+      <SetupScreenContent />
+    </React.Suspense>
   );
 }

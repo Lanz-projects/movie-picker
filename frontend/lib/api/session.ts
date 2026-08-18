@@ -5,6 +5,7 @@ import type {
   JoinSessionRequest,
   LeaveSessionResponse,
   LeaveSessionRequest,
+  KickUserRequest,
   UpdateSessionStatusRequest,
   SessionStatus,
 } from "@/types";

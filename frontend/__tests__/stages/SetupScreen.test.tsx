@@ -18,9 +18,17 @@ vi.mock("@/lib/websocket", () => ({
   },
 }));
 
+const mockGetSearchParams = vi.fn((_param: string): string | null => null);
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: (param: string) => mockGetSearchParams(param),
+  }),
+}));
+
 describe("SetupScreen Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetSearchParams.mockReturnValue(null);
   });
 
   const renderSetupScreen = () => {
@@ -237,5 +245,45 @@ describe("SetupScreen Component", () => {
     expect(
       screen.queryByText(/room creation failed due to database error\./i)
     ).not.toBeInTheDocument();
+  });
+
+  it("auto-switches to Join tab and pre-fills room code when ?join=ROOMCODE is in URL", async () => {
+    const user = userEvent.setup({ delay: null });
+    mockGetSearchParams.mockImplementation((key: string) => (key === "join" ? "mve892" : null));
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "HostUser",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 1, displayName: "HostUser", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+        { id: 2, displayName: "Sam", isHost: false, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    renderSetupScreen();
+
+    // Verify Join tab is active automatically
+    const codeInput = screen.getByPlaceholderText(/mve892/i);
+    expect(codeInput).toBeInTheDocument();
+    expect(codeInput).toHaveValue("MVE892");
+
+    // Type nickname and submit
+    const nameInput = screen.getByPlaceholderText(/e\.g\. alex/i);
+    await user.type(nameInput, "Sam");
+
+    const submitButton = screen.getByRole("button", { name: /join cinema room/i });
+    await user.click(submitButton);
+
+    expect(api.joinSession).toHaveBeenCalledWith({
+      roomCode: "MVE892",
+      displayName: "Sam",
+    });
   });
 });

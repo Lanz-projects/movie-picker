@@ -8,13 +8,25 @@ import { Button } from "@/components/ui/Button";
 export interface JoinRoomFormProps {
   onSubmit: (roomCode: string, displayName: string) => Promise<void>;
   isLoading?: boolean;
+  initialRoomCode?: string;
 }
 
-export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps) {
-  const [roomCode, setRoomCode] = React.useState("");
+export function JoinRoomForm({
+  onSubmit,
+  isLoading = false,
+  initialRoomCode = "",
+}: JoinRoomFormProps) {
+  const sanitizedInitial = initialRoomCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  const [roomCode, setRoomCode] = React.useState(sanitizedInitial);
   const [displayName, setDisplayName] = React.useState("");
   const [codeError, setCodeError] = React.useState<string | null>(null);
   const [nameError, setNameError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (initialRoomCode) {
+      setRoomCode(initialRoomCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6));
+    }
+  }, [initialRoomCode]);
 
   const handleRoomCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uppercase = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
@@ -65,7 +77,7 @@ export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps)
           disabled={isLoading}
           maxLength={6}
           className="font-mono uppercase tracking-widest text-base font-bold text-center sm:text-left"
-          autoFocus
+          autoFocus={!sanitizedInitial}
         />
       </div>
 
@@ -84,6 +96,7 @@ export function JoinRoomForm({ onSubmit, isLoading = false }: JoinRoomFormProps)
           error={nameError || undefined}
           disabled={isLoading}
           maxLength={20}
+          autoFocus={Boolean(sanitizedInitial)}
         />
       </div>
 
