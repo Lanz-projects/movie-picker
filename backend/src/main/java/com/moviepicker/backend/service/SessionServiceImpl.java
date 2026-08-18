@@ -9,9 +9,11 @@ import com.moviepicker.backend.model.MovieSuggestion;
 import com.moviepicker.backend.model.Session;
 import com.moviepicker.backend.model.SessionStatus;
 import com.moviepicker.backend.model.User;
+import com.moviepicker.backend.model.Vote;
 import com.moviepicker.backend.repository.MovieSuggestionRepository;
 import com.moviepicker.backend.repository.SessionRepository;
 import com.moviepicker.backend.repository.UserRepository;
+import com.moviepicker.backend.repository.VoteRepository;
 import com.moviepicker.backend.util.RoomCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,9 @@ public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final MovieSuggestionRepository movieSuggestionRepository;
+    private final VoteRepository voteRepository;
+    private final VoteService voteService;
+    private final ConsensusService consensusService;
     private final RoomCodeGenerator roomCodeGenerator;
     private final RoomEventPublisher roomEventPublisher;
 
@@ -135,7 +140,13 @@ public class SessionServiceImpl implements SessionService {
             throw new InvalidSessionStateException("User does not belong to this session");
         }
 
-        // Disassociate user from movie suggestions to preserve pool data
+        // 1. Delete all votes cast by this user in this session
+        List<Vote> userVotes = voteRepository.findBySessionIdAndUserId(session.getId(), user.getId());
+        if (!userVotes.isEmpty()) {
+            voteRepository.deleteAll(userVotes);
+        }
+
+        // 2. Disassociate user from movie suggestions to preserve pool data
         List<MovieSuggestion> userSuggestions = movieSuggestionRepository.findByUserId(user.getId());
         if (!userSuggestions.isEmpty()) {
             for (MovieSuggestion suggestion : userSuggestions) {
@@ -192,6 +203,95 @@ public class SessionServiceImpl implements SessionService {
     public LeaveSessionResponse leaveSessionByRoomCode(String roomCode, LeaveSessionRequest request) {
         Session session = findSessionByRoomCodeOrThrow(roomCode);
         return leaveSession(session.getId(), request);
+    }
+
+    @Override
+    @Transactional
+    public LeaveSessionResponse kickUser(String roomCode, KickUserRequest request) {
+        Session session = findSessionByRoomCodeOrThrow(roomCode);
+
+        User hostUser = userRepository.findById(request.getHostUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Host user not found with id: " + request.getHostUserId()));
+
+        if (!hostUser.getSession().getId().equals(session.getId())) {
+            throw new InvalidSessionStateException("Host does not belong to this session");
+        }
+
+        if (!session.getHostName().equalsIgnoreCase(hostUser.getDisplayName().trim())) {
+            throw new InvalidSessionStateException("Only the room host can kick members");
+        }
+
+        User targetUser = userRepository.findById(request.getTargetUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Target user not found with id: " + request.getTargetUserId()));
+
+        if (!targetUser.getSession().getId().equals(session.getId())) {
+            throw new InvalidSessionStateException("Target user does not belong to this session");
+        }
+
+        if (targetUser.getId().equals(hostUser.getId())) {
+            throw new InvalidSessionStateException("Host cannot kick themselves. Use leave session instead.");
+        }
+
+        String kickedUserName = targetUser.getDisplayName();
+        Long kickedUserId = targetUser.getId();
+
+        // 1. Delete all votes cast by the target user in this session
+        List<Vote> userVotes = voteRepository.findBySessionIdAndUserId(session.getId(), targetUser.getId());
+        if (!userVotes.isEmpty()) {
+            voteRepository.deleteAll(userVotes);
+        }
+
+        // 2. Disassociate user from movie suggestions to preserve pool data and prevent FK violations
+        List<MovieSuggestion> userSuggestions = movieSuggestionRepository.findByUserId(targetUser.getId());
+        if (!userSuggestions.isEmpty()) {
+            for (MovieSuggestion suggestion : userSuggestions) {
+                suggestion.setUser(null);
+            }
+            movieSuggestionRepository.saveAll(userSuggestions);
+        }
+
+        // 3. Delete the user entity
+        userRepository.delete(targetUser);
+
+        List<User> remainingUsers = userRepository.findBySessionIdOrderByJoinedAtAsc(session.getId());
+        List<UserResponse> userResponses = remainingUsers.stream()
+                .map(UserResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        String message = "User '" + kickedUserName + "' was removed from the session by the host.";
+        log.info("User '{}' (id={}) was kicked from session id={} (roomCode={}) by host '{}'",
+                kickedUserName, kickedUserId, session.getId(), session.getRoomCode(), hostUser.getDisplayName());
+
+        LeaveSessionResponse response = LeaveSessionResponse.builder()
+                .sessionId(session.getId())
+                .roomCode(session.getRoomCode())
+                .hostName(session.getHostName())
+                .status(session.getStatus())
+                .remainingUserCount(remainingUsers.size())
+                .remainingUsers(userResponses)
+                .message(message)
+                .build();
+
+        roomEventPublisher.publishUserKicked(session.getRoomCode(), kickedUserId, kickedUserName, response);
+
+        // If in VOTING stage and remaining users have all finished voting, trigger consensus results
+        if (session.getStatus() == SessionStatus.VOTING && !remainingUsers.isEmpty()) {
+            VotingProgressResponse progress = voteService.getVotingProgress(session.getId());
+            if (progress.isAllUsersCompleted() && progress.getTotalMovies() > 0) {
+                RoomProgressEvent allCompletedEvent = RoomProgressEvent.builder()
+                        .eventType(RoomEventType.ALL_VOTING_COMPLETED)
+                        .roomCode(session.getRoomCode())
+                        .sessionStatus(session.getStatus())
+                        .progress(progress)
+                        .message("All remaining users completed voting.")
+                        .build();
+                roomEventPublisher.publishVoteProgress(session.getRoomCode(), allCompletedEvent);
+                SessionResultsResponse results = consensusService.calculateResults(session.getId());
+                roomEventPublisher.publishResults(session.getRoomCode(), results);
+            }
+        }
+
+        return response;
     }
 
     private Session findSessionByRoomCodeOrThrow(String roomCode) {

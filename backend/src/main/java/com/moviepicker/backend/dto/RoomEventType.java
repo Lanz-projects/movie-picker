@@ -4,6 +4,7 @@ public enum RoomEventType {
     // Roster & Presence
     USER_JOINED,
     USER_LEFT,
+    USER_KICKED,
     HOST_CHANGED,
 
     // Stage Transitions & Progression

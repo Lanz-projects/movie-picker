@@ -29,6 +29,7 @@ import com.moviepicker.backend.model.User;
 import com.moviepicker.backend.repository.MovieSuggestionRepository;
 import com.moviepicker.backend.repository.SessionRepository;
 import com.moviepicker.backend.repository.UserRepository;
+import com.moviepicker.backend.repository.VoteRepository;
 import com.moviepicker.backend.util.RoomCodeGenerator;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +49,15 @@ public class SessionServiceTest {
 
     @Mock
     private RoomEventPublisher roomEventPublisher;
+
+    @Mock
+    private VoteRepository voteRepository;
+
+    @Mock
+    private VoteService voteService;
+
+    @Mock
+    private ConsensusService consensusService;
 
     @InjectMocks
     private SessionServiceImpl sessionService;
@@ -316,5 +326,116 @@ public class SessionServiceTest {
 
         assertThat(suggestion.getUser()).isNull();
         verify(movieSuggestionRepository).saveAll(List.of(suggestion));
+    }
+
+    @Test
+    public void testKickUser_Success_InWaitingStage() {
+        User guestUser = User.builder()
+                .id(20L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now().plusMinutes(1))
+                .build();
+
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(10L)
+                .targetUserId(20L)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser));
+        when(movieSuggestionRepository.findByUserId(20L)).thenReturn(List.of());
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
+
+        LeaveSessionResponse response = sessionService.kickUser("ROOM12", request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getRemainingUserCount()).isEqualTo(1);
+        assertThat(response.getMessage()).contains("Bob");
+        assertThat(response.getMessage()).contains("removed from the session by the host");
+        verify(userRepository).delete(guestUser);
+        verify(roomEventPublisher).publishUserKicked("ROOM12", 20L, "Bob", response);
+    }
+
+    @Test
+    public void testKickUser_Success_InSuggestingStage_DisassociatesSuggestions() {
+        sampleSession.setStatus(SessionStatus.SUGGESTING);
+        User guestUser = User.builder()
+                .id(20L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now().plusMinutes(1))
+                .build();
+
+        MovieSuggestion suggestion = MovieSuggestion.builder()
+                .id(200L)
+                .session(sampleSession)
+                .user(guestUser)
+                .title("Inception")
+                .build();
+
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(10L)
+                .targetUserId(20L)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser));
+        when(movieSuggestionRepository.findByUserId(20L)).thenReturn(List.of(suggestion));
+        when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
+
+        LeaveSessionResponse response = sessionService.kickUser("ROOM12", request);
+
+        assertThat(response).isNotNull();
+        assertThat(suggestion.getUser()).isNull();
+        verify(movieSuggestionRepository).saveAll(List.of(suggestion));
+        verify(userRepository).delete(guestUser);
+        verify(roomEventPublisher).publishUserKicked("ROOM12", 20L, "Bob", response);
+    }
+
+    @Test
+    public void testKickUser_ByNonHost_ThrowsException() {
+        User guestUser1 = User.builder()
+                .id(20L)
+                .session(sampleSession)
+                .displayName("Bob")
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        User guestUser2 = User.builder()
+                .id(30L)
+                .session(sampleSession)
+                .displayName("Charlie")
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(20L) // Bob is not host (Alice is)
+                .targetUserId(30L)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser1));
+
+        assertThatThrownBy(() -> sessionService.kickUser("ROOM12", request))
+                .isInstanceOf(InvalidSessionStateException.class)
+                .hasMessageContaining("Only the room host can kick members");
+    }
+
+    @Test
+    public void testKickUser_HostKickingSelf_ThrowsException() {
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(10L)
+                .targetUserId(10L)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
+
+        assertThatThrownBy(() -> sessionService.kickUser("ROOM12", request))
+                .isInstanceOf(InvalidSessionStateException.class)
+                .hasMessageContaining("Host cannot kick themselves");
     }
 }

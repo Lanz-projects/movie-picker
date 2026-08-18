@@ -62,3 +62,15 @@ export async function leaveSessionByRoomCode(
     body: JSON.stringify(body),
   });
 }
+
+export async function kickUser(
+  roomCode: string,
+  hostUserId: number,
+  targetUserId: number
+): Promise<LeaveSessionResponse> {
+  const code = encodeURIComponent(roomCode.trim());
+  return request<LeaveSessionResponse>(`/api/sessions/room/${code}/kick`, {
+    method: "POST",
+    body: JSON.stringify({ hostUserId, targetUserId }),
+  });
+}

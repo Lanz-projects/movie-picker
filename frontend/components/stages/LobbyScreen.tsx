@@ -14,6 +14,7 @@ export function LobbyScreen() {
     isHost,
     advanceToSearch,
     leaveRoom,
+    kickUser,
     isLoading,
   } = useSession();
 
@@ -36,6 +37,8 @@ export function LobbyScreen() {
           users={session.users}
           hostName={session.hostName}
           currentUserId={currentUser?.id}
+          isHost={isHost}
+          onKickUser={kickUser}
         />
 
         {/* 3. Role-Based Controls (Host CTA / Guest Waiting + Leave) */}

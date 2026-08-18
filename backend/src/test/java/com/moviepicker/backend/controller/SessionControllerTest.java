@@ -218,4 +218,45 @@ public class SessionControllerTest {
                 .andExpect(jsonPath("$.roomCode").value("ROOM99"))
                 .andExpect(jsonPath("$.message").value("User 'Bob' left the session."));
     }
+
+    @Test
+    public void testKickUser_Returns200OK() throws Exception {
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(1L)
+                .targetUserId(2L)
+                .build();
+
+        LeaveSessionResponse kickResponse = LeaveSessionResponse.builder()
+                .sessionId(100L)
+                .roomCode("ROOM99")
+                .hostName("Alice")
+                .status(SessionStatus.WAITING)
+                .remainingUserCount(1)
+                .message("User 'Bob' was removed from the session by the host.")
+                .build();
+
+        when(sessionService.kickUser(eq("ROOM99"), any(KickUserRequest.class))).thenReturn(kickResponse);
+
+        mockMvc.perform(post("/api/sessions/room/ROOM99/kick")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomCode").value("ROOM99"))
+                .andExpect(jsonPath("$.remainingUserCount").value(1))
+                .andExpect(jsonPath("$.message").value("User 'Bob' was removed from the session by the host."));
+    }
+
+    @Test
+    public void testKickUser_InvalidInput_Returns400BadRequest() throws Exception {
+        KickUserRequest request = KickUserRequest.builder()
+                .hostUserId(null)
+                .targetUserId(null)
+                .build();
+
+        mockMvc.perform(post("/api/sessions/room/ROOM99/kick")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
 }

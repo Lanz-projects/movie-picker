@@ -27,6 +27,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     removeFromDeck,
     submitMyDeck,
     startVotingDeck,
+    kickUser,
     isLoading: isSessionLoading,
     error: sessionError,
     clearError,
@@ -161,6 +162,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           readyUserIds={submissionProgress?.readyUserIds || []}
           submittedCount={submissionProgress?.submittedCount || 0}
           totalCount={submissionProgress?.totalCount || totalRoomUsers}
+          hostName={session?.hostName}
+          isHost={isHost}
+          onKickUser={kickUser}
         />
 
         {/* Search Bar Input */}

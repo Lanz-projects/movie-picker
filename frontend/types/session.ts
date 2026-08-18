@@ -39,6 +39,11 @@ export interface LeaveSessionResponse {
   sessionClosed: boolean;
 }
 
+export interface KickUserRequest {
+  hostUserId: number;
+  targetUserId: number;
+}
+
 export interface UpdateSessionStatusRequest {
   status: SessionStatus;
 }

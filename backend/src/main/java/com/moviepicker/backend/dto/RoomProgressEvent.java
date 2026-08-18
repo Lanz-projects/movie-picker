@@ -18,6 +18,7 @@ public class RoomProgressEvent {
     private RoomEventType eventType;
     private String roomCode;
     private Long userId;
+    private Long kickedUserId;
     private String userDisplayName;
     private String hostName;
     private SessionStatus sessionStatus;

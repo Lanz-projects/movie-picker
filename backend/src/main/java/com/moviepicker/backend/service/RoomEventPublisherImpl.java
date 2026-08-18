@@ -53,6 +53,24 @@ public class RoomEventPublisherImpl implements RoomEventPublisher {
     }
 
     @Override
+    public void publishUserKicked(String roomCode, Long kickedUserId, String kickedUserName, LeaveSessionResponse leaveResponse) {
+        String cleanCode = roomCode.trim();
+        RoomProgressEvent event = RoomProgressEvent.builder()
+                .eventType(RoomEventType.USER_KICKED)
+                .roomCode(cleanCode)
+                .userId(kickedUserId)
+                .kickedUserId(kickedUserId)
+                .userDisplayName(kickedUserName)
+                .hostName(leaveResponse.getHostName())
+                .sessionStatus(leaveResponse.getStatus())
+                .users(leaveResponse.getRemainingUsers())
+                .message(leaveResponse.getMessage())
+                .build();
+
+        sendToRoom(cleanCode, event);
+    }
+
+    @Override
     public void publishStageChanged(String roomCode, SessionStatus newStatus, List<UserResponse> users) {
         String cleanCode = roomCode.trim();
         RoomProgressEvent event = RoomProgressEvent.builder()

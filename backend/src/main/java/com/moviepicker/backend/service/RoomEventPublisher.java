@@ -14,6 +14,8 @@ public interface RoomEventPublisher {
 
     void publishUserLeft(String roomCode, LeaveSessionResponse leaveResponse);
 
+    void publishUserKicked(String roomCode, Long kickedUserId, String kickedUserName, LeaveSessionResponse leaveResponse);
+
     void publishStageChanged(String roomCode, SessionStatus newStatus, List<UserResponse> users);
 
     void publishDeckSubmitted(String roomCode, Long userId, String userDisplayName, int submittedCount, int totalUsers);

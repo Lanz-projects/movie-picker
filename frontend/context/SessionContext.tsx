@@ -6,6 +6,7 @@ import {
   getSessionByRoomCode as apiGetSession,
   joinSession as apiJoinSession,
   leaveSessionByRoomCode as apiLeaveSession,
+  kickUser as apiKickUser,
   updateSessionStatus as apiUpdateStatus,
   submitMovies as apiSubmitMovies,
   getSessionMovies as apiGetSessionMovies,
@@ -18,6 +19,7 @@ import {
 import { stompService } from "@/lib/websocket";
 import { useDeckSelection } from "@/hooks/useDeckSelection";
 import { useRoomWebSocket } from "@/hooks/useRoomWebSocket";
+import { KickedModal } from "@/components/ui/KickedModal";
 import type {
   SessionResponse,
   UserResponse,
@@ -52,10 +54,13 @@ export interface SessionContextType {
   isConnected: boolean;
   isLoading: boolean;
   error: string | null;
+  kickedNotice: string | null;
 
   createRoom: (hostName: string, maxUsers?: number, maxSuggestions?: number) => Promise<void>;
   joinRoom: (roomCode: string, displayName: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
+  kickUser: (targetUserId: number) => Promise<void>;
+  dismissKickedNotice: () => void;
   refreshSession: () => Promise<void>;
   advanceToSearch: () => Promise<void>;
   addToDeck: (movie: MovieDto) => void;
@@ -81,12 +86,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [results, setResults] = React.useState<SessionResultsResponse | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [kickedNotice, setKickedNotice] = React.useState<string | null>(null);
   const [hasSubmittedDeck, setHasSubmittedDeck] = React.useState<boolean>(false);
   const [submissionProgress, setSubmissionProgress] = React.useState<DeckSubmissionProgress>({
     submittedCount: 0,
     totalCount: 0,
     readyUserIds: [],
   });
+
+  const dismissKickedNotice = React.useCallback(() => setKickedNotice(null), []);
 
   const {
     myDeckSelection,
@@ -127,7 +135,53 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const handleRoomEvent = React.useCallback(
     async (event: RoomProgressEvent) => {
-      // 1. Roster and presence updates
+      // 1. User kicked event
+      if (event.eventType === "USER_KICKED") {
+        const kickedId = event.kickedUserId ?? event.userId;
+        if (kickedId && currentUser && kickedId === currentUser.id) {
+          stompService.disconnect();
+          setKickedNotice(
+            event.message || "You have been removed from the session by the host."
+          );
+          setSession(null);
+          setCurrentUser(null);
+          setMovieDeck([]);
+          clearMyDeckSelection();
+          setHasSubmittedDeck(false);
+          setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+          setProgress(null);
+          setResults(null);
+          setStage("SETUP");
+          return;
+        }
+
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            users: event.users || prev.users.filter((u) => u.id !== kickedId),
+            hostName: event.hostName || prev.hostName,
+            status: event.sessionStatus || prev.status,
+          };
+        });
+
+        if (kickedId) {
+          setSubmissionProgress((prev) => ({
+            submittedCount: Math.max(
+              0,
+              prev.readyUserIds.includes(kickedId)
+                ? prev.submittedCount - 1
+                : prev.submittedCount
+            ),
+            totalCount: event.users
+              ? event.users.length
+              : Math.max(0, prev.totalCount - 1),
+            readyUserIds: prev.readyUserIds.filter((id) => id !== kickedId),
+          }));
+        }
+      }
+
+      // 2. Roster and presence updates
       if (
         event.eventType === "USER_JOINED" ||
         event.eventType === "USER_LEFT" ||
@@ -477,6 +531,41 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session, clearMyDeckSelection]);
 
+  const kickUser = React.useCallback(
+    async (targetUserId: number) => {
+      if (!session?.roomCode || !currentUser?.id) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        await apiKickUser(session.roomCode, currentUser.id, targetUserId);
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            users: prev.users.filter((u) => u.id !== targetUserId),
+          };
+        });
+        setSubmissionProgress((prev) => ({
+          submittedCount: Math.max(
+            0,
+            prev.readyUserIds.includes(targetUserId)
+              ? prev.submittedCount - 1
+              : prev.submittedCount
+          ),
+          totalCount: Math.max(0, prev.totalCount - 1),
+          readyUserIds: prev.readyUserIds.filter((id) => id !== targetUserId),
+        }));
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to remove user.";
+        setError(message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [session?.roomCode, currentUser?.id]
+  );
+
   const effectiveError = error || deckError;
 
   const value: SessionContextType = {
@@ -493,9 +582,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     isConnected,
     isLoading,
     error: effectiveError,
+    kickedNotice,
     createRoom,
     joinRoom,
     leaveRoom,
+    kickUser,
+    dismissKickedNotice,
     refreshSession,
     advanceToSearch,
     addToDeck,
@@ -510,7 +602,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     clearError,
   };
 
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  return (
+    <SessionContext.Provider value={value}>
+      {children}
+      <KickedModal
+        isOpen={!!kickedNotice}
+        message={kickedNotice || undefined}
+        onDismiss={dismissKickedNotice}
+      />
+    </SessionContext.Provider>
+  );
 }
 
 export function useSession(): SessionContextType {

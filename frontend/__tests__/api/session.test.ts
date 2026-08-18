@@ -5,6 +5,7 @@ import {
   joinSession,
   updateSessionStatus,
   leaveSessionByRoomCode,
+  kickUser,
 } from "@/lib/api/session";
 import { ApiClientError } from "@/lib/api/client";
 import type { SessionResponse, LeaveSessionResponse } from "@/types/session";
@@ -193,5 +194,29 @@ describe("Session API Client", () => {
     await expect(getSessionByRoomCode("ZZZZ")).rejects.toThrow(
       "Session not found with room code: ZZZZ"
     );
+  });
+
+  it("kickUser sends POST to kick endpoint and returns LeaveSessionResponse", async () => {
+    const mockResponse: LeaveSessionResponse = {
+      message: "User Bob was removed from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    } as unknown as Response);
+
+    const result = await kickUser("ABCD", 10, 11);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8080/api/sessions/room/ABCD/kick",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ hostUserId: 10, targetUserId: 11 }),
+      })
+    );
+    expect(result.message).toContain("Bob");
   });
 });

@@ -812,5 +812,151 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.submissionProgress.readyUserIds).toContain(11);
     expect(result.current.hasSubmittedDeck).toBe(true);
   });
+
+  it("kickUser calls api.kickUser and removes user from session state", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+    vi.mocked(api.kickUser).mockResolvedValue({
+      message: "User Bob was removed from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    await act(async () => {
+      await result.current.kickUser(11);
+    });
+
+    expect(api.kickUser).toHaveBeenCalledWith("MVE8", 10, 11);
+    expect(result.current.session?.users).toHaveLength(1);
+    expect(result.current.session?.users[0].displayName).toBe("Alice");
+  });
+
+  it("handles USER_KICKED event when current user is the kicked target", async () => {
+    let roomHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("MVE8", "Bob");
+    });
+
+    expect(result.current.stage).toBe("LOBBY");
+    expect(result.current.currentUser?.id).toBe(11);
+
+    // Host kicks Bob (current user)
+    await act(async () => {
+      roomHandler?.({
+        eventType: "USER_KICKED",
+        roomCode: "MVE8",
+        kickedUserId: 11,
+        userId: 11,
+        userDisplayName: "Bob",
+        message: "You have been removed from the session by the host.",
+      });
+    });
+
+    expect(stompService.disconnect).toHaveBeenCalled();
+    expect(result.current.stage).toBe("SETUP");
+    expect(result.current.session).toBeNull();
+    expect(result.current.currentUser).toBeNull();
+    expect(result.current.kickedNotice).toContain("removed from the session");
+
+    // Dismiss notice
+    act(() => {
+      result.current.dismissKickedNotice();
+    });
+    expect(result.current.kickedNotice).toBeNull();
+  });
+
+  it("handles USER_KICKED event when another user is kicked", async () => {
+    let roomHandler: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      roomHandler = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+        { id: 12, displayName: "Charlie", joinedAt: "2026-08-14T00:02:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.createRoom("Alice");
+    });
+
+    expect(result.current.session?.users).toHaveLength(3);
+
+    // Host kicks Charlie (id=12)
+    await act(async () => {
+      roomHandler?.({
+        eventType: "USER_KICKED",
+        roomCode: "MVE8",
+        kickedUserId: 12,
+        userId: 12,
+        userDisplayName: "Charlie",
+        users: [
+          { id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" },
+          { id: 11, displayName: "Bob", joinedAt: "2026-08-14T00:01:00" },
+        ],
+      });
+    });
+
+    expect(result.current.session?.users).toHaveLength(2);
+    expect(result.current.session?.users.map((u) => u.displayName)).toEqual(["Alice", "Bob"]);
+    expect(result.current.kickedNotice).toBeNull();
+  });
 });
 

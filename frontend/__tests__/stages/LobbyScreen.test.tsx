@@ -152,4 +152,32 @@ describe("LobbyScreen Component", () => {
 
     expect(api.leaveSessionByRoomCode).toHaveBeenCalledWith("MVE892", 10);
   });
+
+  it("renders kick button for host and allows kicking guest members", async () => {
+    const { user } = await renderLobbyScreen(true);
+
+    vi.mocked(api.kickUser).mockResolvedValue({
+      message: "User Bob was removed from the session by the host.",
+      newHostName: null,
+      sessionClosed: false,
+    });
+
+    const kickBobBtn = screen.getByRole("button", { name: /kick bob/i });
+    expect(kickBobBtn).toBeInTheDocument();
+
+    // First click asks for confirmation ("Confirm?")
+    await user.click(kickBobBtn);
+    expect(screen.getByText(/confirm\?/i)).toBeInTheDocument();
+
+    // Second click triggers kick API
+    await user.click(kickBobBtn);
+    expect(api.kickUser).toHaveBeenCalledWith("MVE892", 10, 11);
+  });
+
+  it("does not render kick button when user is a guest", async () => {
+    await renderLobbyScreen(false);
+
+    expect(screen.queryByRole("button", { name: /kick alice/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /kick bob/i })).not.toBeInTheDocument();
+  });
 });

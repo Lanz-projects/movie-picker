@@ -9,4 +9,5 @@ public interface SessionService {
     SessionResponse updateSessionStatus(String roomCode, UpdateSessionStatusRequest request);
     LeaveSessionResponse leaveSession(Long sessionId, LeaveSessionRequest request);
     LeaveSessionResponse leaveSessionByRoomCode(String roomCode, LeaveSessionRequest request);
+    LeaveSessionResponse kickUser(String roomCode, KickUserRequest request);
 }

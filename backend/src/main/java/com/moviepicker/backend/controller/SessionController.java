@@ -56,4 +56,12 @@ public class SessionController {
         LeaveSessionResponse response = sessionService.leaveSessionByRoomCode(roomCode, request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/room/{roomCode}/kick")
+    public ResponseEntity<LeaveSessionResponse> kickUser(
+            @PathVariable String roomCode,
+            @Valid @RequestBody KickUserRequest request) {
+        LeaveSessionResponse response = sessionService.kickUser(roomCode, request);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -5,6 +5,7 @@ export type VoteType = "LIKE" | "PASS" | "SUPERLIKE";
 export type RoomEventType =
   | "USER_JOINED"
   | "USER_LEFT"
+  | "USER_KICKED"
   | "HOST_CHANGED"
   | "STAGE_CHANGED"
   | "DECK_SUBMITTED"
@@ -58,6 +59,7 @@ export interface RoomProgressEvent {
   eventType: RoomEventType;
   roomCode: string;
   userId?: number;
+  kickedUserId?: number;
   userDisplayName?: string;
   hostName?: string;
   sessionStatus?: SessionStatus;

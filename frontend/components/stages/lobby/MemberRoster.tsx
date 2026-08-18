@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Crown, Users } from "lucide-react";
+import { Crown, Users, UserX } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import type { UserResponse } from "@/types";
@@ -10,13 +10,28 @@ export interface MemberRosterProps {
   users: UserResponse[];
   hostName: string;
   currentUserId?: number;
+  isHost?: boolean;
+  onKickUser?: (userId: number, displayName: string) => void;
 }
 
 export function MemberRoster({
   users,
   hostName,
   currentUserId,
+  isHost = false,
+  onKickUser,
 }: MemberRosterProps) {
+  const [confirmKickId, setConfirmKickId] = React.useState<number | null>(null);
+
+  const handleKickClick = (userId: number, displayName: string) => {
+    if (confirmKickId === userId) {
+      onKickUser?.(userId, displayName);
+      setConfirmKickId(null);
+    } else {
+      setConfirmKickId(userId);
+    }
+  };
+
   return (
     <Card variant="card" className="w-full p-5 sm:p-6">
       <div className="flex items-center justify-between gap-2 mb-4">
@@ -34,6 +49,7 @@ export function MemberRoster({
           const isUserHost = user.displayName === hostName;
           const isMe = user.id === currentUserId;
           const initials = user.displayName.slice(0, 2).toUpperCase();
+          const isConfirming = confirmKickId === user.id;
 
           return (
             <div
@@ -56,7 +72,7 @@ export function MemberRoster({
                 </div>
               </div>
 
-              {/* Badges */}
+              {/* Badges & Actions */}
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
                 {isUserHost && (
                   <Badge
@@ -77,6 +93,24 @@ export function MemberRoster({
                   >
                     You
                   </Badge>
+                )}
+
+                {/* Host Moderation: Kick Guest */}
+                {isHost && !isUserHost && onKickUser && (
+                  <button
+                    type="button"
+                    aria-label={`Kick ${user.displayName}`}
+                    onClick={() => handleKickClick(user.id, user.displayName)}
+                    onMouseLeave={() => isConfirming && setConfirmKickId(null)}
+                    className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all duration-200 cursor-pointer ${
+                      isConfirming
+                        ? "bg-brand-rose text-white border-brand-rose shadow-[0_0_16px_rgba(244,63,94,0.5)] animate-pulse"
+                        : "bg-bg-surface/60 border-border-subtle text-text-muted hover:text-brand-rose hover:bg-brand-rose/20 hover:border-brand-rose/60 hover:shadow-[0_0_14px_rgba(244,63,94,0.35)] hover:scale-105 active:scale-95"
+                    }`}
+                  >
+                    <UserX className="h-3.5 w-3.5" />
+                    {isConfirming ? "Confirm?" : "Kick"}
+                  </button>
                 )}
               </div>
             </div>
