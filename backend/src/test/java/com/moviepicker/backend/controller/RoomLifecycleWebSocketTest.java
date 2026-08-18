@@ -218,34 +218,25 @@ public class RoomLifecycleWebSocketTest {
     }
 
     @Test
-    public void testPresenceRegistrationAndAbruptDisconnect_CleansUpAndBroadcastsUserLeft() throws Exception {
-        // Guest joins via REST
-        SessionResponse joinResponse = sessionService.joinSession(JoinSessionRequest.builder()
+    void testPresenceRegistrationAndDisconnect_PreservesSessionForReconnection() throws Exception {
+        sessionService.createSession(CreateSessionRequest.builder()
+                .hostName("Alice")
+                .maxUsers(5)
+                .build());
+
+        Session session = sessionRepository.findAll().get(0);
+        session.setRoomCode("ROOM99");
+        sessionRepository.save(session);
+
+        sessionService.joinSession(JoinSessionRequest.builder()
                 .roomCode("ROOM99")
                 .displayName("Charlie")
                 .build());
-        UserResponse charlie = joinResponse.getUsers().stream()
+
+        User charlie = userRepository.findBySessionId(session.getId()).stream()
                 .filter(u -> u.getDisplayName().equals("Charlie"))
                 .findFirst()
                 .orElseThrow();
-
-        // Host connects and listens
-        StompSession hostWs = connectClient();
-        CompletableFuture<RoomProgressEvent> leaveEventFuture = new CompletableFuture<>();
-        hostWs.subscribe("/topic/room/ROOM99", new StompFrameHandler() {
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return RoomProgressEvent.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                RoomProgressEvent event = (RoomProgressEvent) payload;
-                if (event.getEventType() == RoomEventType.USER_LEFT) {
-                    leaveEventFuture.complete(event);
-                }
-            }
-        });
 
         // Guest connects WebSocket and registers presence
         StompSession guestWs = connectClient();
@@ -257,18 +248,11 @@ public class RoomLifecycleWebSocketTest {
 
         Thread.sleep(400);
 
-        // Guest disconnects abruptly
+        // Guest disconnects abruptly (e.g. page refresh / app backgrounded)
         guestWs.disconnect();
+        Thread.sleep(400);
 
-        RoomProgressEvent receivedLeave = leaveEventFuture.get(5, TimeUnit.SECONDS);
-        assertThat(receivedLeave).isNotNull();
-        assertThat(receivedLeave.getEventType()).isEqualTo(RoomEventType.USER_LEFT);
-        assertThat(receivedLeave.getUsers()).hasSize(1);
-        assertThat(receivedLeave.getUsers().get(0).getDisplayName()).isEqualTo("Alice");
-
-        // Verify Charlie is deleted from DB
-        assertThat(userRepository.findById(charlie.getId())).isEmpty();
-
-        hostWs.disconnect();
+        // Verify Charlie is NOT deleted from DB to allow reattachment on refresh
+        assertThat(userRepository.findById(charlie.getId())).isPresent();
     }
 }

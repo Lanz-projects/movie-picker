@@ -34,7 +34,7 @@ export function useRoomWebSocket({
       onConnect: () => {
         setIsConnected(true);
         if (userId && displayName) {
-          stompService.registerPresence(cleanCode, userId, displayName);
+          stompService.registerPresence?.(cleanCode, userId, displayName);
         }
       },
       onDisconnect: () => setIsConnected(false),
@@ -59,6 +59,12 @@ export function useRoomWebSocket({
       setIsConnected(false);
     };
   }, [roomCode, userId, displayName, onRoomEvent, onProgress, onResults]);
+
+  React.useEffect(() => {
+    if (roomCode && userId && displayName && stompService.isConnected()) {
+      stompService.registerPresence?.(roomCode.trim(), userId, displayName);
+    }
+  }, [roomCode, userId, displayName]);
 
   return { isConnected };
 }

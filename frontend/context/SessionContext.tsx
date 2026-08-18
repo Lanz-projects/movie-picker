@@ -20,6 +20,11 @@ import { stompService } from "@/lib/websocket";
 import { useDeckSelection } from "@/hooks/useDeckSelection";
 import { useRoomWebSocket } from "@/hooks/useRoomWebSocket";
 import { KickedModal } from "@/components/ui/KickedModal";
+import {
+  saveSessionAuth,
+  loadSessionAuth,
+  clearSessionAuth,
+} from "@/lib/storage/sessionStorage";
 import type {
   SessionResponse,
   UserResponse,
@@ -45,6 +50,7 @@ export interface SessionContextType {
   currentUser: UserResponse | null;
   isHost: boolean;
   stage: GameStage;
+  isRehydrating: boolean;
   movieDeck: MovieSuggestionResponse[];
   myDeckSelection: MovieSubmissionDto[];
   hasSubmittedDeck: boolean;
@@ -81,6 +87,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = React.useState<SessionResponse | null>(null);
   const [currentUser, setCurrentUser] = React.useState<UserResponse | null>(null);
   const [stage, setStage] = React.useState<GameStage>("SETUP");
+  const [isRehydrating, setIsRehydrating] = React.useState<boolean>(false);
   const [movieDeck, setMovieDeck] = React.useState<MovieSuggestionResponse[]>([]);
   const [progress, setProgress] = React.useState<VotingProgressResponse | null>(null);
   const [results, setResults] = React.useState<SessionResultsResponse | null>(null);
@@ -94,7 +101,113 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     readyUserIds: [],
   });
 
-  const dismissKickedNotice = React.useCallback(() => setKickedNotice(null), []);
+  const dismissKickedNotice = React.useCallback(() => {
+    clearSessionAuth();
+    setKickedNotice(null);
+  }, []);
+
+  // Rehydrate active session from sessionStorage on app mount / refresh
+  React.useEffect(() => {
+    let isMounted = true;
+
+    async function rehydrateSession() {
+      const stored = loadSessionAuth();
+      if (!stored?.roomCode || !stored?.userId) {
+        return;
+      }
+
+      setIsRehydrating(true);
+
+      try {
+        const active = await apiGetSession(stored.roomCode);
+        if (!isMounted || !active?.users) {
+          return;
+        }
+
+        const me = active.users.find(
+          (u) => u.id === stored.userId || u.displayName === stored.displayName
+        );
+
+        let effectiveMe = me;
+        let effectiveSession = active;
+
+        if (!effectiveMe) {
+          // If the user was removed after disconnect grace period but session is still open, auto-rejoin
+          if (active.status === "WAITING" || active.status === "SUGGESTING") {
+            try {
+              const rejoined = await apiJoinSession({
+                roomCode: stored.roomCode.trim(),
+                displayName: stored.displayName.trim(),
+              });
+
+              if (!isMounted) return;
+
+              effectiveSession = rejoined;
+              effectiveMe =
+                rejoined.users.find((u) => u.displayName === stored.displayName.trim()) || {
+                  id: rejoined.users[rejoined.users.length - 1]?.id || 2,
+                  displayName: stored.displayName.trim(),
+                  isHost: false,
+                  joinedAt: new Date().toISOString(),
+                };
+
+              saveSessionAuth({
+                roomCode: rejoined.roomCode,
+                userId: effectiveMe.id,
+                displayName: effectiveMe.displayName,
+                isHost: effectiveMe.isHost ?? false,
+                savedAt: Date.now(),
+              });
+            } catch (rejoinErr) {
+              console.warn("[SessionContext] Auto-rejoin failed:", rejoinErr);
+              clearSessionAuth();
+              return;
+            }
+          } else {
+            clearSessionAuth();
+            return;
+          }
+        }
+
+        if (!effectiveMe || effectiveSession.status === "COMPLETED") {
+          clearSessionAuth();
+          return;
+        }
+
+        setSession(effectiveSession);
+        setCurrentUser(effectiveMe);
+
+        if (effectiveSession.status === "SUGGESTING") {
+          setStage("SEARCH");
+        } else if (effectiveSession.status === "VOTING") {
+          setStage("SWIPER");
+          try {
+            const movies = await apiGetSessionMovies(effectiveSession.id);
+            if (isMounted) setMovieDeck(movies);
+            const prog = await apiGetProgress(effectiveSession.roomCode);
+            if (isMounted) setProgress(prog);
+          } catch {
+            // Keep current deck
+          }
+        } else if (effectiveSession.status === "WAITING") {
+          setStage("LOBBY");
+        }
+      } catch (err) {
+        console.warn("[SessionContext] Stored session invalid or expired:", err);
+        clearSessionAuth();
+      } finally {
+        if (isMounted) {
+          setIsRehydrating(false);
+        }
+      }
+    }
+
+    rehydrateSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const {
     myDeckSelection,
@@ -139,6 +252,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       if (event.eventType === "USER_KICKED") {
         const kickedId = event.kickedUserId ?? event.userId;
         if (kickedId && currentUser && kickedId === currentUser.id) {
+          clearSessionAuth();
           stompService.disconnect();
           setKickedNotice(
             event.message || "You have been removed from the session by the host."
@@ -300,6 +414,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(newSession);
         setCurrentUser(me);
+        saveSessionAuth({
+          roomCode: newSession.roomCode,
+          userId: me.id,
+          displayName: me.displayName,
+          isHost: true,
+          savedAt: Date.now(),
+        });
         setHasSubmittedDeck(false);
         setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
         setStage("LOBBY");
@@ -334,6 +455,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(joinedSession);
         setCurrentUser(me);
+        saveSessionAuth({
+          roomCode: joinedSession.roomCode,
+          userId: me.id,
+          displayName: me.displayName,
+          isHost: me.isHost ?? false,
+          savedAt: Date.now(),
+        });
         setHasSubmittedDeck(false);
         setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
         
@@ -359,6 +487,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const leaveRoom = React.useCallback(async () => {
     if (!session || !currentUser) {
+      clearSessionAuth();
       setSession(null);
       setCurrentUser(null);
       setHasSubmittedDeck(false);
@@ -372,6 +501,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Graceful exit
     } finally {
+      clearSessionAuth();
       stompService.disconnect();
       setSession(null);
       setCurrentUser(null);
@@ -583,6 +713,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     currentUser,
     isHost,
     stage,
+    isRehydrating,
     movieDeck,
     myDeckSelection,
     hasSubmittedDeck,

@@ -5,6 +5,7 @@ import { afterEach, vi } from "vitest";
 // Automatically unmount React trees after each test
 afterEach(() => {
   cleanup();
+  sessionStorage.clear();
   vi.clearAllMocks();
 });
 

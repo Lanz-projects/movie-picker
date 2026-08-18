@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { SessionProvider, useSession } from "@/context/SessionContext";
 import * as api from "@/lib/api";
@@ -30,11 +30,12 @@ vi.mock("@/lib/websocket", () => {
 
 describe("SessionContext & useSession Hook", () => {
   beforeEach(() => {
+    sessionStorage.clear();
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -1018,6 +1019,219 @@ describe("SessionContext & useSession Hook", () => {
     });
 
     expect(api.kickUser).toHaveBeenCalledWith("MVE8", 10, 11, true);
+  });
+
+  it("rehydrates session from sessionStorage on mount into WAITING (LOBBY) stage", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", isHost: false, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "MVE892",
+        userId: 10,
+        displayName: "Alice",
+        isHost: true,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.stage).toBe("LOBBY");
+    });
+
+    expect(result.current.session?.roomCode).toBe("MVE892");
+    expect(result.current.currentUser?.displayName).toBe("Alice");
+    expect(result.current.isHost).toBe(true);
+  });
+
+  it("rehydrates session from sessionStorage on mount into SUGGESTING (SEARCH) stage", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Alice",
+      status: "SUGGESTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "MVE892",
+        userId: 10,
+        displayName: "Alice",
+        isHost: true,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.stage).toBe("SEARCH");
+    });
+
+    expect(result.current.session?.roomCode).toBe("MVE892");
+  });
+
+  it("rehydrates session from sessionStorage on mount into VOTING (SWIPER) stage and fetches deck", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Alice",
+      status: "VOTING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "MVE892",
+        userId: 10,
+        displayName: "Alice",
+        isHost: true,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockSession);
+    vi.mocked(api.getSessionMovies).mockResolvedValue([
+      {
+        id: 1,
+        tmdbId: 101,
+        title: "Inception",
+        overview: "Dream heist",
+        posterPath: "/poster.jpg",
+        releaseYear: 2010,
+        userId: 10,
+        userDisplayName: "Alice",
+        suggestedAt: "2026-08-14T00:00:00",
+      },
+    ]);
+    vi.mocked(api.getVotingProgressByRoomCode).mockResolvedValue({
+      sessionId: 1,
+      roomCode: "MVE892",
+      totalMovies: 1,
+      totalUsers: 1,
+      completedUserCount: 0,
+      allUsersCompleted: false,
+      users: [{ userId: 10, displayName: "Alice", votedCount: 0, completed: false }],
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.stage).toBe("SWIPER");
+    });
+
+    expect(result.current.movieDeck).toHaveLength(1);
+    expect(result.current.movieDeck[0].title).toBe("Inception");
+  });
+
+  it("auto-rejoins active session if user was removed after disconnect grace period", async () => {
+    const mockActiveSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Bob",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 11, displayName: "Bob", isHost: true, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const mockRejoinedSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Bob",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 11, displayName: "Bob", isHost: true, joinedAt: "2026-08-14T00:01:00" },
+        { id: 12, displayName: "Alice", isHost: false, joinedAt: "2026-08-14T00:02:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "MVE892",
+        userId: 10,
+        displayName: "Alice",
+        isHost: true,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockActiveSession);
+    vi.mocked(api.joinSession).mockResolvedValue(mockRejoinedSession);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.stage).toBe("LOBBY");
+    });
+
+    expect(api.joinSession).toHaveBeenCalledWith({
+      roomCode: "MVE892",
+      displayName: "Alice",
+    });
+    expect(result.current.currentUser?.displayName).toBe("Alice");
+    expect(result.current.isHost).toBe(false);
+  });
+
+  it("clears sessionStorage and remains in SETUP if session is expired or user not in room", async () => {
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "EXPIRED",
+        userId: 99,
+        displayName: "Ghost",
+        isHost: false,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockRejectedValue(new Error("Session not found"));
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem("movie_picker_session_auth")).toBeNull();
+    });
+
+    expect(result.current.stage).toBe("SETUP");
   });
 });
 
