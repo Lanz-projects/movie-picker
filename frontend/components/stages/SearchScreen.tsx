@@ -6,7 +6,6 @@ import { SearchBar } from "./search/SearchBar";
 import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
-import { NominationsReadinessPill } from "./search/NominationsReadinessPill";
 import { SearchFilterToolbar } from "./search/SearchFilterToolbar";
 import { ScrollNavFab } from "@/components/ui/ScrollNavFab";
 import { useSession } from "@/context/SessionContext";
@@ -166,17 +165,6 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             Pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles from trending, genre categories, or search. Click any card to inspect full details!
           </p>
         </div>
-
-        {/* Live Room Readiness Indicator */}
-        <NominationsReadinessPill
-          users={session?.users || []}
-          readyUserIds={submissionProgress?.readyUserIds || []}
-          submittedCount={submissionProgress?.submittedCount || 0}
-          totalCount={submissionProgress?.totalCount || totalRoomUsers}
-          hostName={session?.hostName}
-          isHost={isHost}
-          onKickUser={kickUser}
-        />
 
         {/* Search Bar Input, Category Filters, & Dynamic Heading Toolbar */}
         <SearchFilterToolbar

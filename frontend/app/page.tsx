@@ -10,8 +10,18 @@ import { WinnerScreen } from "@/components/stages/WinnerScreen";
 import { useSession } from "@/context/SessionContext";
 
 export default function Home() {
-  const { session, currentUser, isHost, stage, leaveRoom, isConnected, isRehydrating } =
-    useSession();
+  const {
+    session,
+    currentUser,
+    isHost,
+    stage,
+    leaveRoom,
+    kickUser,
+    submissionProgress,
+    progress,
+    isConnected,
+    isRehydrating,
+  } = useSession();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -21,6 +31,14 @@ export default function Home() {
         nickname={currentUser?.displayName}
         isHost={isHost}
         memberCount={session?.users.length}
+        users={session?.users}
+        maxUsers={session?.maxUsers}
+        hostName={session?.hostName}
+        currentUserId={currentUser?.id}
+        stage={stage}
+        submissionProgress={submissionProgress}
+        votingProgress={progress}
+        onKickUser={kickUser}
         isConnected={isConnected}
         onLeaveRoom={session ? leaveRoom : undefined}
       />

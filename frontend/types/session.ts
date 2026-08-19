@@ -1,5 +1,13 @@
 export type SessionStatus = "WAITING" | "SUGGESTING" | "VOTING" | "COMPLETED";
 
+export type GameStage = "SETUP" | "LOBBY" | "SEARCH" | "SWIPER" | "WINNER";
+
+export interface DeckSubmissionProgress {
+  submittedCount: number;
+  totalCount: number;
+  readyUserIds: number[];
+}
+
 export interface UserResponse {
   id: number;
   displayName: string;
