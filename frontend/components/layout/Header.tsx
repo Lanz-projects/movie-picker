@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Clapperboard, Copy, Check, Crown, Wifi, LogOut } from "lucide-react";
+import { Clapperboard, Copy, Check, Crown, Wifi, LogOut, Volume2, VolumeX } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { RoomUsersDropdown } from "./RoomUsersDropdown";
+import { isSoundMuted, toggleSoundMuted, subscribeSoundMuted } from "@/lib/audio/sounds";
 import { cn } from "@/lib/utils";
 import type { UserResponse, GameStage, DeckSubmissionProgress, VotingProgressResponse } from "@/types";
 
@@ -41,6 +42,12 @@ export const Header = React.memo(function Header({
   onLeaveRoom,
 }: HeaderProps) {
   const [copied, setCopied] = React.useState(false);
+  const [muted, setMuted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMuted(isSoundMuted());
+    return subscribeSoundMuted((nextMuted) => setMuted(nextMuted));
+  }, []);
 
   const handleCopyCode = async () => {
     if (!roomCode) return;
@@ -142,6 +149,21 @@ export const Header = React.memo(function Header({
               <span className="hidden sm:inline">Online</span>
             </div>
           )}
+
+          {/* Sound Mute / Unmute Toggle */}
+          <button
+            onClick={() => toggleSoundMuted()}
+            title={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+            aria-label={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+            className={cn(
+              "p-1.5 rounded-lg transition-colors cursor-pointer",
+              muted
+                ? "text-text-muted/60 hover:text-text-muted hover:bg-bg-surface"
+                : "text-brand-violet hover:text-brand-indigo hover:bg-brand-violet/10"
+            )}
+          >
+            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
         </div>
       </div>
     </header>

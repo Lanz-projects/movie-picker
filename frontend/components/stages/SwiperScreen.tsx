@@ -9,6 +9,7 @@ import { SwiperFinishedView } from "./swiper/SwiperFinishedView";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { useSession } from "@/context/SessionContext";
 import { useKeyboardSwipe } from "@/hooks/useKeyboardSwipe";
+import { playSwipePass, playSwipeLike, playSwipeSuperlike } from "@/lib/audio/sounds";
 import type { MovieSuggestionResponse, VoteType, MovieDto } from "@/types";
 
 export interface SwiperScreenProps {
@@ -41,6 +42,14 @@ export function SwiperScreen({
   const handleVote = React.useCallback(
     (voteType: VoteType) => {
       if (isFinished || !currentMovie || isProcessingVote) return;
+
+      if (voteType === "PASS") {
+        playSwipePass();
+      } else if (voteType === "SUPERLIKE") {
+        playSwipeSuperlike();
+      } else {
+        playSwipeLike();
+      }
 
       setIsProcessingVote(true);
       setExitDirection(voteType);

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import confetti from "canvas-confetti";
+import { playWinnerFanfare } from "@/lib/audio/sounds";
 
 export interface ConfettiCelebrationProps {
   isUnanimous?: boolean;
@@ -13,6 +14,9 @@ export const ConfettiCelebration = React.memo(function ConfettiCelebration({
   durationMs = 3000,
 }: ConfettiCelebrationProps) {
   React.useEffect(() => {
+    // Play celebratory winner fanfare sound
+    playWinnerFanfare();
+
     // Accessibility check: Skip animation if user prefers reduced motion
     if (
       typeof window !== "undefined" &&
@@ -23,9 +27,10 @@ export const ConfettiCelebration = React.memo(function ConfettiCelebration({
     }
 
     const end = Date.now() + durationMs;
+    // Golden cinema & neon theater palettes
     const colors = isUnanimous
-      ? ["#10B981", "#F59E0B", "#8B5CF6", "#6366F1", "#EC4899"]
-      : ["#F59E0B", "#6366F1", "#8B5CF6", "#38BDF8"];
+      ? ["#FFD700", "#F59E0B", "#10B981", "#34D399", "#FDE047", "#FFFFFF"]
+      : ["#FFD700", "#F59E0B", "#EC4899", "#8B5CF6", "#06B6D4", "#F43F5E"];
 
     // Initial celebratory pop
     try {

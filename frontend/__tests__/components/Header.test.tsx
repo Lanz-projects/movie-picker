@@ -48,4 +48,21 @@ describe("Header Component", () => {
 
     expect(handleLeave).toHaveBeenCalledTimes(1);
   });
+
+  it("renders sound mute toggle and toggles state on click", () => {
+    render(
+      <Header
+        roomCode="MVE892"
+        nickname="Alice"
+        isHost={false}
+        users={mockUsers}
+      />
+    );
+
+    const soundBtn = screen.getByRole("button", { name: /mute sound effects/i });
+    expect(soundBtn).toBeInTheDocument();
+
+    fireEvent.click(soundBtn);
+    expect(screen.getByRole("button", { name: /unmute sound effects/i })).toBeInTheDocument();
+  });
 });
