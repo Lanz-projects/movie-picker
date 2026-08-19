@@ -1,24 +1,42 @@
 "use client";
 
 import * as React from "react";
-import { Clapperboard, Copy, Check, Users, Crown, Wifi, LogOut } from "lucide-react";
+import { Clapperboard, Copy, Check, Crown, Wifi, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { RoomUsersDropdown } from "./RoomUsersDropdown";
 import { cn } from "@/lib/utils";
+import type { UserResponse, GameStage, DeckSubmissionProgress, VotingProgressResponse } from "@/types";
 
 export interface HeaderProps {
   roomCode?: string;
   nickname?: string;
   isHost?: boolean;
   memberCount?: number;
+  users?: UserResponse[];
+  maxUsers?: number;
+  hostName?: string;
+  currentUserId?: number;
+  stage?: GameStage;
+  submissionProgress?: DeckSubmissionProgress;
+  votingProgress?: VotingProgressResponse | null;
+  onKickUser?: (userId: number, banPermanently?: boolean) => Promise<void> | void;
   isConnected?: boolean;
   onLeaveRoom?: () => void;
 }
 
-export function Header({
+export const Header = React.memo(function Header({
   roomCode,
   nickname,
   isHost = false,
   memberCount,
+  users,
+  maxUsers,
+  hostName,
+  currentUserId,
+  stage = "LOBBY",
+  submissionProgress,
+  votingProgress,
+  onKickUser,
   isConnected = true,
   onLeaveRoom,
 }: HeaderProps) {
@@ -38,20 +56,34 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-bg-base/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-275 items-center justify-between px-4 sm:px-6">
-        {/* Brand Logo */}
+        {/* Brand Logo & Current Player Identity */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-md shadow-brand-indigo/30">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-md shadow-brand-indigo/30 shrink-0">
             <Clapperboard className="h-5 w-5" />
           </div>
           <div className="flex flex-col">
-            <span className="font-display text-lg font-extrabold tracking-tight text-white">
+            <span className="font-display text-sm sm:text-base font-extrabold tracking-tight text-white leading-tight">
               What Should We Watch
             </span>
+            {nickname && roomCode ? (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[11px] text-text-muted">Playing as</span>
+                <span className="text-[11px] font-bold text-text-main max-w-28 sm:max-w-44 truncate">
+                  {nickname}
+                </span>
+                {isHost && (
+                  <Badge variant="host" size="sm" className="text-[9px] px-1.5 py-0 h-4">
+                    <Crown className="h-2.5 w-2.5" />
+                    <span>Host</span>
+                  </Badge>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {/* Dynamic Room & User State */}
-        <div className="flex items-center gap-2.5 sm:gap-4">
+        {/* Dynamic Room & Controls */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {roomCode ? (
             <>
               {/* Room Code Badge with Copy */}
@@ -59,10 +91,10 @@ export function Header({
                 onClick={handleCopyCode}
                 title="Click to copy Room Code"
                 className={cn(
-                  "group flex items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-3 py-1.5 text-xs font-semibold text-text-main transition-all duration-200 hover:border-brand-violet hover:bg-bg-elevated cursor-pointer active:scale-95"
+                  "group flex items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-text-main transition-all duration-200 hover:border-brand-violet hover:bg-bg-elevated cursor-pointer active:scale-95"
                 )}
               >
-                <span className="text-text-muted">ROOM</span>
+                <span className="text-text-muted hidden xs:inline">ROOM</span>
                 <span className="font-mono font-bold tracking-wider text-brand-violet group-hover:text-white">
                   {roomCode}
                 </span>
@@ -73,26 +105,23 @@ export function Header({
                 )}
               </button>
 
-              {/* Member Counter */}
-              {memberCount !== undefined ? (
-                <div className="hidden items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary sm:flex">
-                  <Users className="h-3.5 w-3.5 text-brand-cyan" />
-                  <span>{memberCount}</span>
-                </div>
-              ) : null}
-
-              {/* User Identity / Host status */}
-              {nickname ? (
-                <div className="flex items-center gap-1.5">
-                  <span className="max-w-25 truncate text-xs font-semibold text-text-main sm:max-w-35">
-                    {nickname}
-                  </span>
-                  {isHost ? (
-                    <Badge variant="host" size="sm">
-                      <Crown className="h-3 w-3" />
-                      <span>Host</span>
-                    </Badge>
-                  ) : null}
+              {/* Interactive Room Members & Readiness Dropdown */}
+              {users && users.length > 0 ? (
+                <RoomUsersDropdown
+                  users={users}
+                  maxUsers={maxUsers}
+                  hostName={hostName}
+                  currentUserId={currentUserId}
+                  isHost={isHost}
+                  stage={stage}
+                  submissionProgress={submissionProgress}
+                  votingProgress={votingProgress}
+                  isConnected={isConnected}
+                  onKickUser={onKickUser}
+                />
+              ) : memberCount !== undefined ? (
+                <div className="flex items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary">
+                  <span>{memberCount} Players</span>
                 </div>
               ) : null}
 
@@ -106,19 +135,6 @@ export function Header({
                   <LogOut className="h-4 w-4" />
                 </button>
               ) : null}
-
-              {/* Connection Dot */}
-              <div
-                className="flex items-center"
-                title={isConnected ? "Connected to Room" : "Reconnecting..."}
-              >
-                <span
-                  className={cn(
-                    "h-2.5 w-2.5 rounded-full ring-2 ring-bg-base transition-colors",
-                    isConnected ? "bg-brand-emerald animate-pulse" : "bg-brand-coral"
-                  )}
-                />
-              </div>
             </>
           ) : (
             <div className="flex items-center gap-2 text-xs font-medium text-text-muted">
@@ -130,4 +146,4 @@ export function Header({
       </div>
     </header>
   );
-}
+});
