@@ -8,6 +8,7 @@ import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { NominationsReadinessPill } from "./search/NominationsReadinessPill";
 import { SearchFilterToolbar } from "./search/SearchFilterToolbar";
+import { ScrollNavFab } from "@/components/ui/ScrollNavFab";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { AlertCircle, X, Sparkles } from "lucide-react";
@@ -266,6 +267,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
         onToggleDeck={handleToggleDeck}
         disabled={!isModalMovieInDeck && isDeckFull}
       />
+
+      {/* Floating Smart Scroll Navigation FAB */}
+      <ScrollNavFab />
     </StageContainer>
   );
 }
