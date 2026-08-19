@@ -84,18 +84,18 @@ public class ConsensusServiceTest {
     @Test
     public void testCalculateResults_UnanimousMatch_Success() {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
-        when(movieSuggestionRepository.findBySessionId(1L)).thenReturn(List.of(movie1, movie2));
+        when(movieSuggestionRepository.findBySessionIdWithUser(1L)).thenReturn(List.of(movie1, movie2));
         when(userRepository.findBySessionId(1L)).thenReturn(List.of(user1, user2));
 
         // Movie 1: 2 YES votes (unanimous)
         Vote v1 = Vote.builder().session(session).user(user1).movieSuggestion(movie1).voteType(VoteType.YES).build();
         Vote v2 = Vote.builder().session(session).user(user2).movieSuggestion(movie1).voteType(VoteType.YES).build();
-        when(voteRepository.findBySessionIdAndMovieSuggestionId(1L, 100L)).thenReturn(List.of(v1, v2));
 
         // Movie 2: 1 YES vote, 1 NO vote
         Vote v3 = Vote.builder().session(session).user(user1).movieSuggestion(movie2).voteType(VoteType.YES).build();
         Vote v4 = Vote.builder().session(session).user(user2).movieSuggestion(movie2).voteType(VoteType.NO).build();
-        when(voteRepository.findBySessionIdAndMovieSuggestionId(1L, 101L)).thenReturn(List.of(v3, v4));
+
+        when(voteRepository.findBySessionIdWithUserAndMovie(1L)).thenReturn(List.of(v1, v2, v3, v4));
 
         SessionResultsResponse response = consensusService.calculateResults(1L);
 
@@ -124,16 +124,16 @@ public class ConsensusServiceTest {
     @Test
     public void testCalculateResults_SuperlikeBreaksTie() {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
-        when(movieSuggestionRepository.findBySessionId(1L)).thenReturn(List.of(movie1, movie2));
+        when(movieSuggestionRepository.findBySessionIdWithUser(1L)).thenReturn(List.of(movie1, movie2));
         when(userRepository.findBySessionId(1L)).thenReturn(List.of(user1, user2));
 
         // Movie 1: 1 SUPERLIKE (score 2)
         Vote v1 = Vote.builder().session(session).user(user1).movieSuggestion(movie1).voteType(VoteType.SUPERLIKE).build();
-        when(voteRepository.findBySessionIdAndMovieSuggestionId(1L, 100L)).thenReturn(List.of(v1));
 
         // Movie 2: 1 YES vote (score 1)
         Vote v2 = Vote.builder().session(session).user(user2).movieSuggestion(movie2).voteType(VoteType.YES).build();
-        when(voteRepository.findBySessionIdAndMovieSuggestionId(1L, 101L)).thenReturn(List.of(v2));
+
+        when(voteRepository.findBySessionIdWithUserAndMovie(1L)).thenReturn(List.of(v1, v2));
 
         SessionResultsResponse response = consensusService.calculateResults(1L);
 

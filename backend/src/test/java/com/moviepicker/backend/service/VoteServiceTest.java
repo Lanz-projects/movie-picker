@@ -193,8 +193,10 @@ public class VoteServiceTest {
         when(movieSuggestionRepository.findBySessionId(1L)).thenReturn(List.of(movieSuggestion, movie2));
         when(userRepository.findBySessionId(1L)).thenReturn(List.of(user, user2));
 
-        when(voteRepository.countBySessionIdAndUserId(1L, 10L)).thenReturn(2L); // Alice completed 2/2
-        when(voteRepository.countBySessionIdAndUserId(1L, 11L)).thenReturn(1L); // Bob completed 1/2
+        when(voteRepository.countVotesGroupedByUserId(1L)).thenReturn(List.of(
+                new Object[]{10L, 2L}, // Alice completed 2/2
+                new Object[]{11L, 1L}  // Bob completed 1/2
+        ));
 
         VotingProgressResponse progress = voteService.getVotingProgress(1L);
 

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -81,14 +82,20 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     private SessionResultsResponse buildResultsResponse(Session session) {
-        List<MovieSuggestion> movies = movieSuggestionRepository.findBySessionId(session.getId());
+        List<MovieSuggestion> movies = movieSuggestionRepository.findBySessionIdWithUser(session.getId());
         List<User> users = userRepository.findBySessionId(session.getId());
+        List<Vote> allVotes = voteRepository.findBySessionIdWithUserAndMovie(session.getId());
+
+        // Group votes in-memory by movieSuggestionId to eliminate N+1 query loops
+        java.util.Map<Long, List<Vote>> votesByMovieId = allVotes.stream()
+                .filter(v -> v.getMovieSuggestion() != null)
+                .collect(Collectors.groupingBy(v -> v.getMovieSuggestion().getId()));
 
         int totalParticipants = users.size();
-        List<ScoredMovieDto> scoredMovies = new ArrayList<>();
+        List<ScoredMovieDto> scoredMovies = new ArrayList<>(movies.size());
 
         for (MovieSuggestion movie : movies) {
-            List<Vote> votes = voteRepository.findBySessionIdAndMovieSuggestionId(session.getId(), movie.getId());
+            List<Vote> votes = votesByMovieId.getOrDefault(movie.getId(), java.util.Collections.emptyList());
 
             long yesVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.YES || v.getVoteType() == VoteType.LIKE).count();
             long superlikeVotes = votes.stream().filter(v -> v.getVoteType() == VoteType.SUPERLIKE).count();
@@ -109,14 +116,14 @@ public class ConsensusServiceImpl implements ConsensusService {
                     .map(v -> v.getUser() != null ? v.getUser().getDisplayName() : null)
                     .filter(org.springframework.util.StringUtils::hasText)
                     .distinct()
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             List<String> superlikers = votes.stream()
                     .filter(v -> v.getVoteType() == VoteType.SUPERLIKE)
                     .map(v -> v.getUser() != null ? v.getUser().getDisplayName() : null)
                     .filter(org.springframework.util.StringUtils::hasText)
                     .distinct()
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             String suggestedBy = movie.getUser() != null ? movie.getUser().getDisplayName() : null;
 

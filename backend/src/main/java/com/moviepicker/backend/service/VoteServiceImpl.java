@@ -80,13 +80,23 @@ public class VoteServiceImpl implements VoteService {
         List<MovieSuggestion> movies = movieSuggestionRepository.findBySessionId(sessionId);
         List<User> users = userRepository.findBySessionId(sessionId);
 
+        // Fetch vote counts grouped by user in 1 single aggregation query
+        List<Object[]> voteCounts = voteRepository.countVotesGroupedByUserId(sessionId);
+        java.util.Map<Long, Long> votesByUser = voteCounts.stream()
+                .filter(row -> row[0] != null && row[1] != null)
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).longValue(),
+                        (existing, replacement) -> existing
+                ));
+
         int totalMovies = movies.size();
         int totalUsers = users.size();
-        List<UserVotingProgressDto> userProgressList = new ArrayList<>();
+        List<UserVotingProgressDto> userProgressList = new ArrayList<>(users.size());
         int completedUserCount = 0;
 
         for (User user : users) {
-            long votesCast = voteRepository.countBySessionIdAndUserId(sessionId, user.getId());
+            long votesCast = votesByUser.getOrDefault(user.getId(), 0L);
             boolean isCompleted = totalMovies > 0 && votesCast >= totalMovies;
             if (isCompleted) {
                 completedUserCount++;
