@@ -87,6 +87,9 @@ function SearchTestWrapper({ isHost = true }: { isHost?: boolean }) {
 describe("SearchScreen Stage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(movieApi.getTrendingMovies).mockResolvedValue(mockSearchResponse);
+    vi.mocked(movieApi.searchMovies).mockResolvedValue(mockSearchResponse);
+    vi.mocked(movieApi.discoverMovies).mockResolvedValue(mockSearchResponse);
     vi.mocked(movieApi.getMovieDetails).mockResolvedValue({
       tmdbId: 550,
       title: "Fight Club",
@@ -116,12 +119,21 @@ describe("SearchScreen Stage Component", () => {
     return { user, view };
   };
 
-  it("renders stage header, search input, and initial empty state prompt", async () => {
+  it("renders stage header, search input, genre chips, and default trending movies", async () => {
     await renderSearchScreen(true);
 
     expect(screen.getByText(/Nominate Your Movie Picks/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /search movies/i })).toBeInTheDocument();
-    expect(screen.getByText(/Search the Movie Catalog/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /trending/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /action/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open filter options/i })).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(movieApi.getTrendingMovies).toHaveBeenCalledWith(1);
+      expect(screen.getByText("Fight Club")).toBeInTheDocument();
+      expect(screen.getByText("Pulp Fiction")).toBeInTheDocument();
+    });
+
     expect(screen.getByRole("region", { name: /movie selection rack/i })).toBeInTheDocument();
   });
 

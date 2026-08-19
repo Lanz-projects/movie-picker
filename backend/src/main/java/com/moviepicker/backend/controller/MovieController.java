@@ -31,6 +31,30 @@ public class MovieController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/trending")
+    public ResponseEntity<MovieSearchResponse> getTrendingMovies(
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be at least 1") int page) {
+        MovieSearchResponse response = movieSearchService.getTrendingMovies(page);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/discover")
+    public ResponseEntity<MovieSearchResponse> discoverMovies(
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String provider,
+            @RequestParam(required = false) String decade,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Integer minRuntime,
+            @RequestParam(required = false) Integer maxRuntime,
+            @RequestParam(required = false) String language,
+            @RequestParam(defaultValue = "popularity.desc") String sortBy,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be at least 1") int page) {
+        MovieSearchResponse response = movieSearchService.discoverMovies(
+                genre, provider, decade, minRating, minRuntime, maxRuntime, language, sortBy, page
+        );
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{tmdbId}")
     public ResponseEntity<MovieDetailsDto> getMovieDetails(
             @PathVariable @NotNull(message = "TMDB ID must not be null") Long tmdbId) {

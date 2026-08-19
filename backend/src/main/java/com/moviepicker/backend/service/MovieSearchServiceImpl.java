@@ -8,6 +8,7 @@ import com.moviepicker.backend.dto.StreamingProviderDto;
 import com.moviepicker.backend.dto.tmdb.TmdbMovieDetailsResponse;
 import com.moviepicker.backend.dto.tmdb.TmdbMovieDto;
 import com.moviepicker.backend.dto.tmdb.TmdbSearchResponse;
+import com.moviepicker.backend.util.TmdbMappingUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,7 +18,6 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,28 +26,6 @@ import java.util.stream.Collectors;
 public class MovieSearchServiceImpl implements MovieSearchService {
 
     private final TmdbClient tmdbClient;
-
-    private static final Map<Integer, String> TMDB_GENRE_MAP = Map.ofEntries(
-            Map.entry(28, "Action"),
-            Map.entry(12, "Adventure"),
-            Map.entry(16, "Animation"),
-            Map.entry(35, "Comedy"),
-            Map.entry(80, "Crime"),
-            Map.entry(99, "Documentary"),
-            Map.entry(18, "Drama"),
-            Map.entry(10751, "Family"),
-            Map.entry(14, "Fantasy"),
-            Map.entry(36, "History"),
-            Map.entry(27, "Horror"),
-            Map.entry(10402, "Music"),
-            Map.entry(9648, "Mystery"),
-            Map.entry(10749, "Romance"),
-            Map.entry(878, "Sci-Fi"),
-            Map.entry(10770, "TV Movie"),
-            Map.entry(53, "Thriller"),
-            Map.entry(10752, "War"),
-            Map.entry(37, "Western")
-    );
 
     @Override
     @Cacheable(value = "movieSearches", key = "#query.trim().toLowerCase() + '_' + #page")
@@ -64,6 +42,96 @@ public class MovieSearchServiceImpl implements MovieSearchService {
         }
 
         TmdbSearchResponse rawResponse = tmdbClient.searchMovies(query.trim(), page);
+
+        if (rawResponse == null || rawResponse.getResults() == null) {
+            return MovieSearchResponse.builder()
+                    .page(Math.max(1, page))
+                    .totalPages(0)
+                    .totalResults(0)
+                    .movies(Collections.emptyList())
+                    .build();
+        }
+
+        List<MovieDto> movies = rawResponse.getResults().stream()
+                .map(this::mapToMovieDto)
+                .collect(Collectors.toList());
+
+        return MovieSearchResponse.builder()
+                .page(rawResponse.getPage() != null ? rawResponse.getPage() : Math.max(1, page))
+                .totalPages(rawResponse.getTotalPages() != null ? rawResponse.getTotalPages() : 0)
+                .totalResults(rawResponse.getTotalResults() != null ? rawResponse.getTotalResults() : 0)
+                .movies(movies)
+                .build();
+    }
+
+    @Override
+    @Cacheable(value = "movieTrending", key = "#page")
+    public MovieSearchResponse getTrendingMovies(int page) {
+        log.info("Executing TMDB trending movies for page={}", page);
+        TmdbSearchResponse rawResponse = tmdbClient.getTrendingMovies(Math.max(1, page));
+
+        if (rawResponse == null || rawResponse.getResults() == null) {
+            return MovieSearchResponse.builder()
+                    .page(Math.max(1, page))
+                    .totalPages(0)
+                    .totalResults(0)
+                    .movies(Collections.emptyList())
+                    .build();
+        }
+
+        List<MovieDto> movies = rawResponse.getResults().stream()
+                .map(this::mapToMovieDto)
+                .collect(Collectors.toList());
+
+        return MovieSearchResponse.builder()
+                .page(rawResponse.getPage() != null ? rawResponse.getPage() : Math.max(1, page))
+                .totalPages(rawResponse.getTotalPages() != null ? rawResponse.getTotalPages() : 0)
+                .totalResults(rawResponse.getTotalResults() != null ? rawResponse.getTotalResults() : 0)
+                .movies(movies)
+                .build();
+    }
+
+    @Override
+    @Cacheable(value = "movieDiscover", key = "(#genre != null ? #genre.trim().toLowerCase() : 'all') + '_' + " +
+            "(#provider != null ? #provider.trim().toLowerCase() : 'all') + '_' + " +
+            "(#decade != null ? #decade.trim().toLowerCase() : 'all') + '_' + " +
+            "(#minRating != null ? #minRating : 0) + '_' + " +
+            "(#minRuntime != null ? #minRuntime : 0) + '_' + " +
+            "(#maxRuntime != null ? #maxRuntime : 0) + '_' + " +
+            "(#language != null ? #language.trim().toLowerCase() : 'all') + '_' + " +
+            "(#sortBy != null ? #sortBy.trim() : 'popularity.desc') + '_' + #page")
+    public MovieSearchResponse discoverMovies(
+            String genre,
+            String provider,
+            String decade,
+            Double minRating,
+            Integer minRuntime,
+            Integer maxRuntime,
+            String language,
+            String sortBy,
+            int page) {
+        log.info("Executing TMDB discover: genre='{}', provider='{}', decade='{}', minRating={}, runtime={}-{}, lang='{}', sortBy='{}', page={}",
+                genre, provider, decade, minRating, minRuntime, maxRuntime, language, sortBy, page);
+
+        Integer genreId = TmdbMappingUtil.resolveGenreId(genre);
+        Integer providerId = TmdbMappingUtil.resolveProviderId(provider);
+        TmdbMappingUtil.DateRange dateRange = TmdbMappingUtil.resolveDecadeRange(decade);
+        String releaseDateGte = dateRange != null ? dateRange.gte() : null;
+        String releaseDateLte = dateRange != null ? dateRange.lte() : null;
+        String languageCode = TmdbMappingUtil.resolveLanguageCode(language);
+
+        TmdbSearchResponse rawResponse = tmdbClient.discoverMovies(
+                genreId,
+                providerId,
+                releaseDateGte,
+                releaseDateLte,
+                minRating,
+                minRuntime,
+                maxRuntime,
+                languageCode,
+                sortBy,
+                Math.max(1, page)
+        );
 
         if (rawResponse == null || rawResponse.getResults() == null) {
             return MovieSearchResponse.builder()
@@ -105,7 +173,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     private MovieDto mapToMovieDto(TmdbMovieDto dto) {
         List<String> genres = dto.getGenreIds() != null
                 ? dto.getGenreIds().stream()
-                    .map(id -> TMDB_GENRE_MAP.getOrDefault(id, "Other"))
+                    .map(TmdbMappingUtil::resolveGenreName)
                     .filter(g -> !"Other".equals(g))
                     .collect(Collectors.toList())
                 : Collections.emptyList();

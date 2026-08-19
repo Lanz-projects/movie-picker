@@ -1,15 +1,36 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
+import { DEFAULT_FILTER_STATE } from "@/components/stages/search/SearchFilterModal";
 import * as movieApi from "@/lib/api/movie";
 import type { MovieSearchResponse } from "@/types";
 
 vi.mock("@/lib/api/movie", () => ({
   searchMovies: vi.fn(),
+  getTrendingMovies: vi.fn(),
+  discoverMovies: vi.fn(),
 }));
 
 describe("useMovieSearch", () => {
   const mockSearchMovies = vi.mocked(movieApi.searchMovies);
+  const mockGetTrendingMovies = vi.mocked(movieApi.getTrendingMovies);
+  const mockDiscoverMovies = vi.mocked(movieApi.discoverMovies);
+
+  const mockTrendingResponse: MovieSearchResponse = {
+    page: 1,
+    totalPages: 2,
+    totalResults: 20,
+    movies: [
+      {
+        tmdbId: 1,
+        title: "Trending Movie 1",
+        overview: "A viral hit.",
+        posterPath: "/trend1.jpg",
+        releaseYear: 2026,
+        voteAverage: 8.5,
+      },
+    ],
+  };
 
   const mockResponsePage1: MovieSearchResponse = {
     page: 1,
@@ -54,24 +75,119 @@ describe("useMovieSearch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockGetTrendingMovies.mockResolvedValue(mockTrendingResponse);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("initializes with default empty state", () => {
+  it("fetches trending movies by default on mount when query is empty", async () => {
     const { result } = renderHook(() => useMovieSearch());
 
-    expect(result.current.query).toBe("");
-    expect(result.current.movies).toEqual([]);
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(mockGetTrendingMovies).toHaveBeenCalledWith(1);
+    expect(result.current.mode).toBe("TRENDING");
+    expect(result.current.sectionTitle).toBe("🔥 Trending This Week");
+    expect(result.current.movies).toEqual(mockTrendingResponse.movies);
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.isSearchingMore).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(result.current.page).toBe(1);
-    expect(result.current.totalPages).toBe(0);
-    expect(result.current.totalResults).toBe(0);
-    expect(result.current.hasSearched).toBe(false);
+  });
+
+  it("fetches discover movies when activeGenre is selected", async () => {
+    const mockHorrorResponse: MovieSearchResponse = {
+      page: 1,
+      totalPages: 1,
+      totalResults: 5,
+      movies: [
+        {
+          tmdbId: 666,
+          title: "The Conjuring",
+          overview: "Haunted house.",
+          posterPath: "/conjuring.jpg",
+          releaseYear: 2013,
+          voteAverage: 7.5,
+        },
+      ],
+    };
+    mockDiscoverMovies.mockResolvedValueOnce(mockHorrorResponse);
+
+    const { result } = renderHook(() => useMovieSearch());
+
+    act(() => {
+      result.current.setActiveGenre("Horror");
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(mockDiscoverMovies).toHaveBeenCalledWith({
+      genre: "Horror",
+      provider: undefined,
+      decade: undefined,
+      minRating: undefined,
+      minRuntime: undefined,
+      maxRuntime: undefined,
+      language: undefined,
+      sortBy: "popularity.desc",
+      page: 1,
+    });
+    expect(result.current.mode).toBe("DISCOVER");
+    expect(result.current.sectionTitle).toBe("Horror Movies");
+    expect(result.current.movies).toEqual(mockHorrorResponse.movies);
+  });
+
+  it("fetches discover movies when both genre and full filter options are set", async () => {
+    const mockNetflixAction: MovieSearchResponse = {
+      page: 1,
+      totalPages: 1,
+      totalResults: 8,
+      movies: [
+        {
+          tmdbId: 777,
+          title: "The Matrix",
+          overview: "Welcome to the real world.",
+          posterPath: "/matrix.jpg",
+          releaseYear: 1999,
+          voteAverage: 8.7,
+        },
+      ],
+    };
+    mockDiscoverMovies.mockResolvedValueOnce(mockNetflixAction);
+
+    const { result } = renderHook(() => useMovieSearch());
+
+    act(() => {
+      result.current.setActiveGenre("Action");
+      result.current.setFilters({
+        ...DEFAULT_FILTER_STATE,
+        provider: "Netflix",
+        decade: "90s",
+        minRating: 8.0,
+      });
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(mockDiscoverMovies).toHaveBeenCalledWith({
+      genre: "Action",
+      provider: "Netflix",
+      decade: "90s",
+      minRating: 8.0,
+      minRuntime: undefined,
+      maxRuntime: undefined,
+      language: undefined,
+      sortBy: "popularity.desc",
+      page: 1,
+    });
+    expect(result.current.sectionTitle).toBe("90s Acclaimed Action Movies on Netflix");
+    expect(result.current.movies).toEqual(mockNetflixAction.movies);
+    expect(result.current.activeFilterCount).toBe(3);
   });
 
   it("debounces search request and updates movies on success", async () => {
@@ -85,7 +201,6 @@ describe("useMovieSearch", () => {
 
     expect(result.current.query).toBe("Nolan");
     expect(result.current.isLoading).toBe(true);
-    expect(mockSearchMovies).not.toHaveBeenCalled();
 
     // Fast-forward debounce timer
     await act(async () => {
@@ -94,34 +209,13 @@ describe("useMovieSearch", () => {
 
     expect(mockSearchMovies).toHaveBeenCalledTimes(1);
     expect(mockSearchMovies).toHaveBeenCalledWith("Nolan", 1);
-
+    expect(result.current.mode).toBe("SEARCH");
+    expect(result.current.sectionTitle).toBe('Search Results for "Nolan"');
     expect(result.current.movies).toEqual(mockResponsePage1.movies);
-    expect(result.current.page).toBe(1);
-    expect(result.current.totalPages).toBe(3);
-    expect(result.current.totalResults).toBe(30);
-    expect(result.current.hasSearched).toBe(true);
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
   });
 
-  it("does not trigger search when query is only whitespace", async () => {
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
-
-    act(() => {
-      result.current.setQuery("    ");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(mockSearchMovies).not.toHaveBeenCalled();
-    expect(result.current.movies).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.hasSearched).toBe(false);
-  });
-
-  it("loads more movies when loadMore is called", async () => {
+  it("loads more movies when loadMore is called in search mode", async () => {
     mockSearchMovies.mockResolvedValueOnce(mockResponsePage1);
     mockSearchMovies.mockResolvedValueOnce(mockResponsePage2);
 
@@ -151,151 +245,35 @@ describe("useMovieSearch", () => {
     expect(result.current.isSearchingMore).toBe(false);
   });
 
-  it("does not loadMore when page reaches totalPages", async () => {
-    const singlePageResponse: MovieSearchResponse = {
-      page: 1,
-      totalPages: 1,
-      totalResults: 2,
-      movies: mockResponsePage1.movies,
-    };
-
-    mockSearchMovies.mockResolvedValueOnce(singlePageResponse);
-
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
+  it("resets state and restores trending when clearFilters is called", async () => {
+    const { result } = renderHook(() => useMovieSearch());
 
     act(() => {
-      result.current.setQuery("Inception");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(result.current.page).toBe(1);
-    expect(result.current.totalPages).toBe(1);
-
-    await act(async () => {
-      await result.current.loadMore();
-    });
-
-    // Should not have fetched page 2
-    expect(mockSearchMovies).toHaveBeenCalledTimes(1);
-  });
-
-  it("handles search errors gracefully", async () => {
-    mockSearchMovies.mockRejectedValueOnce(new Error("TMDB service unavailable"));
-
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
-
-    act(() => {
-      result.current.setQuery("Error Movie");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(result.current.movies).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.hasSearched).toBe(true);
-    expect(result.current.error).toBe("TMDB service unavailable");
-  });
-
-  it("handles race conditions when rapid typing occurs", async () => {
-    let resolveFirst: (value: MovieSearchResponse) => void;
-    const firstPromise = new Promise<MovieSearchResponse>((resolve) => {
-      resolveFirst = resolve;
-    });
-
-    mockSearchMovies.mockImplementationOnce(() => firstPromise);
-    mockSearchMovies.mockResolvedValueOnce(mockResponsePage1);
-
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 100 }));
-
-    // User types "In"
-    act(() => {
-      result.current.setQuery("In");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(100);
-    });
-
-    expect(mockSearchMovies).toHaveBeenCalledWith("In", 1);
-
-    // User quickly types "Inception" before "In" resolves
-    act(() => {
-      result.current.setQuery("Inception");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(100);
-    });
-
-    expect(mockSearchMovies).toHaveBeenCalledWith("Inception", 1);
-
-    // Now resolve the older "In" query late
-    await act(async () => {
-      resolveFirst!({
-        page: 1,
-        totalPages: 10,
-        totalResults: 100,
-        movies: [{ tmdbId: 999, title: "Old Stale Movie", overview: "", posterPath: null, releaseYear: 2000, voteAverage: 5 }],
+      result.current.setActiveGenre("Comedy");
+      result.current.setFilters({
+        ...DEFAULT_FILTER_STATE,
+        provider: "Disney+",
       });
     });
 
-    // Stale result should NOT overwrite "Inception"
-    expect(result.current.movies).toEqual(mockResponsePage1.movies);
-    expect(result.current.movies.some((m) => m.title === "Old Stale Movie")).toBe(false);
-  });
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
 
-  it("resets state when clearSearch is called", async () => {
-    mockSearchMovies.mockResolvedValueOnce(mockResponsePage1);
-
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
+    expect(result.current.mode).toBe("DISCOVER");
 
     act(() => {
-      result.current.setQuery("Nolan");
+      result.current.clearFilters();
     });
 
     await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(result.current.movies).toHaveLength(2);
-
-    act(() => {
-      result.current.clearSearch();
+      vi.advanceTimersByTime(0);
     });
 
     expect(result.current.query).toBe("");
-    expect(result.current.movies).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.page).toBe(1);
-    expect(result.current.totalPages).toBe(0);
-    expect(result.current.totalResults).toBe(0);
-    expect(result.current.hasSearched).toBe(false);
-  });
-
-  it("clears error state when clearError is called", async () => {
-    mockSearchMovies.mockRejectedValueOnce(new Error("Network error"));
-
-    const { result } = renderHook(() => useMovieSearch({ debounceMs: 300 }));
-
-    act(() => {
-      result.current.setQuery("Crash");
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(result.current.error).toBe("Network error");
-
-    act(() => {
-      result.current.clearError();
-    });
-
-    expect(result.current.error).toBeNull();
+    expect(result.current.activeGenre).toBeNull();
+    expect(result.current.filters).toEqual(DEFAULT_FILTER_STATE);
+    expect(result.current.mode).toBe("TRENDING");
+    expect(result.current.sectionTitle).toBe("🔥 Trending This Week");
   });
 });

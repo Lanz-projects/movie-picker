@@ -7,6 +7,8 @@ import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { NominationsReadinessPill } from "./search/NominationsReadinessPill";
+import { SearchFilterToolbar } from "./search/SearchFilterToolbar";
+import { ScrollNavFab } from "@/components/ui/ScrollNavFab";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
 import { AlertCircle, X, Sparkles } from "lucide-react";
@@ -38,14 +40,23 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
   const {
     query,
     setQuery,
+    activeGenre,
+    setActiveGenre,
+    filters,
+    setFilters,
+    activeFilterCount,
     clearSearch,
+    clearFilters,
     movies,
     isLoading: isSearching,
     isSearchingMore,
     error: searchError,
     page,
     totalPages,
+    totalResults,
     hasSearched,
+    mode,
+    sectionTitle,
     loadMore,
     clearError: clearSearchError,
   } = useMovieSearch({ debounceMs });
@@ -142,7 +153,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
       maxWidth="xl"
       className="pb-56 sm:pb-64"
     >
-      <div className="flex flex-col items-center gap-6 w-full">
+      <div className="flex flex-col items-center gap-5 w-full">
         {/* Stage Header */}
         <div className="text-center max-w-xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-indigo/10 border border-brand-indigo/30 text-brand-indigo text-xs font-bold mb-3">
@@ -152,7 +163,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             Nominate Your Movie Picks
           </h1>
           <p className="mt-1.5 text-xs sm:text-sm text-text-secondary">
-            Search TMDB to pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles for the room deck. Click any card to inspect full details!
+            Pick up to <span className="font-semibold text-text-main">{maxSuggestions}</span> titles from trending, genre categories, or search. Click any card to inspect full details!
           </p>
         </div>
 
@@ -167,23 +178,29 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           onKickUser={kickUser}
         />
 
-        {/* Search Bar Input */}
-        <div className="w-full max-w-2xl mx-auto">
-          <SearchBar
-            value={query}
-            onChange={setQuery}
-            onClear={clearSearch}
-            isLoading={isSearching}
-            placeholder="Search TMDB by movie title, director, or actor..."
-            autoFocus
-          />
-        </div>
+        {/* Search Bar Input, Category Filters, & Dynamic Heading Toolbar */}
+        <SearchFilterToolbar
+          query={query}
+          onQueryChange={setQuery}
+          onClearQuery={clearSearch}
+          isLoading={isSearching}
+          activeGenre={activeGenre}
+          onSelectGenre={setActiveGenre}
+          filters={filters}
+          onFiltersChange={setFilters}
+          activeFilterCount={activeFilterCount}
+          onClearFilters={clearFilters}
+          mode={mode}
+          sectionTitle={sectionTitle}
+          totalResults={totalResults}
+          currentResultsCount={movies.length}
+        />
 
         {/* Global Error Banner */}
         {effectiveError ? (
           <div
             role="alert"
-            className="flex items-center justify-between gap-3 w-full max-w-2xl p-3.5 rounded-2xl border border-brand-coral/30 bg-brand-coral/10 text-text-main shadow-lg"
+            className="flex items-center justify-between gap-3 w-full max-w-3xl p-3.5 rounded-2xl border border-brand-coral/30 bg-brand-coral/10 text-text-main shadow-lg"
           >
             <div className="flex items-center gap-2.5">
               <AlertCircle className="h-5 w-5 text-brand-coral flex-shrink-0" />
@@ -208,7 +225,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           deckMovieIds={selectedMovieIds}
           onToggleDeck={handleToggleDeck}
           onSelectMovie={handleSelectMovie}
-          isLoading={isSearching && !hasSearched}
+          isLoading={isSearching && movies.length === 0}
           isSearchingMore={isSearchingMore}
           hasSearched={hasSearched}
           query={query}
@@ -252,6 +269,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
         onToggleDeck={handleToggleDeck}
         disabled={!isModalMovieInDeck && isDeckFull}
       />
+
+      {/* Floating Smart Scroll Navigation FAB */}
+      <ScrollNavFab />
     </StageContainer>
   );
 }
