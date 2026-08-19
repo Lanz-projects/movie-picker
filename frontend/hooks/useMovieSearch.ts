@@ -1,17 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { searchMovies } from "@/lib/api/movie";
+import { searchMovies, getTrendingMovies, discoverMovies } from "@/lib/api/movie";
 import type { MovieDto } from "@/types";
 
 export interface UseMovieSearchOptions {
   debounceMs?: number;
   initialQuery?: string;
+  initialGenre?: string | null;
+  initialProvider?: string | null;
 }
+
+export type SearchMode = "TRENDING" | "DISCOVER" | "SEARCH";
 
 export interface UseMovieSearchReturn {
   query: string;
   setQuery: (q: string) => void;
+  activeGenre: string | null;
+  setActiveGenre: (genre: string | null) => void;
+  activeProvider: string | null;
+  setActiveProvider: (provider: string | null) => void;
   movies: MovieDto[];
   isLoading: boolean;
   isSearchingMore: boolean;
@@ -20,17 +28,28 @@ export interface UseMovieSearchReturn {
   totalPages: number;
   totalResults: number;
   hasSearched: boolean;
+  mode: SearchMode;
+  sectionTitle: string;
   loadMore: () => Promise<void>;
   clearSearch: () => void;
+  clearFilters: () => void;
   clearError: () => void;
 }
 
 export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSearchReturn {
-  const { debounceMs = 300, initialQuery = "" } = options;
+  const {
+    debounceMs = 300,
+    initialQuery = "",
+    initialGenre = null,
+    initialProvider = null,
+  } = options;
 
   const [query, setQuery] = React.useState<string>(initialQuery);
+  const [activeGenre, setActiveGenre] = React.useState<string | null>(initialGenre);
+  const [activeProvider, setActiveProvider] = React.useState<string | null>(initialProvider);
+
   const [movies, setMovies] = React.useState<MovieDto[]>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isSearchingMore, setIsSearchingMore] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const [page, setPage] = React.useState<number>(1);
@@ -40,52 +59,70 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
 
   // Keep track of the active request counter to prevent stale race conditions
   const activeRequestIdRef = React.useRef<number>(0);
-  // Keep track of the current query string for loadMore
+
   const currentQueryRef = React.useRef<string>(initialQuery);
   currentQueryRef.current = query;
+
+  const currentGenreRef = React.useRef<string | null>(initialGenre);
+  currentGenreRef.current = activeGenre;
+
+  const currentProviderRef = React.useRef<string | null>(initialProvider);
+  currentProviderRef.current = activeProvider;
+
+  const mode: SearchMode = React.useMemo(() => {
+    if (query.trim()) return "SEARCH";
+    if (activeGenre || activeProvider) return "DISCOVER";
+    return "TRENDING";
+  }, [query, activeGenre, activeProvider]);
+
+  const sectionTitle: string = React.useMemo(() => {
+    if (query.trim()) return `Search Results for "${query.trim()}"`;
+    if (activeGenre && activeProvider) return `${activeGenre} Movies on ${activeProvider}`;
+    if (activeGenre) return `${activeGenre} Movies`;
+    if (activeProvider) return `Movies on ${activeProvider}`;
+    return "🔥 Trending This Week";
+  }, [query, activeGenre, activeProvider]);
 
   const clearError = React.useCallback(() => {
     setError(null);
   }, []);
 
   const clearSearch = React.useCallback(() => {
-    activeRequestIdRef.current += 1;
     setQuery("");
-    setMovies([]);
-    setIsLoading(false);
-    setIsSearchingMore(false);
-    setError(null);
-    setPage(1);
-    setTotalPages(0);
-    setTotalResults(0);
-    setHasSearched(false);
   }, []);
 
+  const clearFilters = React.useCallback(() => {
+    setQuery("");
+    setActiveGenre(null);
+    setActiveProvider(null);
+  }, []);
+
+  // Main data fetching effect for Search, Discover, or Trending
   React.useEffect(() => {
     const trimmed = query.trim();
-
-    if (!trimmed) {
-      activeRequestIdRef.current += 1;
-      setMovies([]);
-      setIsLoading(false);
-      setIsSearchingMore(false);
-      setError(null);
-      setPage(1);
-      setTotalPages(0);
-      setTotalResults(0);
-      setHasSearched(false);
-      return;
-    }
-
     const currentReqId = ++activeRequestIdRef.current;
     setIsLoading(true);
     setIsSearchingMore(false);
     setError(null);
 
+    // If typing text query, debounce by debounceMs
+    const delay = trimmed ? debounceMs : 0;
+
     const timer = setTimeout(async () => {
       try {
-        const response = await searchMovies(trimmed, 1);
-        // Only update state if this is still the active request
+        let response;
+        if (trimmed) {
+          response = await searchMovies(trimmed, 1);
+        } else if (activeGenre || activeProvider) {
+          response = await discoverMovies({
+            genre: activeGenre || undefined,
+            provider: activeProvider || undefined,
+            page: 1,
+          });
+        } else {
+          response = await getTrendingMovies(1);
+        }
+
         if (currentReqId === activeRequestIdRef.current) {
           setMovies(response.movies || []);
           setPage(response.page || 1);
@@ -96,22 +133,21 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
         }
       } catch (err: unknown) {
         if (currentReqId === activeRequestIdRef.current) {
-          const message = err instanceof Error ? err.message : "Failed to search movies.";
+          const message = err instanceof Error ? err.message : "Failed to load movies.";
           setError(message);
           setIsLoading(false);
           setHasSearched(true);
         }
       }
-    }, debounceMs);
+    }, delay);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [query, debounceMs]);
+  }, [query, activeGenre, activeProvider, debounceMs]);
 
   const loadMore = React.useCallback(async () => {
-    const trimmed = currentQueryRef.current.trim();
-    if (!trimmed || isLoading || isSearchingMore || page >= totalPages) {
+    if (isLoading || isSearchingMore || page >= totalPages) {
       return;
     }
 
@@ -119,9 +155,24 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
     setIsSearchingMore(true);
     setError(null);
 
+    const trimmed = currentQueryRef.current.trim();
+    const genre = currentGenreRef.current;
+    const provider = currentProviderRef.current;
+    const nextPage = page + 1;
+
     try {
-      const nextPage = page + 1;
-      const response = await searchMovies(trimmed, nextPage);
+      let response;
+      if (trimmed) {
+        response = await searchMovies(trimmed, nextPage);
+      } else if (genre || provider) {
+        response = await discoverMovies({
+          genre: genre || undefined,
+          provider: provider || undefined,
+          page: nextPage,
+        });
+      } else {
+        response = await getTrendingMovies(nextPage);
+      }
 
       if (currentReqId === activeRequestIdRef.current) {
         setMovies((prev) => {
@@ -148,6 +199,10 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
   return {
     query,
     setQuery,
+    activeGenre,
+    setActiveGenre,
+    activeProvider,
+    setActiveProvider,
     movies,
     isLoading,
     isSearchingMore,
@@ -156,8 +211,11 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
     totalPages,
     totalResults,
     hasSearched,
+    mode,
+    sectionTitle,
     loadMore,
     clearSearch,
+    clearFilters,
     clearError,
   };
 }

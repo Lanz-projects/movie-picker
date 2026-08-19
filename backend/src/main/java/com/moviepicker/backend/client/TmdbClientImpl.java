@@ -107,4 +107,79 @@ public class TmdbClientImpl implements TmdbClient {
             throw new TmdbApiException("Failed to fetch movie details from TMDB: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public TmdbSearchResponse getTrendingMovies(int page) {
+        try {
+            return restClient.get()
+                    .uri(uriBuilder -> {
+                        uriBuilder.path("/trending/movie/week")
+                                .queryParam("page", Math.max(1, page))
+                                .queryParam("language", "en-US");
+
+                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
+                            uriBuilder.queryParam("api_key", properties.getKey());
+                        }
+                        return uriBuilder.build();
+                    })
+                    .headers(headers -> {
+                        if (StringUtils.hasText(properties.getAccessToken())) {
+                            headers.setBearerAuth(properties.getAccessToken());
+                        }
+                    })
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = new String(response.getBody().readAllBytes());
+                        log.error("TMDB API returned error status for trending movies: {} - {}", response.getStatusCode(), errorBody);
+                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
+                    })
+                    .body(TmdbSearchResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error fetching trending movies from TMDB: {}", e.getMessage(), e);
+            throw new TmdbApiException("Failed to fetch trending movies from TMDB: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public TmdbSearchResponse discoverMovies(Integer genreId, Integer providerId, String sortBy, int page) {
+        try {
+            return restClient.get()
+                    .uri(uriBuilder -> {
+                        uriBuilder.path("/discover/movie")
+                                .queryParam("page", Math.max(1, page))
+                                .queryParam("include_adult", false)
+                                .queryParam("language", "en-US")
+                                .queryParam("sort_by", StringUtils.hasText(sortBy) ? sortBy : "popularity.desc");
+
+                        if (genreId != null) {
+                            uriBuilder.queryParam("with_genres", genreId);
+                        }
+
+                        if (providerId != null) {
+                            uriBuilder.queryParam("with_watch_providers", providerId);
+                            uriBuilder.queryParam("watch_region", "US");
+                        }
+
+                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
+                            uriBuilder.queryParam("api_key", properties.getKey());
+                        }
+                        return uriBuilder.build();
+                    })
+                    .headers(headers -> {
+                        if (StringUtils.hasText(properties.getAccessToken())) {
+                            headers.setBearerAuth(properties.getAccessToken());
+                        }
+                    })
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String errorBody = new String(response.getBody().readAllBytes());
+                        log.error("TMDB API returned error status for discover movies: {} - {}", response.getStatusCode(), errorBody);
+                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
+                    })
+                    .body(TmdbSearchResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error discovering movies from TMDB: {}", e.getMessage(), e);
+            throw new TmdbApiException("Failed to discover movies from TMDB: " + e.getMessage(), e);
+        }
+    }
 }

@@ -21,6 +21,39 @@ export async function searchMovies(
   );
 }
 
+export async function getTrendingMovies(
+  page: number = 1
+): Promise<MovieSearchResponse> {
+  const safePage = Math.max(1, page);
+  return request<MovieSearchResponse>(
+    `/api/movies/trending?page=${safePage}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function discoverMovies(params: {
+  genre?: string;
+  provider?: string;
+  sortBy?: string;
+  page?: number;
+}): Promise<MovieSearchResponse> {
+  const safePage = Math.max(1, params.page || 1);
+  const searchParams = new URLSearchParams();
+  if (params.genre) searchParams.set("genre", params.genre);
+  if (params.provider) searchParams.set("provider", params.provider);
+  if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+  searchParams.set("page", String(safePage));
+
+  return request<MovieSearchResponse>(
+    `/api/movies/discover?${searchParams.toString()}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
 export async function getMovieDetails(
   tmdbId: number
 ): Promise<MovieDetailsDto> {

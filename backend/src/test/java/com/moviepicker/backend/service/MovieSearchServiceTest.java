@@ -107,4 +107,28 @@ public class MovieSearchServiceTest {
         assertThat(response.getMovies()).hasSize(1);
         assertThat(response.getMovies().get(0).getReleaseYear()).isNull();
     }
+
+    @Test
+    public void testGetTrendingMovies_MapsCorrectly() {
+        when(tmdbClient.getTrendingMovies(1)).thenReturn(sampleTmdbResponse);
+
+        MovieSearchResponse response = movieSearchService.getTrendingMovies(1);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getMovies()).hasSize(2);
+        assertThat(response.getMovies().get(0).getTitle()).isEqualTo("Fight Club");
+        verify(tmdbClient, times(1)).getTrendingMovies(1);
+    }
+
+    @Test
+    public void testDiscoverMovies_MapsGenresAndProvidersCorrectly() {
+        when(tmdbClient.discoverMovies(eq(28), eq(8), eq("popularity.desc"), eq(1)))
+                .thenReturn(sampleTmdbResponse);
+
+        MovieSearchResponse response = movieSearchService.discoverMovies("Action", "Netflix", "popularity.desc", 1);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getMovies()).hasSize(2);
+        verify(tmdbClient, times(1)).discoverMovies(28, 8, "popularity.desc", 1);
+    }
 }

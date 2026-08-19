@@ -80,6 +80,61 @@ public class MovieControllerTest {
     }
 
     @Test
+    public void testGetTrendingMovies_Success() throws Exception {
+        MovieDto movie = MovieDto.builder()
+                .tmdbId(101L)
+                .title("Inception")
+                .releaseYear(2010)
+                .voteAverage(8.8)
+                .build();
+
+        MovieSearchResponse response = MovieSearchResponse.builder()
+                .page(1)
+                .totalPages(5)
+                .totalResults(100)
+                .movies(List.of(movie))
+                .build();
+
+        when(movieSearchService.getTrendingMovies(eq(1))).thenReturn(response);
+
+        mockMvc.perform(get("/api/movies/trending")
+                        .param("page", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.movies[0].title").value("Inception"));
+    }
+
+    @Test
+    public void testDiscoverMovies_Success() throws Exception {
+        MovieDto movie = MovieDto.builder()
+                .tmdbId(202L)
+                .title("The Dark Knight")
+                .releaseYear(2008)
+                .voteAverage(9.0)
+                .build();
+
+        MovieSearchResponse response = MovieSearchResponse.builder()
+                .page(1)
+                .totalPages(2)
+                .totalResults(40)
+                .movies(List.of(movie))
+                .build();
+
+        when(movieSearchService.discoverMovies(eq("Action"), eq("Netflix"), eq("popularity.desc"), eq(1)))
+                .thenReturn(response);
+
+        mockMvc.perform(get("/api/movies/discover")
+                        .param("genre", "Action")
+                        .param("provider", "Netflix")
+                        .param("sortBy", "popularity.desc")
+                        .param("page", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movies[0].title").value("The Dark Knight"));
+    }
+
+    @Test
     public void testSearchMovies_TmdbErrorReturnsBadGateway() throws Exception {
         when(movieSearchService.searchMovies(eq("ErrorMovie"), eq(1)))
                 .thenThrow(new TmdbApiException("TMDB API 500 error"));

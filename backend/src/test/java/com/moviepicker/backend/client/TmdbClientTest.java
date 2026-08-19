@@ -107,6 +107,72 @@ public class TmdbClientTest {
     }
 
     @Test
+    public void testGetTrendingMovies_Success() {
+        String jsonResponse = """
+                {
+                    "page": 1,
+                    "results": [
+                        {
+                            "id": 101,
+                            "title": "Inception",
+                            "overview": "A thief...",
+                            "release_date": "2010-07-16",
+                            "vote_average": 8.3
+                        }
+                    ],
+                    "total_pages": 1,
+                    "total_results": 1
+                }
+                """;
+
+        mockServer.expect(requestTo("https://api.themoviedb.org/3/trending/movie/week?page=1&language=en-US"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer test_access_token"))
+                .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
+
+        TmdbSearchResponse response = tmdbClient.getTrendingMovies(1);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getResults()).hasSize(1);
+        assertThat(response.getResults().get(0).getTitle()).isEqualTo("Inception");
+
+        mockServer.verify();
+    }
+
+    @Test
+    public void testDiscoverMovies_Success() {
+        String jsonResponse = """
+                {
+                    "page": 1,
+                    "results": [
+                        {
+                            "id": 202,
+                            "title": "The Dark Knight",
+                            "overview": "Batman...",
+                            "release_date": "2008-07-18",
+                            "vote_average": 9.0
+                        }
+                    ],
+                    "total_pages": 1,
+                    "total_results": 1
+                }
+                """;
+
+        mockServer.expect(requestTo("https://api.themoviedb.org/3/discover/movie?page=1&include_adult=false&language=en-US&sort_by=popularity.desc&with_genres=28&with_watch_providers=8&watch_region=US"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer test_access_token"))
+                .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
+
+        TmdbSearchResponse response = tmdbClient.discoverMovies(28, 8, "popularity.desc", 1);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getResults()).hasSize(1);
+        assertThat(response.getResults().get(0).getTitle()).isEqualTo("The Dark Knight");
+
+        mockServer.verify();
+    }
+
+    @Test
     public void testSearchMovies_ApiErrorThrowsTmdbApiException() {
         mockServer.expect(requestTo("https://api.themoviedb.org/3/search/movie?query=Error&page=1&include_adult=false"))
                 .andExpect(method(HttpMethod.GET))
