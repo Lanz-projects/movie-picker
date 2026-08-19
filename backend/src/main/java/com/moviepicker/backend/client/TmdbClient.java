@@ -7,5 +7,16 @@ public interface TmdbClient {
     TmdbSearchResponse searchMovies(String query, int page);
     TmdbMovieDetailsResponse getMovieDetails(Long tmdbId);
     TmdbSearchResponse getTrendingMovies(int page);
-    TmdbSearchResponse discoverMovies(Integer genreId, Integer providerId, String sortBy, int page);
+    TmdbSearchResponse discoverMovies(
+            Integer genreId,
+            Integer providerId,
+            String releaseDateGte,
+            String releaseDateLte,
+            Double minRating,
+            Integer minRuntime,
+            Integer maxRuntime,
+            String language,
+            String sortBy,
+            int page
+    );
 }

@@ -141,7 +141,17 @@ public class TmdbClientImpl implements TmdbClient {
     }
 
     @Override
-    public TmdbSearchResponse discoverMovies(Integer genreId, Integer providerId, String sortBy, int page) {
+    public TmdbSearchResponse discoverMovies(
+            Integer genreId,
+            Integer providerId,
+            String releaseDateGte,
+            String releaseDateLte,
+            Double minRating,
+            Integer minRuntime,
+            Integer maxRuntime,
+            String language,
+            String sortBy,
+            int page) {
         try {
             return restClient.get()
                     .uri(uriBuilder -> {
@@ -158,6 +168,31 @@ public class TmdbClientImpl implements TmdbClient {
                         if (providerId != null) {
                             uriBuilder.queryParam("with_watch_providers", providerId);
                             uriBuilder.queryParam("watch_region", "US");
+                        }
+
+                        if (StringUtils.hasText(releaseDateGte)) {
+                            uriBuilder.queryParam("primary_release_date.gte", releaseDateGte);
+                        }
+
+                        if (StringUtils.hasText(releaseDateLte)) {
+                            uriBuilder.queryParam("primary_release_date.lte", releaseDateLte);
+                        }
+
+                        if (minRating != null && minRating > 0) {
+                            uriBuilder.queryParam("vote_average.gte", minRating);
+                            uriBuilder.queryParam("vote_count.gte", 50);
+                        }
+
+                        if (minRuntime != null && minRuntime > 0) {
+                            uriBuilder.queryParam("with_runtime.gte", minRuntime);
+                        }
+
+                        if (maxRuntime != null && maxRuntime > 0) {
+                            uriBuilder.queryParam("with_runtime.lte", maxRuntime);
+                        }
+
+                        if (StringUtils.hasText(language)) {
+                            uriBuilder.queryParam("with_original_language", language);
                         }
 
                         if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {

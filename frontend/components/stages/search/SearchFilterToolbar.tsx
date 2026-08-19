@@ -3,8 +3,8 @@
 import * as React from "react";
 import { SearchBar } from "./SearchBar";
 import { GenreFilterChips } from "./GenreFilterChips";
-import { StreamingFilterBar } from "./StreamingFilterBar";
-import { RotateCcw, Tv, ChevronDown } from "lucide-react";
+import { SearchFilterModal, type FilterState } from "./SearchFilterModal";
+import { RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import type { SearchMode } from "@/hooks/useMovieSearch";
 
 export interface SearchFilterToolbarProps {
@@ -14,8 +14,9 @@ export interface SearchFilterToolbarProps {
   isLoading: boolean;
   activeGenre: string | null;
   onSelectGenre: (genre: string | null) => void;
-  activeProvider: string | null;
-  onSelectProvider: (provider: string | null) => void;
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+  activeFilterCount: number;
   onClearFilters: () => void;
   mode: SearchMode;
   sectionTitle: string;
@@ -30,23 +31,37 @@ export function SearchFilterToolbar({
   isLoading,
   activeGenre,
   onSelectGenre,
-  activeProvider,
-  onSelectProvider,
+  filters,
+  onFiltersChange,
+  activeFilterCount,
   onClearFilters,
   mode,
   sectionTitle,
   totalResults,
   currentResultsCount,
 }: SearchFilterToolbarProps) {
+  const [isFilterModalOpen, setIsFilterModalOpen] = React.useState<boolean>(false);
   const isFiltered = mode !== "TRENDING";
-  const [isStreamingOpen, setIsStreamingOpen] = React.useState<boolean>(Boolean(activeProvider));
 
-  // Keep open if a provider is active
-  React.useEffect(() => {
-    if (activeProvider) {
-      setIsStreamingOpen(true);
-    }
-  }, [activeProvider]);
+  const handleRemoveProvider = () => {
+    onFiltersChange({ ...filters, provider: null });
+  };
+
+  const handleRemoveDecade = () => {
+    onFiltersChange({ ...filters, decade: null });
+  };
+
+  const handleRemoveRating = () => {
+    onFiltersChange({ ...filters, minRating: null });
+  };
+
+  const handleRemoveRuntime = () => {
+    onFiltersChange({ ...filters, minRuntime: null, maxRuntime: null });
+  };
+
+  const handleRemoveLanguage = () => {
+    onFiltersChange({ ...filters, language: null });
+  };
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3.5">
@@ -71,52 +86,101 @@ export function SearchFilterToolbar({
           }}
         />
 
-        {/* Streaming Filter Toggle Button */}
-        <div className="flex items-center justify-between gap-2 px-1 pt-0.5 border-t border-border-subtle/50">
+        {/* Filter Controls & Active Badges Row */}
+        <div className="flex flex-wrap items-center gap-2 px-1 pt-1 border-t border-border-subtle/50">
+          {/* Sleek Filter Options Button */}
           <button
             type="button"
-            onClick={() => setIsStreamingOpen((prev) => !prev)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
-              activeProvider
-                ? "bg-brand-cyan/20 border border-brand-cyan/60 text-brand-cyan shadow-sm"
-                : isStreamingOpen
-                ? "bg-bg-elevated border border-border-muted text-text-main"
+            onClick={() => setIsFilterModalOpen(true)}
+            aria-label="Open filter options"
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
+              activeFilterCount > 0
+                ? "bg-gradient-to-r from-brand-violet/20 to-brand-cyan/20 border border-brand-cyan/60 text-brand-cyan shadow-sm"
                 : "bg-bg-surface hover:bg-bg-elevated border border-border-subtle text-text-muted hover:text-text-secondary"
             }`}
-            aria-expanded={isStreamingOpen}
           >
-            <Tv className="h-3.5 w-3.5" />
-            <span>{activeProvider ? `Stream: ${activeProvider}` : "Filter by Platform"}</span>
-            <ChevronDown
-              className={`h-3 w-3 transition-transform duration-200 ${
-                isStreamingOpen ? "rotate-180" : ""
-              }`}
-            />
+            <SlidersHorizontal className="h-3.5 w-3.5 text-brand-cyan" />
+            <span>Filter Options</span>
+            {activeFilterCount > 0 ? (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-cyan px-1 text-[10px] font-bold text-black">
+                {activeFilterCount}
+              </span>
+            ) : null}
           </button>
 
-          {activeProvider ? (
-            <button
-              type="button"
-              onClick={() => onSelectProvider(null)}
-              className="text-xs text-text-muted hover:text-brand-coral transition-colors cursor-pointer"
-            >
-              Clear Stream
-            </button>
+          {/* Quick Active Filter Badges */}
+          {filters.provider ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30 animate-in fade-in">
+              <span>📺 {filters.provider}</span>
+              <button
+                type="button"
+                onClick={handleRemoveProvider}
+                aria-label={`Remove ${filters.provider} filter`}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ) : null}
+
+          {filters.decade ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-violet/15 text-brand-violet border border-brand-violet/30 animate-in fade-in">
+              <span>📅 {filters.decade === "vintage" ? "Vintage" : filters.decade}</span>
+              <button
+                type="button"
+                onClick={handleRemoveDecade}
+                aria-label={`Remove ${filters.decade} filter`}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ) : null}
+
+          {filters.minRating ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-amber/15 text-brand-amber border border-brand-amber/30 animate-in fade-in">
+              <span>⭐ {filters.minRating}+</span>
+              <button
+                type="button"
+                onClick={handleRemoveRating}
+                aria-label="Remove rating filter"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ) : null}
+
+          {filters.minRuntime !== null || filters.maxRuntime !== null ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-coral/15 text-brand-coral border border-brand-coral/30 animate-in fade-in">
+              <span>
+                ⏱️ {filters.maxRuntime && !filters.minRuntime ? "<90m" : filters.minRuntime && filters.maxRuntime ? "90-120m" : ">120m"}
+              </span>
+              <button
+                type="button"
+                onClick={handleRemoveRuntime}
+                aria-label="Remove runtime filter"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ) : null}
+
+          {filters.language ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-indigo/15 text-brand-indigo border border-brand-indigo/30 animate-in fade-in">
+              <span>🌐 {filters.language.toUpperCase()}</span>
+              <button
+                type="button"
+                onClick={handleRemoveLanguage}
+                aria-label="Remove language filter"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           ) : null}
         </div>
-
-        {/* Streaming Platform Filter Bar (Expanded on toggle or active selection) */}
-        {isStreamingOpen ? (
-          <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-            <StreamingFilterBar
-              selectedProvider={activeProvider}
-              onSelectProvider={(provider) => {
-                if (query.trim()) onQueryChange("");
-                onSelectProvider(provider);
-              }}
-            />
-          </div>
-        ) : null}
       </div>
 
       {/* Section Heading with Dynamic Title & Reset Action */}
@@ -143,6 +207,17 @@ export function SearchFilterToolbar({
           </button>
         ) : null}
       </div>
+
+      {/* Filter Options Modal */}
+      <SearchFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        filters={filters}
+        onApplyFilters={(newFilters) => {
+          if (query.trim()) onQueryChange("");
+          onFiltersChange(newFilters);
+        }}
+      />
     </div>
   );
 }

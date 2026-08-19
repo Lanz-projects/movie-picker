@@ -126,7 +126,7 @@ describe("SearchScreen Stage Component", () => {
     expect(screen.getByRole("textbox", { name: /search movies/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /trending/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /action/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /filter by platform/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open filter options/i })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(movieApi.getTrendingMovies).toHaveBeenCalledWith(1);

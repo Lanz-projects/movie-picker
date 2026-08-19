@@ -76,6 +76,41 @@ public final class TmdbMappingUtil {
             Map.entry("peacock premium", 386)
     );
 
+    public record DateRange(String gte, String lte) {}
+
+    public static DateRange resolveDecadeRange(String decade) {
+        if (!StringUtils.hasText(decade)) {
+            return null;
+        }
+        String clean = decade.trim().toLowerCase();
+        return switch (clean) {
+            case "2020s" -> new DateRange("2020-01-01", null);
+            case "2010s" -> new DateRange("2010-01-01", "2019-12-31");
+            case "2000s" -> new DateRange("2000-01-01", "2009-12-31");
+            case "90s", "1990s" -> new DateRange("1990-01-01", "1999-12-31");
+            case "80s", "1980s" -> new DateRange("1980-01-01", "1989-12-31");
+            case "vintage", "classic", "classics" -> new DateRange(null, "1979-12-31");
+            default -> null;
+        };
+    }
+
+    public static String resolveLanguageCode(String language) {
+        if (!StringUtils.hasText(language)) {
+            return null;
+        }
+        String clean = language.trim().toLowerCase();
+        return switch (clean) {
+            case "en", "english" -> "en";
+            case "ko", "korean" -> "ko";
+            case "ja", "japanese" -> "ja";
+            case "es", "spanish" -> "es";
+            case "fr", "french" -> "fr";
+            case "de", "german" -> "de";
+            case "it", "italian" -> "it";
+            default -> clean.length() == 2 ? clean : null;
+        };
+    }
+
     public static Integer resolveGenreId(String genre) {
         if (!StringUtils.hasText(genre)) {
             return null;

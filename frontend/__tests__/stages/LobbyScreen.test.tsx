@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LobbyScreen } from "@/components/stages/LobbyScreen";
@@ -100,7 +100,9 @@ describe("LobbyScreen Component", () => {
     expect(copyButton).toBeInTheDocument();
 
     await user.click(copyButton);
-    expect(screen.getByText(/room code copied!/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/room code copied!/i)).toBeInTheDocument();
+    });
   });
 
   it("copies deep-link invite URL when Share Invite Link is clicked", async () => {

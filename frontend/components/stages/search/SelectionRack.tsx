@@ -38,7 +38,7 @@ export const SelectionRack = React.memo(function SelectionRack({
   isStartingVoting = false,
   readyCount,
   totalUsersCount,
-  defaultExpanded = true,
+  defaultExpanded = false,
   className,
 }: SelectionRackProps) {
   const [isExpanded, setIsExpanded] = React.useState<boolean>(defaultExpanded);

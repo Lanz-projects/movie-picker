@@ -42,8 +42,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     setQuery,
     activeGenre,
     setActiveGenre,
-    activeProvider,
-    setActiveProvider,
+    filters,
+    setFilters,
+    activeFilterCount,
     clearSearch,
     clearFilters,
     movies,
@@ -185,8 +186,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           isLoading={isSearching}
           activeGenre={activeGenre}
           onSelectGenre={setActiveGenre}
-          activeProvider={activeProvider}
-          onSelectProvider={setActiveProvider}
+          filters={filters}
+          onFiltersChange={setFilters}
+          activeFilterCount={activeFilterCount}
           onClearFilters={clearFilters}
           mode={mode}
           sectionTitle={sectionTitle}

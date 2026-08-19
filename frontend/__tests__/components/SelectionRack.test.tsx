@@ -28,7 +28,21 @@ describe("SelectionRack", () => {
     vi.clearAllMocks();
   });
 
-  it("renders selected movie thumbnails and count badge", () => {
+  it("is collapsed by default and shows expand button", () => {
+    render(
+      <SelectionRack
+        selectedMovies={mockSelectedMovies}
+        maxSuggestions={3}
+        onRemoveMovie={mockOnRemoveMovie}
+        onSubmitDeck={mockOnSubmitDeck}
+      />
+    );
+
+    expect(screen.getByText("2 / 3 Picked")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expand movie selection deck" })).toBeInTheDocument();
+  });
+
+  it("renders selected movie thumbnails and count badge when expanded", () => {
     render(
       <SelectionRack
         selectedMovies={mockSelectedMovies}
@@ -36,6 +50,7 @@ describe("SelectionRack", () => {
         onRemoveMovie={mockOnRemoveMovie}
         onSubmitDeck={mockOnSubmitDeck}
         onSelectMovie={mockOnSelectMovie}
+        defaultExpanded={true}
       />
     );
 
@@ -53,6 +68,7 @@ describe("SelectionRack", () => {
         onRemoveMovie={mockOnRemoveMovie}
         onSubmitDeck={mockOnSubmitDeck}
         onSelectMovie={mockOnSelectMovie}
+        defaultExpanded={true}
       />
     );
 
@@ -70,22 +86,23 @@ describe("SelectionRack", () => {
         onRemoveMovie={mockOnRemoveMovie}
         onSubmitDeck={mockOnSubmitDeck}
         onSelectMovie={mockOnSelectMovie}
+        defaultExpanded={false}
       />
     );
 
-    // Click Hide button
-    const hideBtn = screen.getByRole("button", { name: "Minimize movie selection deck" });
-    fireEvent.click(hideBtn);
-
-    // Verify collapsed view is visible
-    expect(screen.getByRole("button", { name: "Expand movie selection deck" })).toBeInTheDocument();
-
-    // Click Expand
+    // Click Expand button
     const expandBtn = screen.getByRole("button", { name: "Expand movie selection deck" });
     fireEvent.click(expandBtn);
 
-    // Verify expanded view is restored
+    // Verify expanded view is visible
+    expect(screen.getByRole("button", { name: "Minimize movie selection deck" })).toBeInTheDocument();
     expect(screen.getByText("2 / 3 Picked")).toBeInTheDocument();
+
+    // Click Hide
+    const hideBtn = screen.getByRole("button", { name: "Minimize movie selection deck" });
+    fireEvent.click(hideBtn);
+
+    expect(screen.getByRole("button", { name: "Expand movie selection deck" })).toBeInTheDocument();
   });
 
   it("calls onRemoveMovie when delete button on thumbnail is clicked", () => {
@@ -95,6 +112,7 @@ describe("SelectionRack", () => {
         maxSuggestions={3}
         onRemoveMovie={mockOnRemoveMovie}
         onSubmitDeck={mockOnSubmitDeck}
+        defaultExpanded={true}
       />
     );
 
@@ -145,6 +163,7 @@ describe("SelectionRack", () => {
         hasSubmitted={true}
         isHost={true}
         onStartVoting={mockOnStartVoting}
+        defaultExpanded={true}
       />
     );
 

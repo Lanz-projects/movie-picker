@@ -121,12 +121,18 @@ public class MovieControllerTest {
                 .movies(List.of(movie))
                 .build();
 
-        when(movieSearchService.discoverMovies(eq("Action"), eq("Netflix"), eq("popularity.desc"), eq(1)))
-                .thenReturn(response);
+        when(movieSearchService.discoverMovies(
+                eq("Action"), eq("Netflix"), eq("90s"), eq(7.0), eq(90), eq(120), eq("en"), eq("popularity.desc"), eq(1)
+        )).thenReturn(response);
 
         mockMvc.perform(get("/api/movies/discover")
                         .param("genre", "Action")
                         .param("provider", "Netflix")
+                        .param("decade", "90s")
+                        .param("minRating", "7.0")
+                        .param("minRuntime", "90")
+                        .param("maxRuntime", "120")
+                        .param("language", "en")
                         .param("sortBy", "popularity.desc")
                         .param("page", "1")
                         .accept(MediaType.APPLICATION_JSON))

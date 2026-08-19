@@ -42,9 +42,16 @@ public class MovieController {
     public ResponseEntity<MovieSearchResponse> discoverMovies(
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String provider,
+            @RequestParam(required = false) String decade,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Integer minRuntime,
+            @RequestParam(required = false) Integer maxRuntime,
+            @RequestParam(required = false) String language,
             @RequestParam(defaultValue = "popularity.desc") String sortBy,
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be at least 1") int page) {
-        MovieSearchResponse response = movieSearchService.discoverMovies(genre, provider, sortBy, page);
+        MovieSearchResponse response = movieSearchService.discoverMovies(
+                genre, provider, decade, minRating, minRuntime, maxRuntime, language, sortBy, page
+        );
         return ResponseEntity.ok(response);
     }
 

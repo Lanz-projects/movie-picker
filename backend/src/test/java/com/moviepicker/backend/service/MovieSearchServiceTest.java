@@ -122,13 +122,18 @@ public class MovieSearchServiceTest {
 
     @Test
     public void testDiscoverMovies_MapsGenresAndProvidersCorrectly() {
-        when(tmdbClient.discoverMovies(eq(28), eq(8), eq("popularity.desc"), eq(1)))
-                .thenReturn(sampleTmdbResponse);
+        when(tmdbClient.discoverMovies(
+                eq(28), eq(8), eq("1990-01-01"), eq("1999-12-31"), eq(7.0), eq(90), eq(120), eq("en"), eq("popularity.desc"), eq(1)
+        )).thenReturn(sampleTmdbResponse);
 
-        MovieSearchResponse response = movieSearchService.discoverMovies("Action", "Netflix", "popularity.desc", 1);
+        MovieSearchResponse response = movieSearchService.discoverMovies(
+                "Action", "Netflix", "90s", 7.0, 90, 120, "en", "popularity.desc", 1
+        );
 
         assertThat(response).isNotNull();
         assertThat(response.getMovies()).hasSize(2);
-        verify(tmdbClient, times(1)).discoverMovies(28, 8, "popularity.desc", 1);
+        verify(tmdbClient, times(1)).discoverMovies(
+                28, 8, "1990-01-01", "1999-12-31", 7.0, 90, 120, "en", "popularity.desc", 1
+        );
     }
 }

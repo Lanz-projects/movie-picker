@@ -33,16 +33,30 @@ export async function getTrendingMovies(
   );
 }
 
-export async function discoverMovies(params: {
+export interface DiscoverMovieParams {
   genre?: string;
   provider?: string;
+  decade?: string;
+  minRating?: number;
+  minRuntime?: number;
+  maxRuntime?: number;
+  language?: string;
   sortBy?: string;
   page?: number;
-}): Promise<MovieSearchResponse> {
+}
+
+export async function discoverMovies(
+  params: DiscoverMovieParams
+): Promise<MovieSearchResponse> {
   const safePage = Math.max(1, params.page || 1);
   const searchParams = new URLSearchParams();
   if (params.genre) searchParams.set("genre", params.genre);
   if (params.provider) searchParams.set("provider", params.provider);
+  if (params.decade) searchParams.set("decade", params.decade);
+  if (params.minRating && params.minRating > 0) searchParams.set("minRating", String(params.minRating));
+  if (params.minRuntime && params.minRuntime > 0) searchParams.set("minRuntime", String(params.minRuntime));
+  if (params.maxRuntime && params.maxRuntime > 0) searchParams.set("maxRuntime", String(params.maxRuntime));
+  if (params.language) searchParams.set("language", params.language);
   if (params.sortBy) searchParams.set("sortBy", params.sortBy);
   searchParams.set("page", String(safePage));
 

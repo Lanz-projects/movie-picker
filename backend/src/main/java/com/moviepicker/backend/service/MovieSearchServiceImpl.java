@@ -92,14 +92,46 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     }
 
     @Override
-    @Cacheable(value = "movieDiscover", key = "(#genre != null ? #genre.trim().toLowerCase() : 'all') + '_' + (#provider != null ? #provider.trim().toLowerCase() : 'all') + '_' + (#sortBy != null ? #sortBy.trim() : 'popularity.desc') + '_' + #page")
-    public MovieSearchResponse discoverMovies(String genre, String provider, String sortBy, int page) {
-        log.info("Executing TMDB discover for genre='{}', provider='{}', sortBy='{}', page={}", genre, provider, sortBy, page);
+    @Cacheable(value = "movieDiscover", key = "(#genre != null ? #genre.trim().toLowerCase() : 'all') + '_' + " +
+            "(#provider != null ? #provider.trim().toLowerCase() : 'all') + '_' + " +
+            "(#decade != null ? #decade.trim().toLowerCase() : 'all') + '_' + " +
+            "(#minRating != null ? #minRating : 0) + '_' + " +
+            "(#minRuntime != null ? #minRuntime : 0) + '_' + " +
+            "(#maxRuntime != null ? #maxRuntime : 0) + '_' + " +
+            "(#language != null ? #language.trim().toLowerCase() : 'all') + '_' + " +
+            "(#sortBy != null ? #sortBy.trim() : 'popularity.desc') + '_' + #page")
+    public MovieSearchResponse discoverMovies(
+            String genre,
+            String provider,
+            String decade,
+            Double minRating,
+            Integer minRuntime,
+            Integer maxRuntime,
+            String language,
+            String sortBy,
+            int page) {
+        log.info("Executing TMDB discover: genre='{}', provider='{}', decade='{}', minRating={}, runtime={}-{}, lang='{}', sortBy='{}', page={}",
+                genre, provider, decade, minRating, minRuntime, maxRuntime, language, sortBy, page);
 
         Integer genreId = TmdbMappingUtil.resolveGenreId(genre);
         Integer providerId = TmdbMappingUtil.resolveProviderId(provider);
+        TmdbMappingUtil.DateRange dateRange = TmdbMappingUtil.resolveDecadeRange(decade);
+        String releaseDateGte = dateRange != null ? dateRange.gte() : null;
+        String releaseDateLte = dateRange != null ? dateRange.lte() : null;
+        String languageCode = TmdbMappingUtil.resolveLanguageCode(language);
 
-        TmdbSearchResponse rawResponse = tmdbClient.discoverMovies(genreId, providerId, sortBy, Math.max(1, page));
+        TmdbSearchResponse rawResponse = tmdbClient.discoverMovies(
+                genreId,
+                providerId,
+                releaseDateGte,
+                releaseDateLte,
+                minRating,
+                minRuntime,
+                maxRuntime,
+                languageCode,
+                sortBy,
+                Math.max(1, page)
+        );
 
         if (rawResponse == null || rawResponse.getResults() == null) {
             return MovieSearchResponse.builder()

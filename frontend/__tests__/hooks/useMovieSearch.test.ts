@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
+import { DEFAULT_FILTER_STATE } from "@/components/stages/search/SearchFilterModal";
 import * as movieApi from "@/lib/api/movie";
 import type { MovieSearchResponse } from "@/types";
 
@@ -126,6 +127,12 @@ describe("useMovieSearch", () => {
     expect(mockDiscoverMovies).toHaveBeenCalledWith({
       genre: "Horror",
       provider: undefined,
+      decade: undefined,
+      minRating: undefined,
+      minRuntime: undefined,
+      maxRuntime: undefined,
+      language: undefined,
+      sortBy: "popularity.desc",
       page: 1,
     });
     expect(result.current.mode).toBe("DISCOVER");
@@ -133,7 +140,7 @@ describe("useMovieSearch", () => {
     expect(result.current.movies).toEqual(mockHorrorResponse.movies);
   });
 
-  it("fetches discover movies when both genre and provider are set", async () => {
+  it("fetches discover movies when both genre and full filter options are set", async () => {
     const mockNetflixAction: MovieSearchResponse = {
       page: 1,
       totalPages: 1,
@@ -141,11 +148,11 @@ describe("useMovieSearch", () => {
       movies: [
         {
           tmdbId: 777,
-          title: "Extraction",
-          overview: "Mercenary mission.",
-          posterPath: "/extraction.jpg",
-          releaseYear: 2020,
-          voteAverage: 7.2,
+          title: "The Matrix",
+          overview: "Welcome to the real world.",
+          posterPath: "/matrix.jpg",
+          releaseYear: 1999,
+          voteAverage: 8.7,
         },
       ],
     };
@@ -155,7 +162,12 @@ describe("useMovieSearch", () => {
 
     act(() => {
       result.current.setActiveGenre("Action");
-      result.current.setActiveProvider("Netflix");
+      result.current.setFilters({
+        ...DEFAULT_FILTER_STATE,
+        provider: "Netflix",
+        decade: "90s",
+        minRating: 8.0,
+      });
     });
 
     await act(async () => {
@@ -165,10 +177,17 @@ describe("useMovieSearch", () => {
     expect(mockDiscoverMovies).toHaveBeenCalledWith({
       genre: "Action",
       provider: "Netflix",
+      decade: "90s",
+      minRating: 8.0,
+      minRuntime: undefined,
+      maxRuntime: undefined,
+      language: undefined,
+      sortBy: "popularity.desc",
       page: 1,
     });
-    expect(result.current.sectionTitle).toBe("Action Movies on Netflix");
+    expect(result.current.sectionTitle).toBe("90s Acclaimed Action Movies on Netflix");
     expect(result.current.movies).toEqual(mockNetflixAction.movies);
+    expect(result.current.activeFilterCount).toBe(3);
   });
 
   it("debounces search request and updates movies on success", async () => {
@@ -231,7 +250,10 @@ describe("useMovieSearch", () => {
 
     act(() => {
       result.current.setActiveGenre("Comedy");
-      result.current.setActiveProvider("Disney+");
+      result.current.setFilters({
+        ...DEFAULT_FILTER_STATE,
+        provider: "Disney+",
+      });
     });
 
     await act(async () => {
@@ -250,7 +272,7 @@ describe("useMovieSearch", () => {
 
     expect(result.current.query).toBe("");
     expect(result.current.activeGenre).toBeNull();
-    expect(result.current.activeProvider).toBeNull();
+    expect(result.current.filters).toEqual(DEFAULT_FILTER_STATE);
     expect(result.current.mode).toBe("TRENDING");
     expect(result.current.sectionTitle).toBe("🔥 Trending This Week");
   });
