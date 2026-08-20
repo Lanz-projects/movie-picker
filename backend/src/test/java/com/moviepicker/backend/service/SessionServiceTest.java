@@ -247,7 +247,6 @@ public class SessionServiceTest {
 
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(11L)).thenReturn(Optional.of(bobUser));
-        when(movieSuggestionRepository.findByUserId(11L)).thenReturn(List.of());
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
 
         LeaveSessionResponse response = sessionService.leaveSession(1L, request);
@@ -272,7 +271,6 @@ public class SessionServiceTest {
 
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser)); // Alice is host
-        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of());
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(bobUser));
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -292,7 +290,6 @@ public class SessionServiceTest {
 
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
-        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of());
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of()); // No remaining users
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -307,25 +304,17 @@ public class SessionServiceTest {
 
     @Test
     public void testLeaveSession_DisassociatesMovieSuggestions() {
-        MovieSuggestion suggestion = MovieSuggestion.builder()
-                .id(100L)
-                .session(sampleSession)
-                .user(hostUser)
-                .title("Fight Club")
-                .build();
-
         LeaveSessionRequest request = LeaveSessionRequest.builder().userId(10L).build();
 
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
-        when(movieSuggestionRepository.findByUserId(10L)).thenReturn(List.of(suggestion));
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of());
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
         sessionService.leaveSession(1L, request);
 
-        assertThat(suggestion.getUser()).isNull();
-        verify(movieSuggestionRepository).saveAll(List.of(suggestion));
+        verify(voteRepository).deleteBySessionIdAndUserId(1L, 10L);
+        verify(movieSuggestionRepository).disassociateUserSuggestions(10L);
     }
 
     @Test
@@ -345,7 +334,6 @@ public class SessionServiceTest {
         when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
         when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser));
-        when(movieSuggestionRepository.findByUserId(20L)).thenReturn(List.of());
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
 
         LeaveSessionResponse response = sessionService.kickUser("ROOM12", request);
@@ -354,6 +342,8 @@ public class SessionServiceTest {
         assertThat(response.getRemainingUserCount()).isEqualTo(1);
         assertThat(response.getMessage()).contains("Bob");
         assertThat(response.getMessage()).contains("removed from the session by the host");
+        verify(voteRepository).deleteBySessionIdAndUserId(1L, 20L);
+        verify(movieSuggestionRepository).disassociateUserSuggestions(20L);
         verify(userRepository).delete(guestUser);
         verify(roomEventPublisher).publishUserKicked("ROOM12", 20L, "Bob", response);
     }
@@ -368,13 +358,6 @@ public class SessionServiceTest {
                 .joinedAt(LocalDateTime.now().plusMinutes(1))
                 .build();
 
-        MovieSuggestion suggestion = MovieSuggestion.builder()
-                .id(200L)
-                .session(sampleSession)
-                .user(guestUser)
-                .title("Inception")
-                .build();
-
         KickUserRequest request = KickUserRequest.builder()
                 .hostUserId(10L)
                 .targetUserId(20L)
@@ -383,14 +366,13 @@ public class SessionServiceTest {
         when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(hostUser));
         when(userRepository.findById(20L)).thenReturn(Optional.of(guestUser));
-        when(movieSuggestionRepository.findByUserId(20L)).thenReturn(List.of(suggestion));
         when(userRepository.findBySessionIdOrderByJoinedAtAsc(1L)).thenReturn(List.of(hostUser));
 
         LeaveSessionResponse response = sessionService.kickUser("ROOM12", request);
 
         assertThat(response).isNotNull();
-        assertThat(suggestion.getUser()).isNull();
-        verify(movieSuggestionRepository).saveAll(List.of(suggestion));
+        verify(voteRepository).deleteBySessionIdAndUserId(1L, 20L);
+        verify(movieSuggestionRepository).disassociateUserSuggestions(20L);
         verify(userRepository).delete(guestUser);
         verify(roomEventPublisher).publishUserKicked("ROOM12", 20L, "Bob", response);
     }

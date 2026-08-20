@@ -20,6 +20,10 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     @Query("SELECT v.user.id, COUNT(v) FROM Vote v WHERE v.session.id = :sessionId GROUP BY v.user.id")
     List<Object[]> countVotesGroupedByUserId(@Param("sessionId") Long sessionId);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM Vote v WHERE v.session.id = :sessionId AND v.user.id = :userId")
+    void deleteBySessionIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
+
     List<Vote> findBySessionIdAndMovieSuggestionId(Long sessionId, Long movieSuggestionId);
 
     List<Vote> findBySessionIdAndUserId(Long sessionId, Long userId);

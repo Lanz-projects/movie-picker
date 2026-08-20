@@ -15,6 +15,13 @@ public interface MovieSuggestionRepository extends JpaRepository<MovieSuggestion
     @Query("SELECT m FROM MovieSuggestion m LEFT JOIN FETCH m.user WHERE m.session.id = :sessionId")
     List<MovieSuggestion> findBySessionIdWithUser(@Param("sessionId") Long sessionId);
 
+    @Query("SELECT m.tmdbId FROM MovieSuggestion m WHERE m.session.id = :sessionId")
+    java.util.Set<Long> findExistingTmdbIdsBySessionId(@Param("sessionId") Long sessionId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE MovieSuggestion m SET m.user = null WHERE m.user.id = :userId")
+    void disassociateUserSuggestions(@Param("userId") Long userId);
+
     List<MovieSuggestion> findByUserId(Long userId);
     long countBySessionIdAndUserId(Long sessionId, Long userId);
     boolean existsBySessionIdAndTmdbId(Long sessionId, Long tmdbId);

@@ -103,8 +103,7 @@ public class MovieSubmissionServiceTest {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
         when(movieSuggestionRepository.countBySessionIdAndUserId(1L, 10L)).thenReturn(0L);
-        when(movieSuggestionRepository.existsBySessionIdAndTmdbId(1L, 550L)).thenReturn(false);
-        when(movieSuggestionRepository.existsBySessionIdAndTmdbId(1L, 27205L)).thenReturn(false);
+        when(movieSuggestionRepository.findExistingTmdbIdsBySessionId(1L)).thenReturn(Collections.emptySet());
 
         MovieSuggestion saved1 = MovieSuggestion.builder()
                 .id(100L)
@@ -122,14 +121,14 @@ public class MovieSubmissionServiceTest {
                 .title("Inception")
                 .build();
 
-        when(movieSuggestionRepository.save(any(MovieSuggestion.class))).thenReturn(saved1, saved2);
+        when(movieSuggestionRepository.saveAll(any())).thenReturn(List.of(saved1, saved2));
 
         List<MovieSuggestionResponse> responses = movieSubmissionService.submitMovies(1L, request);
 
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).getTitle()).isEqualTo("Fight Club");
         assertThat(responses.get(1).getTitle()).isEqualTo("Inception");
-        verify(movieSuggestionRepository, times(2)).save(any(MovieSuggestion.class));
+        verify(movieSuggestionRepository).saveAll(any());
     }
 
     @Test
@@ -142,7 +141,7 @@ public class MovieSubmissionServiceTest {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
         when(movieSuggestionRepository.countBySessionIdAndUserId(1L, 10L)).thenReturn(0L);
-        when(movieSuggestionRepository.existsBySessionIdAndTmdbId(1L, 550L)).thenReturn(false);
+        when(movieSuggestionRepository.findExistingTmdbIdsBySessionId(1L)).thenReturn(Collections.emptySet());
 
         MovieSuggestion saved1 = MovieSuggestion.builder()
                 .id(100L)
@@ -152,7 +151,7 @@ public class MovieSubmissionServiceTest {
                 .title("Fight Club")
                 .build();
 
-        when(movieSuggestionRepository.save(any(MovieSuggestion.class))).thenReturn(saved1);
+        when(movieSuggestionRepository.saveAll(any())).thenReturn(List.of(saved1));
 
         List<MovieSuggestionResponse> responses = movieSubmissionService.submitMovies(1L, request);
 
@@ -188,8 +187,7 @@ public class MovieSubmissionServiceTest {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
         when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
         when(movieSuggestionRepository.countBySessionIdAndUserId(1L, 10L)).thenReturn(0L);
-        when(movieSuggestionRepository.existsBySessionIdAndTmdbId(1L, 550L)).thenReturn(true); // Already suggested by another user
-        when(movieSuggestionRepository.existsBySessionIdAndTmdbId(1L, 27205L)).thenReturn(false);
+        when(movieSuggestionRepository.findExistingTmdbIdsBySessionId(1L)).thenReturn(java.util.Set.of(550L)); // Already suggested by another user
 
         MovieSuggestion saved2 = MovieSuggestion.builder()
                 .id(101L)
@@ -199,13 +197,31 @@ public class MovieSubmissionServiceTest {
                 .title("Inception")
                 .build();
 
-        when(movieSuggestionRepository.save(any(MovieSuggestion.class))).thenReturn(saved2);
+        when(movieSuggestionRepository.saveAll(any())).thenReturn(List.of(saved2));
 
         List<MovieSuggestionResponse> responses = movieSubmissionService.submitMovies(1L, request);
 
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getTitle()).isEqualTo("Inception");
-        verify(movieSuggestionRepository, times(1)).save(any(MovieSuggestion.class));
+    }
+
+    @Test
+    public void testGetSessionMovies_Success() {
+        MovieSuggestion saved1 = MovieSuggestion.builder()
+                .id(100L)
+                .session(sampleSession)
+                .user(sampleUser)
+                .tmdbId(550L)
+                .title("Fight Club")
+                .build();
+
+        when(sessionRepository.existsById(1L)).thenReturn(true);
+        when(movieSuggestionRepository.findBySessionIdWithUser(1L)).thenReturn(List.of(saved1));
+
+        List<MovieSuggestionResponse> responses = movieSubmissionService.getSessionMovies(1L);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).getTitle()).isEqualTo("Fight Club");
     }
 
     @Test

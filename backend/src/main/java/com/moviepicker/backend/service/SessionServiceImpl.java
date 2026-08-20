@@ -160,20 +160,11 @@ public class SessionServiceImpl implements SessionService {
             throw new InvalidSessionStateException("User does not belong to this session");
         }
 
-        // 1. Delete all votes cast by this user in this session
-        List<Vote> userVotes = voteRepository.findBySessionIdAndUserId(session.getId(), user.getId());
-        if (!userVotes.isEmpty()) {
-            voteRepository.deleteAll(userVotes);
-        }
+        // 1. Bulk delete all votes cast by this user in this session
+        voteRepository.deleteBySessionIdAndUserId(session.getId(), user.getId());
 
-        // 2. Disassociate user from movie suggestions to preserve pool data
-        List<MovieSuggestion> userSuggestions = movieSuggestionRepository.findByUserId(user.getId());
-        if (!userSuggestions.isEmpty()) {
-            for (MovieSuggestion suggestion : userSuggestions) {
-                suggestion.setUser(null);
-            }
-            movieSuggestionRepository.saveAll(userSuggestions);
-        }
+        // 2. Bulk disassociate user from movie suggestions to preserve pool data
+        movieSuggestionRepository.disassociateUserSuggestions(user.getId());
 
         boolean wasHost = session.getHostName().equalsIgnoreCase(user.getDisplayName().trim());
         String departingUserName = user.getDisplayName();
@@ -281,20 +272,11 @@ public class SessionServiceImpl implements SessionService {
         }
         sessionRepository.save(session);
 
-        // 1. Delete all votes cast by the target user in this session
-        List<Vote> userVotes = voteRepository.findBySessionIdAndUserId(session.getId(), targetUser.getId());
-        if (!userVotes.isEmpty()) {
-            voteRepository.deleteAll(userVotes);
-        }
+        // 1. Bulk delete all votes cast by the target user in this session
+        voteRepository.deleteBySessionIdAndUserId(session.getId(), targetUser.getId());
 
-        // 2. Disassociate user from movie suggestions to preserve pool data and prevent FK violations
-        List<MovieSuggestion> userSuggestions = movieSuggestionRepository.findByUserId(targetUser.getId());
-        if (!userSuggestions.isEmpty()) {
-            for (MovieSuggestion suggestion : userSuggestions) {
-                suggestion.setUser(null);
-            }
-            movieSuggestionRepository.saveAll(userSuggestions);
-        }
+        // 2. Bulk disassociate user from movie suggestions to preserve pool data and prevent FK violations
+        movieSuggestionRepository.disassociateUserSuggestions(targetUser.getId());
 
         // 3. Delete the user entity
         userRepository.delete(targetUser);

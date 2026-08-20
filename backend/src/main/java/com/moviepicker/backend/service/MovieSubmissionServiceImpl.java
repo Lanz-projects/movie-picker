@@ -62,9 +62,12 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
         }
 
         List<MovieSuggestion> savedSuggestions = new ArrayList<>();
-        if (request.getMovies() != null) {
+        if (request.getMovies() != null && !request.getMovies().isEmpty()) {
+            java.util.Set<Long> existingTmdbIds = movieSuggestionRepository.findExistingTmdbIdsBySessionId(sessionId);
+            List<MovieSuggestion> toSave = new ArrayList<>();
+
             for (MovieSubmissionDto movieDto : request.getMovies()) {
-                if (movieSuggestionRepository.existsBySessionIdAndTmdbId(sessionId, movieDto.getTmdbId())) {
+                if (existingTmdbIds.contains(movieDto.getTmdbId())) {
                     log.info("Movie tmdbId={} already exists in session id={}, skipping duplicate", movieDto.getTmdbId(), sessionId);
                     continue;
                 }
@@ -79,12 +82,16 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
                         .releaseYear(movieDto.getReleaseYear())
                         .build();
 
-                savedSuggestions.add(movieSuggestionRepository.save(suggestion));
+                toSave.add(suggestion);
+            }
+
+            if (!toSave.isEmpty()) {
+                savedSuggestions = movieSuggestionRepository.saveAll(toSave);
             }
         }
 
         List<User> users = userRepository.findBySessionId(sessionId);
-        List<MovieSuggestion> allSuggestions = movieSuggestionRepository.findBySessionId(sessionId);
+        List<MovieSuggestion> allSuggestions = movieSuggestionRepository.findBySessionIdWithUser(sessionId);
         long submittedUsersCount = allSuggestions.stream()
                 .map(s -> s.getUser() != null ? s.getUser().getId() : null)
                 .filter(java.util.Objects::nonNull)
@@ -111,7 +118,7 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
             throw new ResourceNotFoundException("Session not found with id: " + sessionId);
         }
 
-        return movieSuggestionRepository.findBySessionId(sessionId).stream()
+        return movieSuggestionRepository.findBySessionIdWithUser(sessionId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
