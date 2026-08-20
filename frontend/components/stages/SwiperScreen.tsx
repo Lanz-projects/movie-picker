@@ -10,6 +10,7 @@ import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { useSession } from "@/context/SessionContext";
 import { useKeyboardSwipe } from "@/hooks/useKeyboardSwipe";
 import { playSwipePass, playSwipeLike, playSwipeSuperlike } from "@/lib/audio/sounds";
+import { cn } from "@/lib/utils";
 import type { MovieSuggestionResponse, VoteType, MovieDto } from "@/types";
 
 export interface SwiperScreenProps {
@@ -124,8 +125,11 @@ export function SwiperScreen({
   }, [selectedMovieForModal]);
 
   return (
-    <StageContainer maxWidth="md" className={className}>
-      <div className="flex flex-col items-center gap-5 sm:gap-6 w-full animate-stage-in">
+    <StageContainer
+      maxWidth="md"
+      className={cn("flex-1 flex flex-col items-center justify-center px-3 py-2 sm:py-6 sm:px-4", className)}
+    >
+      <div className="flex flex-col items-center gap-3 sm:gap-4 w-full max-w-[420px] mx-auto animate-stage-in">
         {isFinished ? (
           <SwiperFinishedView
             progress={progress}
@@ -138,9 +142,10 @@ export function SwiperScreen({
               currentIndex={currentIndex}
               totalMovies={totalMovies}
               progress={progress}
+              className="w-full shrink-0"
             />
 
-            <div className="relative w-full max-w-[480px] h-[500px] sm:h-[540px] flex items-center justify-center">
+            <div className="relative w-full max-w-[360px] sm:max-w-[440px] h-[440px] sm:h-[520px] max-h-[58vh] sm:max-h-none flex items-center justify-center">
               {currentIndex + 2 < totalMovies && (
                 <SwipeCard
                   key={`back-2-${movieDeck[currentIndex + 2].id}`}
@@ -179,6 +184,7 @@ export function SwiperScreen({
               onLike={handleLike}
               onInfo={handleInfo}
               disabled={isProcessingVote}
+              className="w-full shrink-0"
             />
           </>
         )}

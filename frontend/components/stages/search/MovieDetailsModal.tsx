@@ -159,7 +159,7 @@ export const MovieDetailsModal = React.memo(function MovieDetailsModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -167,8 +167,11 @@ export const MovieDetailsModal = React.memo(function MovieDetailsModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex flex-col w-full max-w-xl max-h-[90vh] overflow-hidden rounded-3xl border border-border-highlight bg-bg-card shadow-2xl shadow-black/90 animate-scale-in"
+        className="relative flex flex-col w-full max-w-xl max-h-[88vh] sm:max-h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-border-highlight bg-bg-card shadow-2xl shadow-black/90 pb-[env(safe-area-inset-bottom)] animate-scale-in"
       >
+        {/* Mobile Grab Handle */}
+        <div className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+
         <button
           type="button"
           onClick={onClose}

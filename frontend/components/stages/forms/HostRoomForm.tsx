@@ -87,7 +87,7 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+    <form onSubmit={handleSubmit} suppressHydrationWarning className="flex flex-col gap-4 w-full">
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5">
           Your Nickname
@@ -136,6 +136,7 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
               min={2}
               max={20}
               disabled={isLoading}
+              suppressHydrationWarning
               className="w-12 h-8 text-center text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
             />
             <button
@@ -177,6 +178,7 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
               min={1}
               max={10}
               disabled={isLoading}
+              suppressHydrationWarning
               className="w-12 h-8 text-center text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
             />
             <button

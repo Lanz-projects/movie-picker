@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Users, Crown, Check, Clock, UserX, ChevronDown, ShieldAlert } from "lucide-react";
+import { Users, Crown, Check, Clock, UserX, ChevronDown, ShieldAlert, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import type { UserResponse, GameStage, DeckSubmissionProgress, VotingProgressResponse } from "@/types";
@@ -17,6 +17,8 @@ export interface RoomUsersDropdownProps {
   votingProgress?: VotingProgressResponse | null;
   isConnected?: boolean;
   onKickUser?: (userId: number, banPermanently?: boolean) => Promise<void> | void;
+  roomCode?: string;
+  nickname?: string;
 }
 
 export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
@@ -30,13 +32,28 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
   votingProgress,
   isConnected = true,
   onKickUser,
+  roomCode,
+  nickname,
 }: RoomUsersDropdownProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [confirmKickUserId, setConfirmKickUserId] = React.useState<number | null>(null);
   const [isBanning, setIsBanning] = React.useState(false);
   const [isSubmittingAction, setIsSubmittingAction] = React.useState(false);
+  const [copiedCode, setCopiedCode] = React.useState(false);
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const handleCopyCode = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!roomCode) return;
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // Fallback
+    }
+  };
 
   // Close on outside click
   React.useEffect(() => {
@@ -135,6 +152,13 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
           aria-hidden="true"
         />
 
+        {/* Mobile-only Room Code Tag */}
+        {roomCode && (
+          <span className="sm:hidden font-mono font-bold text-brand-violet">
+            {roomCode} ·
+          </span>
+        )}
+
         <Users className="h-3.5 w-3.5 text-brand-cyan" />
         <span>
           {memberCount}
@@ -162,6 +186,36 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
           aria-orientation="vertical"
           className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-2xl border border-border-subtle bg-bg-surface/95 p-3.5 shadow-2xl shadow-black/80 backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150"
         >
+          {/* Mobile Room Code & Nickname Card */}
+          {roomCode && (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-bg-elevated/80 border border-border-subtle mb-2.5 sm:hidden">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-text-muted">Room:</span>
+                <span className="font-mono text-xs font-bold text-brand-cyan tracking-wider">
+                  {roomCode}
+                </span>
+                {nickname && (
+                  <span className="text-[11px] text-text-secondary truncate max-w-24">
+                    ({nickname})
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="flex items-center gap-1 text-[11px] font-semibold text-text-secondary hover:text-white px-2 py-1 rounded-lg bg-bg-surface hover:bg-brand-violet/20 transition-colors"
+                title="Copy Room Code"
+              >
+                {copiedCode ? (
+                  <Check className="h-3 w-3 text-brand-emerald" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+                <span>{copiedCode ? "Copied" : "Copy"}</span>
+              </button>
+            </div>
+          )}
+
           {/* Header & Stage Progress Summary */}
           <div className="border-b border-border-subtle/70 pb-2.5 mb-2.5">
             <div className="flex items-center justify-between">

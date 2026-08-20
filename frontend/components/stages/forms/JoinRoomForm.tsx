@@ -63,7 +63,7 @@ export function JoinRoomForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+    <form onSubmit={handleSubmit} suppressHydrationWarning className="flex flex-col gap-5 w-full">
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5">
           6-Character Room Code

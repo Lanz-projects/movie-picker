@@ -63,11 +63,11 @@ export const Header = React.memo(function Header({
     <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-bg-base/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-275 items-center justify-between px-4 sm:px-6">
         {/* Brand Logo & Current Player Identity */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-md shadow-brand-indigo/30 shrink-0">
-            <Clapperboard className="h-5 w-5" />
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-md shadow-brand-indigo/30 shrink-0">
+            <Clapperboard className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <div className="flex flex-col">
+          <div className="hidden sm:flex flex-col">
             <span className="font-display text-sm sm:text-base font-extrabold tracking-tight text-white leading-tight">
               What Should We Watch
             </span>
@@ -89,15 +89,15 @@ export const Header = React.memo(function Header({
         </div>
 
         {/* Dynamic Room & Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {roomCode ? (
             <>
-              {/* Room Code Badge with Copy */}
+              {/* Room Code Badge with Copy (Desktop) */}
               <button
                 onClick={handleCopyCode}
                 title="Click to copy Room Code"
                 className={cn(
-                  "group flex items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-text-main transition-all duration-200 hover:border-brand-violet hover:bg-bg-elevated cursor-pointer active:scale-95"
+                  "hidden sm:flex group items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-text-main transition-all duration-200 hover:border-brand-violet hover:bg-bg-elevated cursor-pointer active:scale-95"
                 )}
               >
                 <span className="text-text-muted hidden xs:inline">ROOM</span>
@@ -124,6 +124,8 @@ export const Header = React.memo(function Header({
                   votingProgress={votingProgress}
                   isConnected={isConnected}
                   onKickUser={onKickUser}
+                  roomCode={roomCode}
+                  nickname={nickname}
                 />
               ) : memberCount !== undefined ? (
                 <div className="flex items-center gap-1.5 rounded-xl border border-border-subtle bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary">

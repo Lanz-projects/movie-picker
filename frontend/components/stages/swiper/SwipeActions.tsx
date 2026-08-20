@@ -26,7 +26,7 @@ export const SwipeActions = React.memo(function SwipeActions({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-3 sm:gap-4 py-3 select-none",
+        "flex items-center justify-center gap-2 sm:gap-4 py-1.5 sm:py-3 select-none",
         className
       )}
       role="toolbar"
@@ -40,9 +40,9 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Pass (Left Arrow)"
           title="Pass / Nope (←)"
-          className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-brand-coral/40 bg-bg-surface text-brand-coral shadow-lg shadow-black/40 transition-all duration-150 hover:scale-110 hover:border-brand-coral hover:bg-brand-coral/15 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-brand-coral/40 bg-bg-surface text-brand-coral shadow-lg shadow-black/40 transition-all duration-150 hover:scale-110 hover:border-brand-coral hover:bg-brand-coral/15 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          <X className="h-7 w-7 transition-transform group-hover:rotate-12" />
+          <X className="h-6 w-6 sm:h-7 sm:w-7 transition-transform group-hover:rotate-12" />
         </button>
         <span className="text-[10px] font-semibold text-text-muted opacity-70">← Pass</span>
       </div>
@@ -55,11 +55,11 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Skip (Space)"
           title="Skip movie (Space / ↓)"
-          className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          <FastForward className="h-5 w-5 transition-transform group-hover:translate-x-0.5 text-text-muted group-hover:text-text-main" />
+          <FastForward className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-0.5 text-text-muted group-hover:text-text-main" />
         </button>
-        <span className="text-[10px] font-semibold text-text-muted opacity-70">Space</span>
+        <span className="text-[10px] font-semibold text-text-muted opacity-70">Skip</span>
       </div>
 
       {/* 3. Superlike Hero Button (⭐) */}
@@ -70,11 +70,11 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Superlike (Up Arrow)"
           title="Superlike +2 pts (↑)"
-          className="group relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-brand-amber/50 bg-bg-surface text-brand-amber shadow-xl shadow-brand-amber/20 transition-all duration-150 hover:scale-115 hover:border-brand-amber hover:bg-brand-amber/20 hover:shadow-brand-amber/40 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full border-2 border-brand-amber/50 bg-bg-surface text-brand-amber shadow-xl shadow-brand-amber/20 transition-all duration-150 hover:scale-115 hover:border-brand-amber hover:bg-brand-amber/20 hover:shadow-brand-amber/40 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          <Star className="h-8 w-8 fill-brand-amber transition-transform group-hover:scale-110" />
+          <Star className="h-7 w-7 sm:h-8 sm:w-8 fill-brand-amber transition-transform group-hover:scale-110" />
         </button>
-        <span className="text-[10px] font-bold text-brand-amber opacity-90">↑ Superlike</span>
+        <span className="text-[10px] font-bold text-brand-amber opacity-90">↑ Super</span>
       </div>
 
       {/* 4. Like Button (💚) */}
@@ -85,9 +85,9 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Like (Right Arrow)"
           title="Like movie (→)"
-          className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-brand-emerald/40 bg-bg-surface text-brand-emerald shadow-lg shadow-black/40 transition-all duration-150 hover:scale-110 hover:border-brand-emerald hover:bg-brand-emerald/15 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-brand-emerald/40 bg-bg-surface text-brand-emerald shadow-lg shadow-black/40 transition-all duration-150 hover:scale-110 hover:border-brand-emerald hover:bg-brand-emerald/15 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          <Heart className="h-7 w-7 fill-brand-emerald transition-transform group-hover:scale-110" />
+          <Heart className="h-6 w-6 sm:h-7 sm:w-7 fill-brand-emerald transition-transform group-hover:scale-110" />
         </button>
         <span className="text-[10px] font-semibold text-text-muted opacity-70">Like →</span>
       </div>
@@ -100,11 +100,11 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Movie Info (i)"
           title="Inspect details (i / Enter)"
-          className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          <Info className="h-5 w-5 text-brand-indigo group-hover:text-brand-violet transition-colors" />
+          <Info className="h-4 w-4 sm:h-5 sm:w-5 text-brand-indigo group-hover:text-brand-violet transition-colors" />
         </button>
-        <span className="text-[10px] font-semibold text-text-muted opacity-70">i</span>
+        <span className="text-[10px] font-semibold text-text-muted opacity-70">Info</span>
       </div>
     </div>
   );

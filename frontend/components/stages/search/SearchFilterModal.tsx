@@ -138,13 +138,16 @@ export function SearchFilterModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="filter-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div
-        className="relative flex flex-col w-full max-w-2xl max-h-[85vh] rounded-3xl border border-border-subtle bg-bg-surface shadow-2xl shadow-black/80 overflow-hidden"
+        className="relative flex flex-col w-full max-w-2xl max-h-[85vh] rounded-t-3xl sm:rounded-3xl border-t sm:border border-border-subtle bg-bg-surface shadow-2xl shadow-black/80 overflow-hidden pb-[env(safe-area-inset-bottom)]"
       >
+        {/* Mobile Grab Handle */}
+        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle bg-bg-elevated/40">
+        <div className="flex items-center justify-between px-5 py-3.5 sm:py-4 border-b border-border-subtle bg-bg-elevated/40">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan">
               <SlidersHorizontal className="h-4 w-4" />

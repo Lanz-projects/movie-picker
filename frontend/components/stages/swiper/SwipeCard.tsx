@@ -187,7 +187,7 @@ export const SwipeCard = React.memo(function SwipeCard({
       onPointerCancel={handlePointerCancel}
       style={getStackStyle()}
       className={cn(
-        "absolute inset-0 mx-auto flex flex-col w-full max-w-[480px] h-[500px] sm:h-[540px] select-none touch-none overflow-hidden rounded-3xl border border-border-subtle bg-bg-card shadow-2xl shadow-black/80 will-change-transform",
+        "absolute inset-0 mx-auto flex flex-col w-full h-full select-none touch-none overflow-hidden rounded-3xl border border-border-subtle bg-bg-card shadow-2xl shadow-black/80 will-change-transform",
         className
       )}
       role="article"
@@ -222,9 +222,9 @@ export const SwipeCard = React.memo(function SwipeCard({
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/70 to-transparent" />
 
-        <div className="absolute top-4 inset-x-4 flex items-center justify-between pointer-events-none z-10">
+        <div className="absolute top-3 sm:top-4 inset-x-3 sm:inset-x-4 flex items-center justify-between pointer-events-none z-10">
           {movie.releaseYear ? (
-            <span className="rounded-lg border border-white/10 bg-black/60 px-2.5 py-1 text-xs font-bold text-text-secondary backdrop-blur-md">
+            <span className="rounded-lg border border-white/10 bg-black/60 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-text-secondary backdrop-blur-md">
               {movie.releaseYear}
             </span>
           ) : (
@@ -232,17 +232,17 @@ export const SwipeCard = React.memo(function SwipeCard({
           )}
 
           {movie.userDisplayName ? (
-            <Badge variant="subtle" size="sm" className="gap-1 bg-black/70 backdrop-blur-md border-white/10">
-              <User className="h-3 w-3 text-brand-indigo" />
-              Nominated by {movie.userDisplayName}
+            <Badge variant="subtle" size="sm" className="gap-1 bg-black/70 backdrop-blur-md border-white/10 text-[10px] sm:text-xs py-0.5">
+              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-brand-indigo" />
+              <span className="truncate max-w-28 sm:max-w-none">Nominated by {movie.userDisplayName}</span>
             </Badge>
           ) : null}
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 flex flex-col justify-end z-10">
-          <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-5 flex flex-col justify-end z-10">
+          <div className="flex items-start justify-between gap-2 mb-1 sm:mb-2">
             <h2
-              className="font-display text-2xl sm:text-3xl font-extrabold text-text-main leading-tight line-clamp-2 drop-shadow-md"
+              className="font-display text-lg sm:text-2xl md:text-3xl font-extrabold text-text-main leading-snug sm:leading-tight line-clamp-1 sm:line-clamp-2 drop-shadow-md"
               title={movie.title}
             >
               {movie.title}
@@ -256,20 +256,20 @@ export const SwipeCard = React.memo(function SwipeCard({
                   onOpenDetails(movie);
                 }}
                 aria-label={`View details for ${movie.title}`}
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-black/60 border border-white/15 text-text-secondary hover:text-white hover:bg-bg-elevated transition-colors cursor-pointer backdrop-blur-md"
+                className="flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full bg-black/60 border border-white/15 text-text-secondary hover:text-white hover:bg-bg-elevated transition-colors cursor-pointer backdrop-blur-md"
                 title="Inspect movie details"
               >
-                <Info className="h-5 w-5 text-brand-indigo" />
+                <Info className="h-4 w-4 sm:h-5 sm:w-5 text-brand-indigo" />
               </button>
             ) : null}
           </div>
 
           {movie.overview ? (
-            <p className="text-xs sm:text-sm leading-relaxed text-text-secondary line-clamp-3 mb-1 drop-shadow-sm">
+            <p className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-text-secondary line-clamp-2 sm:line-clamp-3 mb-0.5 sm:mb-1 drop-shadow-sm">
               {movie.overview}
             </p>
           ) : (
-            <p className="text-xs text-text-muted italic mb-1">
+            <p className="text-[11px] sm:text-xs text-text-muted italic mb-0.5 sm:mb-1">
               No description available.
             </p>
           )}

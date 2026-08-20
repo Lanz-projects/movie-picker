@@ -24,7 +24,7 @@ export default function Home() {
   } = useSession();
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       {/* Sticky Cinema Navigation */}
       <Header
         roomCode={session?.roomCode}
