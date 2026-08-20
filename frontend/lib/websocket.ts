@@ -2,11 +2,20 @@ import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import type { RoomProgressEvent, SessionResultsResponse, VoteMessageDto } from "@/types";
 
-const WS_BASE_URL =
-  process.env.NEXT_PUBLIC_WS_URL ||
-  (process.env.NEXT_PUBLIC_API_URL
-    ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "")}/ws`
-    : "http://localhost:8080/ws");
+export function getWebSocketUrl(): string {
+  if (process.env.NEXT_PUBLIC_WS_URL) {
+    return process.env.NEXT_PUBLIC_WS_URL;
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return `${process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "")}/ws`;
+  }
+  if (typeof window !== "undefined" && window.location.hostname) {
+    return `http://${window.location.hostname}:8080/ws`;
+  }
+  return "http://localhost:8080/ws";
+}
+
+const WS_BASE_URL = getWebSocketUrl();
 
 export interface WebSocketCallbacks {
   onConnect?: () => void;
@@ -40,8 +49,9 @@ export class StompClientService {
 
     this.isConnecting = true;
 
+    const wsUrl = getWebSocketUrl();
     this.client = new Client({
-      webSocketFactory: () => new SockJS(WS_BASE_URL),
+      webSocketFactory: () => new SockJS(wsUrl),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

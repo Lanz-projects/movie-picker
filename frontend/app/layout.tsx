@@ -41,9 +41,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${outfit.variable} ${inter.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col cinema-ambient-bg text-text-main bg-bg-base font-sans selection:bg-brand-indigo/30 selection:text-white">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col cinema-ambient-bg text-text-main bg-bg-base font-sans selection:bg-brand-indigo/30 selection:text-white"
+      >
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
