@@ -9,7 +9,8 @@ import type {
 
 export async function searchMovies(
   query: string,
-  page: number = 1
+  page: number = 1,
+  signal?: AbortSignal
 ): Promise<MovieSearchResponse> {
   const encodedQuery = encodeURIComponent(query.trim());
   const safePage = Math.max(1, page);
@@ -17,18 +18,21 @@ export async function searchMovies(
     `/api/movies/search?query=${encodedQuery}&page=${safePage}`,
     {
       method: "GET",
+      signal,
     }
   );
 }
 
 export async function getTrendingMovies(
-  page: number = 1
+  page: number = 1,
+  signal?: AbortSignal
 ): Promise<MovieSearchResponse> {
   const safePage = Math.max(1, page);
   return request<MovieSearchResponse>(
     `/api/movies/trending?page=${safePage}`,
     {
       method: "GET",
+      signal,
     }
   );
 }
@@ -43,6 +47,7 @@ export interface DiscoverMovieParams {
   language?: string;
   sortBy?: string;
   page?: number;
+  signal?: AbortSignal;
 }
 
 export async function discoverMovies(
@@ -64,15 +69,18 @@ export async function discoverMovies(
     `/api/movies/discover?${searchParams.toString()}`,
     {
       method: "GET",
+      signal: params.signal,
     }
   );
 }
 
 export async function getMovieDetails(
-  tmdbId: number
+  tmdbId: number,
+  signal?: AbortSignal
 ): Promise<MovieDetailsDto> {
   return request<MovieDetailsDto>(`/api/movies/${tmdbId}`, {
     method: "GET",
+    signal,
   });
 }
 

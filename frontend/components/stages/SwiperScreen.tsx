@@ -39,6 +39,19 @@ export function SwiperScreen({
   const isFinished = currentIndex >= totalMovies;
   const currentMovie = !isFinished ? movieDeck[currentIndex] : null;
 
+  // Preload upcoming movie poster images into browser cache for instant rendering
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !movieDeck.length) return;
+
+    for (let i = currentIndex + 1; i <= Math.min(currentIndex + 3, movieDeck.length - 1); i++) {
+      const posterPath = movieDeck[i]?.posterPath;
+      if (posterPath) {
+        const img = new (window.Image || Image)();
+        img.src = `https://image.tmdb.org/t/p/w780${posterPath}`;
+      }
+    }
+  }, [currentIndex, movieDeck]);
+
   const handleVote = React.useCallback(
     (voteType: VoteType) => {
       if (isFinished || !currentMovie || isProcessingVote) return;

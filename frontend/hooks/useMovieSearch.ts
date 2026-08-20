@@ -123,6 +123,8 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
   React.useEffect(() => {
     const trimmed = query.trim();
     const currentReqId = ++activeRequestIdRef.current;
+    const abortController = new AbortController();
+
     setIsLoading(true);
     setIsSearchingMore(false);
     setError(null);

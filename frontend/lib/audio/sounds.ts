@@ -21,6 +21,17 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
+if (typeof window !== "undefined") {
+  const unlockAudio = () => {
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+  };
+  window.addEventListener("touchstart", unlockAudio, { passive: true, once: true });
+  window.addEventListener("pointerdown", unlockAudio, { passive: true, once: true });
+  window.addEventListener("click", unlockAudio, { passive: true, once: true });
+}
+
 export function isSoundMuted(): boolean {
   if (typeof window === "undefined") return false;
   try {
