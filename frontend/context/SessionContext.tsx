@@ -24,6 +24,7 @@ import {
   saveSessionAuth,
   loadSessionAuth,
   clearSessionAuth,
+  clearVotedSuggestionIds,
 } from "@/lib/storage/sessionStorage";
 import type {
   SessionResponse,
@@ -647,6 +648,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(updated);
       setMovieDeck([]);
       clearMyDeckSelection();
+      clearVotedSuggestionIds(session.roomCode, currentUser?.id);
       setHasSubmittedDeck(false);
       setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setProgress(null);
@@ -659,7 +661,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [session, clearMyDeckSelection]);
+  }, [session, currentUser, clearMyDeckSelection]);
 
   const resetToLobby = React.useCallback(async () => {
     if (!session) return;
@@ -668,6 +670,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(updated);
       setMovieDeck([]);
       clearMyDeckSelection();
+      clearVotedSuggestionIds(session.roomCode, currentUser?.id);
       setHasSubmittedDeck(false);
       setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
       setProgress(null);
@@ -676,7 +679,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } catch {
       setStage("LOBBY");
     }
-  }, [session, clearMyDeckSelection]);
+  }, [session, currentUser, clearMyDeckSelection]);
 
   const kickUser = React.useCallback(
     async (targetUserId: number, banPermanently?: boolean) => {

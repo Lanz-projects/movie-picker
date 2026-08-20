@@ -3,6 +3,9 @@ import {
   saveSessionAuth,
   loadSessionAuth,
   clearSessionAuth,
+  saveVotedSuggestionId,
+  loadVotedSuggestionIds,
+  clearVotedSuggestionIds,
   type StoredSessionAuth,
 } from "@/lib/storage/sessionStorage";
 
@@ -73,5 +76,24 @@ describe("sessionStorage helper", () => {
 
     clearSessionAuth();
     expect(loadSessionAuth()).toBeNull();
+  });
+
+  it("saves, loads, and deduplicates voted suggestion IDs", () => {
+    expect(loadVotedSuggestionIds("KTQH", 1)).toEqual([]);
+
+    saveVotedSuggestionId("KTQH", 1, 101);
+    saveVotedSuggestionId("KTQH", 1, 102);
+    saveVotedSuggestionId("KTQH", 1, 101); // duplicate
+
+    expect(loadVotedSuggestionIds("KTQH", 1)).toEqual([101, 102]);
+  });
+
+  it("clears voted suggestions for a specific room and user", () => {
+    saveVotedSuggestionId("KTQH", 1, 101);
+    saveVotedSuggestionId("OTHER", 2, 202);
+
+    clearVotedSuggestionIds("KTQH", 1);
+    expect(loadVotedSuggestionIds("KTQH", 1)).toEqual([]);
+    expect(loadVotedSuggestionIds("OTHER", 2)).toEqual([202]);
   });
 });

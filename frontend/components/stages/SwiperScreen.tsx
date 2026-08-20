@@ -10,6 +10,7 @@ import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { useSession } from "@/context/SessionContext";
 import { useKeyboardSwipe } from "@/hooks/useKeyboardSwipe";
 import { playSwipePass, playSwipeLike, playSwipeSuperlike } from "@/lib/audio/sounds";
+import { saveVotedSuggestionId, loadVotedSuggestionIds } from "@/lib/storage/sessionStorage";
 import { cn } from "@/lib/utils";
 import type { MovieSuggestionResponse, VoteType, MovieDto } from "@/types";
 
@@ -30,7 +31,15 @@ export function SwiperScreen({
     castSwipeVote,
   } = useSession();
 
-  const [currentIndex, setCurrentIndex] = React.useState<number>(0);
+  const roomCode = session?.roomCode || "";
+  const userId = currentUser?.id || 0;
+
+  const [currentIndex, setCurrentIndex] = React.useState<number>(() => {
+    if (!roomCode || !userId || !movieDeck.length) return 0;
+    const votedIds = new Set(loadVotedSuggestionIds(roomCode, userId));
+    const firstUnvotedIndex = movieDeck.findIndex((m) => !votedIds.has(m.id));
+    return firstUnvotedIndex === -1 ? movieDeck.length : firstUnvotedIndex;
+  });
   const [exitDirection, setExitDirection] = React.useState<VoteType | null>(null);
   const [selectedMovieForModal, setSelectedMovieForModal] = React.useState<MovieSuggestionResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
@@ -69,6 +78,9 @@ export function SwiperScreen({
       setExitDirection(voteType);
 
       castSwipeVote(currentMovie.id, voteType);
+      if (roomCode && userId) {
+        saveVotedSuggestionId(roomCode, userId, currentMovie.id);
+      }
 
       if (animationDurationMs === 0) {
         setCurrentIndex((prev) => prev + 1);
@@ -82,7 +94,7 @@ export function SwiperScreen({
         }, animationDurationMs);
       }
     },
-    [isFinished, currentMovie, isProcessingVote, castSwipeVote, animationDurationMs]
+    [isFinished, currentMovie, isProcessingVote, castSwipeVote, roomCode, userId, animationDurationMs]
   );
 
   const handleOpenDetails = React.useCallback((movie: MovieSuggestionResponse) => {
