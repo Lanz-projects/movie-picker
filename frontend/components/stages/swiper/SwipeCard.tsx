@@ -32,6 +32,16 @@ export const SwipeCard = React.memo(function SwipeCard({
 
   const cardRef = React.useRef<HTMLDivElement>(null);
   const startPosRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const pendingOffsetRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const rafIdRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   const rawPosterUrl = movie.posterPath
     ? `https://image.tmdb.org/t/p/w780${movie.posterPath}`
@@ -48,6 +58,7 @@ export const SwipeCard = React.memo(function SwipeCard({
 
     setIsDragging(true);
     startPosRef.current = { x: e.clientX, y: e.clientY };
+    pendingOffsetRef.current = { x: 0, y: 0 };
     if (typeof cardRef.current?.setPointerCapture === "function") {
       try {
         cardRef.current.setPointerCapture(e.pointerId);
@@ -62,11 +73,23 @@ export const SwipeCard = React.memo(function SwipeCard({
 
     const deltaX = e.clientX - startPosRef.current.x;
     const deltaY = e.clientY - startPosRef.current.y;
-    setOffset({ x: deltaX, y: deltaY });
+    pendingOffsetRef.current = { x: deltaX, y: deltaY };
+
+    if (rafIdRef.current === null) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        setOffset(pendingOffsetRef.current);
+        rafIdRef.current = null;
+      });
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging || !isTop) return;
+
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
 
     setIsDragging(false);
     if (typeof cardRef.current?.releasePointerCapture === "function") {
@@ -77,7 +100,7 @@ export const SwipeCard = React.memo(function SwipeCard({
       }
     }
 
-    const { x: deltaX, y: deltaY } = offset;
+    const { x: deltaX, y: deltaY } = pendingOffsetRef.current;
     const SWIPE_X_THRESHOLD = 90;
     const SWIPE_Y_THRESHOLD = -80;
 
@@ -88,13 +111,19 @@ export const SwipeCard = React.memo(function SwipeCard({
     } else if (deltaX < -SWIPE_X_THRESHOLD) {
       onSwipe?.("PASS");
     } else {
+      pendingOffsetRef.current = { x: 0, y: 0 };
       setOffset({ x: 0, y: 0 });
     }
   };
 
   const handlePointerCancel = () => {
     if (!isTop) return;
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
     setIsDragging(false);
+    pendingOffsetRef.current = { x: 0, y: 0 };
     setOffset({ x: 0, y: 0 });
   };
 
