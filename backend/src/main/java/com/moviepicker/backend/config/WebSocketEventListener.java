@@ -1,20 +1,21 @@
 package com.moviepicker.backend.config;
 
+import java.time.Instant;
+import java.util.Map;
+
+import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
 import com.moviepicker.backend.dto.LeaveSessionRequest;
 import com.moviepicker.backend.exception.ResourceNotFoundException;
 import com.moviepicker.backend.service.SessionService;
 import com.moviepicker.backend.service.WebSocketPresenceService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -23,8 +24,7 @@ public class WebSocketEventListener {
 
     private final SessionService sessionService;
     private final WebSocketPresenceService presenceService;
-
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final TaskScheduler taskScheduler;
 
     private static final long RECONNECT_GRACE_PERIOD_SECONDS = 5;
 
@@ -47,7 +47,7 @@ public class WebSocketEventListener {
             log.info("WebSocket disconnected for user '{}' (id={}) in room '{}'. Starting {}s reconnect grace period...",
                     displayName, userId, roomCode, RECONNECT_GRACE_PERIOD_SECONDS);
 
-            scheduler.schedule(() -> {
+            taskScheduler.schedule(() -> {
                 try {
                     if (!presenceService.isUserConnected(roomCode, userId)) {
                         log.info("User '{}' (id={}) did not reconnect within grace period. Removing from room '{}'...",
@@ -65,7 +65,7 @@ public class WebSocketEventListener {
                 } catch (Exception e) {
                     log.warn("Error cleaning up departed user on grace period expiry: {}", e.getMessage());
                 }
-            }, RECONNECT_GRACE_PERIOD_SECONDS, TimeUnit.SECONDS);
+            }, Instant.now().plusSeconds(RECONNECT_GRACE_PERIOD_SECONDS));
         }
     }
 }

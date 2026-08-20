@@ -1,11 +1,7 @@
 package com.moviepicker.backend.controller;
 
-import com.moviepicker.backend.dto.*;
-import com.moviepicker.backend.exception.ResourceNotFoundException;
-import com.moviepicker.backend.model.Session;
-import com.moviepicker.backend.repository.SessionRepository;
-import com.moviepicker.backend.service.ConsensusService;
-import com.moviepicker.backend.service.RoomEventPublisher;
+import com.moviepicker.backend.dto.CastVoteRequest;
+import com.moviepicker.backend.dto.VoteMessageDto;
 import com.moviepicker.backend.service.VoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +16,11 @@ import org.springframework.stereotype.Controller;
 public class VoteMessageController {
 
     private final VoteService voteService;
-    private final ConsensusService consensusService;
-    private final SessionRepository sessionRepository;
-    private final RoomEventPublisher roomEventPublisher;
 
     @MessageMapping("/vote")
     public void handleVote(@Valid @Payload VoteMessageDto message) {
         log.info("Received WebSocket vote message for roomCode='{}', user={}, movie={}",
                 message.getRoomCode(), message.getUserId(), message.getMovieSuggestionId());
-
-        Session session = sessionRepository.findByRoomCode(message.getRoomCode().trim())
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with room code: " + message.getRoomCode()));
 
         CastVoteRequest castRequest = CastVoteRequest.builder()
                 .userId(message.getUserId())
@@ -38,39 +28,6 @@ public class VoteMessageController {
                 .voteType(message.getVoteType())
                 .build();
 
-        VoteResponse voteResponse = voteService.castVote(session.getId(), castRequest);
-        VotingProgressResponse progress = voteService.getVotingProgress(session.getId());
-
-        RoomEventType eventType = RoomEventType.VOTE_CAST;
-        if (progress.isAllUsersCompleted()) {
-            eventType = RoomEventType.ALL_VOTING_COMPLETED;
-        } else {
-            boolean userCompleted = progress.getUsers().stream()
-                    .filter(u -> u.getUserId().equals(message.getUserId()))
-                    .anyMatch(UserVotingProgressDto::isCompleted);
-            if (userCompleted) {
-                eventType = RoomEventType.USER_COMPLETED;
-            }
-        }
-
-        RoomProgressEvent event = RoomProgressEvent.builder()
-                .eventType(eventType)
-                .roomCode(message.getRoomCode().trim())
-                .userId(voteResponse.getUserId())
-                .userDisplayName(voteResponse.getUserDisplayName())
-                .movieSuggestionId(voteResponse.getMovieSuggestionId())
-                .tmdbId(voteResponse.getTmdbId())
-                .movieTitle(voteResponse.getMovieTitle())
-                .voteType(voteResponse.getVoteType())
-                .progress(progress)
-                .build();
-
-        roomEventPublisher.publishVoteProgress(message.getRoomCode(), event);
-
-        // If all users finished voting, calculate results and broadcast winner to /topic/room/{roomCode}/results
-        if (progress.isAllUsersCompleted()) {
-            SessionResultsResponse results = consensusService.calculateResults(session.getId());
-            roomEventPublisher.publishResults(message.getRoomCode(), results);
-        }
+        voteService.castVoteAndBroadcastByRoomCode(message.getRoomCode().trim(), castRequest);
     }
 }

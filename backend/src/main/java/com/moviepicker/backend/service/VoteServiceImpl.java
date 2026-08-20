@@ -1,6 +1,9 @@
 package com.moviepicker.backend.service;
 
 import com.moviepicker.backend.dto.CastVoteRequest;
+import com.moviepicker.backend.dto.RoomEventType;
+import com.moviepicker.backend.dto.RoomProgressEvent;
+import com.moviepicker.backend.dto.SessionResultsResponse;
 import com.moviepicker.backend.dto.UserVotingProgressDto;
 import com.moviepicker.backend.dto.VoteResponse;
 import com.moviepicker.backend.dto.VotingProgressResponse;
@@ -29,6 +32,58 @@ public class VoteServiceImpl implements VoteService {
     private final UserRepository userRepository;
     private final MovieSuggestionRepository movieSuggestionRepository;
     private final VoteRepository voteRepository;
+    private final ConsensusService consensusService;
+    private final RoomEventPublisher roomEventPublisher;
+
+    @Override
+    @Transactional
+    public VoteResponse castVoteAndBroadcast(Long sessionId, CastVoteRequest request) {
+        VoteResponse response = castVote(sessionId, request);
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
+        VotingProgressResponse progress = getVotingProgress(sessionId);
+
+        RoomEventType eventType = RoomEventType.VOTE_CAST;
+        if (progress.isAllUsersCompleted()) {
+            eventType = RoomEventType.ALL_VOTING_COMPLETED;
+        } else {
+            boolean userCompleted = progress.getUsers().stream()
+                    .filter(u -> u.getUserId().equals(request.getUserId()))
+                    .anyMatch(UserVotingProgressDto::isCompleted);
+            if (userCompleted) {
+                eventType = RoomEventType.USER_COMPLETED;
+            }
+        }
+
+        RoomProgressEvent event = RoomProgressEvent.builder()
+                .eventType(eventType)
+                .roomCode(session.getRoomCode())
+                .userId(response.getUserId())
+                .userDisplayName(response.getUserDisplayName())
+                .movieSuggestionId(response.getMovieSuggestionId())
+                .tmdbId(response.getTmdbId())
+                .movieTitle(response.getMovieTitle())
+                .voteType(response.getVoteType())
+                .progress(progress)
+                .build();
+
+        roomEventPublisher.publishVoteProgress(session.getRoomCode(), event);
+
+        if (progress.isAllUsersCompleted()) {
+            SessionResultsResponse results = consensusService.calculateResults(session.getId());
+            roomEventPublisher.publishResults(session.getRoomCode(), results);
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public VoteResponse castVoteAndBroadcastByRoomCode(String roomCode, CastVoteRequest request) {
+        Session session = sessionRepository.findByRoomCode(roomCode.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with room code: " + roomCode));
+        return castVoteAndBroadcast(session.getId(), request);
+    }
 
     @Override
     @Transactional

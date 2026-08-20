@@ -78,17 +78,7 @@ public class VoteControllerTest {
                 .status(com.moviepicker.backend.model.SessionStatus.VOTING)
                 .build();
 
-        when(voteService.castVote(eq(1L), any(CastVoteRequest.class))).thenReturn(voteResponse);
-        when(sessionRepository.findById(1L)).thenReturn(java.util.Optional.of(sampleSession));
-        when(voteService.getVotingProgress(1L)).thenReturn(VotingProgressResponse.builder()
-                .sessionId(1L)
-                .roomCode("SWIPE1")
-                .totalMovies(1)
-                .totalUsers(1)
-                .completedUserCount(1)
-                .allUsersCompleted(true)
-                .users(List.of())
-                .build());
+        when(voteService.castVoteAndBroadcast(eq(1L), any(CastVoteRequest.class))).thenReturn(voteResponse);
 
         mockMvc.perform(post("/api/sessions/1/votes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +98,7 @@ public class VoteControllerTest {
                 .voteType(VoteType.YES)
                 .build();
 
-        when(voteService.castVote(eq(1L), any(CastVoteRequest.class)))
+        when(voteService.castVoteAndBroadcast(eq(1L), any(CastVoteRequest.class)))
                 .thenThrow(new DuplicateVoteException("User has already voted on this movie"));
 
         mockMvc.perform(post("/api/sessions/1/votes")

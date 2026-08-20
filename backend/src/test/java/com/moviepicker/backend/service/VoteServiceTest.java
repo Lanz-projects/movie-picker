@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
@@ -47,6 +48,12 @@ public class VoteServiceTest {
 
     @Mock
     private VoteRepository voteRepository;
+
+    @Mock
+    private ConsensusService consensusService;
+
+    @Mock
+    private RoomEventPublisher roomEventPublisher;
 
     @InjectMocks
     private VoteServiceImpl voteService;
@@ -208,5 +215,40 @@ public class VoteServiceTest {
         assertThat(progress.getUsers()).hasSize(2);
         assertThat(progress.getUsers().get(0).isCompleted()).isTrue();
         assertThat(progress.getUsers().get(1).isCompleted()).isFalse();
+    }
+
+    @Test
+    public void testCastVoteAndBroadcast_AllUsersCompleted_CalculatesResults() {
+        CastVoteRequest request = CastVoteRequest.builder()
+                .userId(10L)
+                .movieSuggestionId(100L)
+                .voteType(VoteType.YES)
+                .build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(movieSuggestionRepository.findById(100L)).thenReturn(Optional.of(movieSuggestion));
+        when(voteRepository.existsByUserIdAndMovieSuggestionId(10L, 100L)).thenReturn(false);
+
+        Vote savedVote = Vote.builder()
+                .id(500L)
+                .session(session)
+                .user(user)
+                .movieSuggestion(movieSuggestion)
+                .voteType(VoteType.YES)
+                .votedAt(LocalDateTime.now())
+                .build();
+
+        when(voteRepository.save(any(Vote.class))).thenReturn(savedVote);
+        when(movieSuggestionRepository.findBySessionId(1L)).thenReturn(List.of(movieSuggestion));
+        when(userRepository.findBySessionId(1L)).thenReturn(List.of(user));
+        when(voteRepository.countVotesGroupedByUserId(1L)).thenReturn(List.<Object[]>of(new Object[]{10L, 1L}));
+
+        VoteResponse response = voteService.castVoteAndBroadcast(1L, request);
+
+        assertThat(response).isNotNull();
+        verify(roomEventPublisher).publishVoteProgress(eq("SWIPE1"), any());
+        verify(consensusService).calculateResults(1L);
+        verify(roomEventPublisher).publishResults(eq("SWIPE1"), any());
     }
 }
