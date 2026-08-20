@@ -24,16 +24,13 @@ export const MovieCard = React.memo(function MovieCard({
   disabled = false,
   className,
 }: MovieCardProps) {
-  const [imageError, setImageError] = React.useState(false);
+  const [failedPosterUrl, setFailedPosterUrl] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setImageError(false);
-  }, [movie.posterPath, movie.tmdbId]);
+  const rawPosterUrl = movie.posterPath
+    ? `https://image.tmdb.org/t/p/w500${movie.posterPath}`
+    : null;
 
-  const posterUrl =
-    !imageError && movie.posterPath
-      ? `https://image.tmdb.org/t/p/w500${movie.posterPath}`
-      : null;
+  const posterUrl = rawPosterUrl && failedPosterUrl !== rawPosterUrl ? rawPosterUrl : null;
 
   const handleCardClick = () => {
     onSelectMovie?.(movie);
@@ -82,9 +79,10 @@ export const MovieCard = React.memo(function MovieCard({
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-bg-elevated flex items-center justify-center">
         {posterUrl ? (
           <img
+            key={posterUrl}
             src={posterUrl}
             alt={movie.title}
-            onError={() => setImageError(true)}
+            onError={() => setFailedPosterUrl(rawPosterUrl)}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />

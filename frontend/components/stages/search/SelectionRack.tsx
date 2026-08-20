@@ -42,17 +42,18 @@ export const SelectionRack = React.memo(function SelectionRack({
   className,
 }: SelectionRackProps) {
   const [isExpanded, setIsExpanded] = React.useState<boolean>(defaultExpanded);
+  const [prevCount, setPrevCount] = React.useState<number>(selectedMovies.length);
 
   const count = selectedMovies.length;
   const emptySlotsCount = Math.max(0, maxSuggestions - count);
 
-  const prevCountRef = React.useRef(count);
-  React.useEffect(() => {
-    if (count > prevCountRef.current && !isExpanded) {
+  // Auto-expand when a new movie is added without an asynchronous useEffect re-render cycle
+  if (count !== prevCount) {
+    setPrevCount(count);
+    if (count > prevCount && !isExpanded) {
       setIsExpanded(true);
     }
-    prevCountRef.current = count;
-  }, [count, isExpanded]);
+  }
 
   const startVotingLabel = React.useMemo(() => {
     if (readyCount !== undefined && totalUsersCount !== undefined && totalUsersCount > 0) {

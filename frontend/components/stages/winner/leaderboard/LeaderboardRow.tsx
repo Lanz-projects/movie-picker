@@ -22,16 +22,13 @@ export const LeaderboardRow = React.memo(function LeaderboardRow({
   onOpenDetails,
   className,
 }: LeaderboardRowProps) {
-  const [imageError, setImageError] = React.useState(false);
+  const [failedPosterUrl, setFailedPosterUrl] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setImageError(false);
-  }, [movie.posterPath, movie.tmdbId]);
+  const rawPosterUrl = movie.posterPath
+    ? `https://image.tmdb.org/t/p/w185${movie.posterPath}`
+    : null;
 
-  const posterUrl =
-    !imageError && movie.posterPath
-      ? `https://image.tmdb.org/t/p/w185${movie.posterPath}`
-      : null;
+  const posterUrl = rawPosterUrl && failedPosterUrl !== rawPosterUrl ? rawPosterUrl : null;
 
   const matchPct = Math.round(movie.matchPercentage ?? 0);
 
@@ -50,12 +47,13 @@ export const LeaderboardRow = React.memo(function LeaderboardRow({
         <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-bg-card shadow-sm">
           {posterUrl ? (
             <Image
+              key={posterUrl}
               src={posterUrl}
               alt={movie.title}
               fill
               sizes="40px"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              onError={() => setImageError(true)}
+              onError={() => setFailedPosterUrl(rawPosterUrl)}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-text-muted">

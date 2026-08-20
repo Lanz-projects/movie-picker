@@ -42,12 +42,11 @@ export const Header = React.memo(function Header({
   onLeaveRoom,
 }: HeaderProps) {
   const [copied, setCopied] = React.useState(false);
-  const [muted, setMuted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMuted(isSoundMuted());
-    return subscribeSoundMuted((nextMuted) => setMuted(nextMuted));
-  }, []);
+  const muted = React.useSyncExternalStore(
+    subscribeSoundMuted,
+    isSoundMuted,
+    () => false
+  );
 
   const handleCopyCode = async () => {
     if (!roomCode) return;

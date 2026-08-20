@@ -65,23 +65,28 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [isStartingVoting, setIsStartingVoting] = React.useState<boolean>(false);
 
-  const selectedMovieIds = React.useMemo(
-    () => myDeckSelection.map((m) => m.tmdbId),
+  const selectedMovieIdSet = React.useMemo(
+    () => new Set(myDeckSelection.map((m) => m.tmdbId)),
     [myDeckSelection]
+  );
+
+  const selectedMovieIds = React.useMemo(
+    () => Array.from(selectedMovieIdSet),
+    [selectedMovieIdSet]
   );
 
   const isDeckFull = myDeckSelection.length >= maxSuggestions;
 
   const handleToggleDeck = React.useCallback(
     (movie: MovieDto) => {
-      const isAlreadyInDeck = selectedMovieIds.includes(movie.tmdbId);
+      const isAlreadyInDeck = selectedMovieIdSet.has(movie.tmdbId);
       if (isAlreadyInDeck) {
         removeFromDeck(movie.tmdbId);
       } else {
         addToDeck(movie);
       }
     },
-    [selectedMovieIds, removeFromDeck, addToDeck]
+    [selectedMovieIdSet, removeFromDeck, addToDeck]
   );
 
   const handleSelectMovie = React.useCallback((movie: MovieDto | MovieSubmissionDto) => {

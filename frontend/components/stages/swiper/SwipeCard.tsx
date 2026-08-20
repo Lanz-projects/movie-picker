@@ -26,21 +26,18 @@ export const SwipeCard = React.memo(function SwipeCard({
   exitDirection = null,
   className,
 }: SwipeCardProps) {
-  const [imageError, setImageError] = React.useState(false);
+  const [failedPosterUrl, setFailedPosterUrl] = React.useState<string | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [offset, setOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const cardRef = React.useRef<HTMLDivElement>(null);
   const startPosRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  React.useEffect(() => {
-    setImageError(false);
-  }, [movie.posterPath, movie.tmdbId]);
+  const rawPosterUrl = movie.posterPath
+    ? `https://image.tmdb.org/t/p/w780${movie.posterPath}`
+    : null;
 
-  const posterUrl =
-    !imageError && movie.posterPath
-      ? `https://image.tmdb.org/t/p/w780${movie.posterPath}`
-      : null;
+  const posterUrl = rawPosterUrl && failedPosterUrl !== rawPosterUrl ? rawPosterUrl : null;
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isTop || exitDirection) return;
@@ -178,9 +175,10 @@ export const SwipeCard = React.memo(function SwipeCard({
       <div className="relative h-full w-full overflow-hidden bg-bg-elevated">
         {posterUrl ? (
           <img
+            key={posterUrl}
             src={posterUrl}
             alt={movie.title}
-            onError={() => setImageError(true)}
+            onError={() => setFailedPosterUrl(rawPosterUrl)}
             className="h-full w-full object-cover pointer-events-none"
             draggable={false}
           />

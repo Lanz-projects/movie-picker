@@ -99,19 +99,20 @@ export function SearchFilterModal({
   filters,
   onApplyFilters,
 }: SearchFilterModalProps) {
+  const [prevFilters, setPrevFilters] = React.useState<FilterState>(filters);
   const [draft, setDraft] = React.useState<FilterState>(filters);
 
-  // Sync draft when opened
-  React.useEffect(() => {
-    if (isOpen) {
-      setDraft(filters);
-    }
-  }, [isOpen, filters]);
+  // Sync draft when parent filters change without extra render cycle
+  if (filters !== prevFilters) {
+    setPrevFilters(filters);
+    setDraft(filters);
+  }
 
   // Handle escape key
   React.useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         onClose();
       }
     };
