@@ -22,6 +22,10 @@ public interface MovieSuggestionRepository extends JpaRepository<MovieSuggestion
     @Query("UPDATE MovieSuggestion m SET m.user = null WHERE m.user.id = :userId")
     void disassociateUserSuggestions(@Param("userId") Long userId);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM MovieSuggestion m WHERE m.session.id = :sessionId")
+    void deleteBySessionId(@Param("sessionId") Long sessionId);
+
     List<MovieSuggestion> findByUserId(Long userId);
     long countBySessionIdAndUserId(Long sessionId, Long userId);
     boolean existsBySessionIdAndTmdbId(Long sessionId, Long tmdbId);

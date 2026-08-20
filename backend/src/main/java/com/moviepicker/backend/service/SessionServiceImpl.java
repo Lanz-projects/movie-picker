@@ -131,6 +131,12 @@ public class SessionServiceImpl implements SessionService {
         Session session = findSessionByRoomCodeOrThrow(roomCode);
         session.setStatus(request.getStatus());
 
+        // When starting a new nomination round or resetting to lobby, purge previous round deck and votes
+        if (request.getStatus() == SessionStatus.SUGGESTING || request.getStatus() == SessionStatus.WAITING) {
+            voteRepository.deleteBySessionId(session.getId());
+            movieSuggestionRepository.deleteBySessionId(session.getId());
+        }
+
         if (request.getStatus() == SessionStatus.WAITING && session.getRoundKickedDisplayNames() != null) {
             session.getRoundKickedDisplayNames().clear();
         }

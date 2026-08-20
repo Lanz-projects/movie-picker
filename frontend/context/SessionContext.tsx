@@ -325,8 +325,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (event.sessionStatus === "SUGGESTING") {
+          setMovieDeck([]);
+          clearMyDeckSelection();
           setHasSubmittedDeck(false);
           setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+          setProgress(null);
+          setResults(null);
           setStage("SEARCH");
         } else if (event.sessionStatus === "VOTING") {
           if (session?.id) {
@@ -542,8 +546,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       const updated = await apiUpdateStatus(session.roomCode, "SUGGESTING");
       setSession(updated);
+      setMovieDeck([]);
+      clearMyDeckSelection();
       setHasSubmittedDeck(false);
       setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+      setProgress(null);
+      setResults(null);
       setStage("SEARCH");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to start movie search.";
@@ -552,7 +560,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session, clearMyDeckSelection]);
 
   const submitMyDeck = React.useCallback(async () => {
     if (!session || !currentUser) return;

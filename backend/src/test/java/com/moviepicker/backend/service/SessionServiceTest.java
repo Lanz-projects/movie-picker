@@ -235,6 +235,46 @@ public class SessionServiceTest {
     }
 
     @Test
+    public void testUpdateSessionStatus_ToSuggesting_PurgesPreviousRoundVotesAndSuggestions() {
+        sampleSession.setStatus(SessionStatus.COMPLETED);
+        UpdateSessionStatusRequest request = UpdateSessionStatusRequest.builder()
+                .status(SessionStatus.SUGGESTING)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(sessionRepository.save(any(Session.class))).thenReturn(sampleSession);
+        when(userRepository.findBySessionId(1L)).thenReturn(List.of(hostUser));
+
+        SessionResponse response = sessionService.updateSessionStatus("ROOM12", request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SessionStatus.SUGGESTING);
+        verify(voteRepository).deleteBySessionId(1L);
+        verify(movieSuggestionRepository).deleteBySessionId(1L);
+    }
+
+    @Test
+    public void testUpdateSessionStatus_ToWaiting_PurgesPreviousRoundVotesAndSuggestions() {
+        sampleSession.setStatus(SessionStatus.COMPLETED);
+        sampleSession.getRoundKickedDisplayNames().add("bob");
+        UpdateSessionStatusRequest request = UpdateSessionStatusRequest.builder()
+                .status(SessionStatus.WAITING)
+                .build();
+
+        when(sessionRepository.findByRoomCode("ROOM12")).thenReturn(Optional.of(sampleSession));
+        when(sessionRepository.save(any(Session.class))).thenReturn(sampleSession);
+        when(userRepository.findBySessionId(1L)).thenReturn(List.of(hostUser));
+
+        SessionResponse response = sessionService.updateSessionStatus("ROOM12", request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SessionStatus.WAITING);
+        assertThat(sampleSession.getRoundKickedDisplayNames()).isEmpty();
+        verify(voteRepository).deleteBySessionId(1L);
+        verify(movieSuggestionRepository).deleteBySessionId(1L);
+    }
+
+    @Test
     public void testLeaveSession_NonHostLeaves() {
         User bobUser = User.builder()
                 .id(11L)
