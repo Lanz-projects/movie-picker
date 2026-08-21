@@ -154,8 +154,10 @@ public class VoteWebSocketTest {
         assertThat(receivedEvent.getProgress().isAllUsersCompleted()).isTrue();
         assertThat(receivedEvent.getProgress().getCompletedUserCount()).isEqualTo(1);
 
-        // Verify vote is saved in DB
-        assertThat(voteRepository.existsByUserIdAndMovieSuggestionId(testUser.getId(), testMovie.getId())).isTrue();
+        // Verify vote is saved in DB (wait for async transaction completion)
+        org.awaitility.Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(voteRepository.existsByUserIdAndMovieSuggestionId(testUser.getId(), testMovie.getId())).isTrue());
 
         stompSession.disconnect();
     }
