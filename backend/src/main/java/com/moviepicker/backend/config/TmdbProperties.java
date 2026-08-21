@@ -12,4 +12,6 @@ public class TmdbProperties {
     private String baseUrl = "https://api.themoviedb.org/3";
     private String accessToken;
     private String key;
+    private int maxRetries = 2;
+    private long retryBackoffMs = 200;
 }

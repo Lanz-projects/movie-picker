@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriBuilder;
+
+import java.util.function.Supplier;
 
 @Slf4j
 @Component
@@ -24,13 +27,23 @@ public class TmdbClientImpl implements TmdbClient {
     @Autowired
     public TmdbClientImpl(RestClient.Builder restClientBuilder, TmdbProperties properties) {
         this.properties = properties;
-        this.restClient = restClientBuilder
+
+        RestClient.Builder builder = restClientBuilder
                 .baseUrl(properties.getBaseUrl())
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                    String errorBody = new String(response.getBody().readAllBytes());
+                    log.error("TMDB API returned error status: {} - {}", response.getStatusCode(), errorBody);
+                    throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
+                });
+
+        if (StringUtils.hasText(properties.getAccessToken())) {
+            builder.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getAccessToken().trim());
+        }
+
+        this.restClient = builder.build();
     }
 
-    // Constructor for testing with pre-built RestClient
     public TmdbClientImpl(RestClient restClient, TmdbProperties properties) {
         this.restClient = restClient;
         this.properties = properties;
@@ -42,35 +55,14 @@ public class TmdbClientImpl implements TmdbClient {
             return TmdbSearchResponse.builder().page(page).build();
         }
 
-        try {
-            return restClient.get()
-                    .uri(uriBuilder -> {
-                        uriBuilder.path("/search/movie")
-                                .queryParam("query", query)
-                                .queryParam("page", Math.max(1, page))
-                                .queryParam("include_adult", false);
-
-                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
-                            uriBuilder.queryParam("api_key", properties.getKey());
-                        }
-                        return uriBuilder.build();
-                    })
-                    .headers(headers -> {
-                        if (StringUtils.hasText(properties.getAccessToken())) {
-                            headers.setBearerAuth(properties.getAccessToken());
-                        }
-                    })
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, (request, response) -> {
-                        String errorBody = new String(response.getBody().readAllBytes());
-                        log.error("TMDB API returned error status: {} - {}", response.getStatusCode(), errorBody);
-                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
-                    })
-                    .body(TmdbSearchResponse.class);
-        } catch (RestClientException e) {
-            log.error("Error communicating with TMDB API: {}", e.getMessage(), e);
-            throw new TmdbApiException("Failed to communicate with TMDB API: " + e.getMessage(), e);
-        }
+        return executeWithRetry(() -> restClient.get()
+                .uri(builder -> applyAuthParams(builder.path("/search/movie")
+                        .queryParam("query", query)
+                        .queryParam("page", Math.max(1, page))
+                        .queryParam("include_adult", false))
+                        .build())
+                .retrieve()
+                .body(TmdbSearchResponse.class), "searchMovies");
     }
 
     @Override
@@ -79,65 +71,23 @@ public class TmdbClientImpl implements TmdbClient {
             return null;
         }
 
-        try {
-            return restClient.get()
-                    .uri(uriBuilder -> {
-                        uriBuilder.path("/movie/{id}")
-                                .queryParam("append_to_response", "credits,watch/providers,release_dates");
-
-                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
-                            uriBuilder.queryParam("api_key", properties.getKey());
-                        }
-                        return uriBuilder.build(tmdbId);
-                    })
-                    .headers(headers -> {
-                        if (StringUtils.hasText(properties.getAccessToken())) {
-                            headers.setBearerAuth(properties.getAccessToken());
-                        }
-                    })
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, (request, response) -> {
-                        String errorBody = new String(response.getBody().readAllBytes());
-                        log.error("TMDB API returned error status for movie id {}: {} - {}", tmdbId, response.getStatusCode(), errorBody);
-                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
-                    })
-                    .body(TmdbMovieDetailsResponse.class);
-        } catch (RestClientException e) {
-            log.error("Error fetching details for movie id {} from TMDB: {}", tmdbId, e.getMessage(), e);
-            throw new TmdbApiException("Failed to fetch movie details from TMDB: " + e.getMessage(), e);
-        }
+        return executeWithRetry(() -> restClient.get()
+                .uri(builder -> applyAuthParams(builder.path("/movie/{id}")
+                        .queryParam("append_to_response", "credits,watch/providers,release_dates"))
+                        .build(tmdbId))
+                .retrieve()
+                .body(TmdbMovieDetailsResponse.class), "getMovieDetails");
     }
 
     @Override
     public TmdbSearchResponse getTrendingMovies(int page) {
-        try {
-            return restClient.get()
-                    .uri(uriBuilder -> {
-                        uriBuilder.path("/trending/movie/week")
-                                .queryParam("page", Math.max(1, page))
-                                .queryParam("language", "en-US");
-
-                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
-                            uriBuilder.queryParam("api_key", properties.getKey());
-                        }
-                        return uriBuilder.build();
-                    })
-                    .headers(headers -> {
-                        if (StringUtils.hasText(properties.getAccessToken())) {
-                            headers.setBearerAuth(properties.getAccessToken());
-                        }
-                    })
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, (request, response) -> {
-                        String errorBody = new String(response.getBody().readAllBytes());
-                        log.error("TMDB API returned error status for trending movies: {} - {}", response.getStatusCode(), errorBody);
-                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
-                    })
-                    .body(TmdbSearchResponse.class);
-        } catch (RestClientException e) {
-            log.error("Error fetching trending movies from TMDB: {}", e.getMessage(), e);
-            throw new TmdbApiException("Failed to fetch trending movies from TMDB: " + e.getMessage(), e);
-        }
+        return executeWithRetry(() -> restClient.get()
+                .uri(builder -> applyAuthParams(builder.path("/trending/movie/week")
+                        .queryParam("page", Math.max(1, page))
+                        .queryParam("language", "en-US"))
+                        .build())
+                .retrieve()
+                .body(TmdbSearchResponse.class), "getTrendingMovies");
     }
 
     @Override
@@ -152,69 +102,87 @@ public class TmdbClientImpl implements TmdbClient {
             String language,
             String sortBy,
             int page) {
-        try {
-            return restClient.get()
-                    .uri(uriBuilder -> {
-                        uriBuilder.path("/discover/movie")
-                                .queryParam("page", Math.max(1, page))
-                                .queryParam("include_adult", false)
-                                .queryParam("language", "en-US")
-                                .queryParam("sort_by", StringUtils.hasText(sortBy) ? sortBy : "popularity.desc");
 
-                        if (genreId != null) {
-                            uriBuilder.queryParam("with_genres", genreId);
-                        }
+        return executeWithRetry(() -> restClient.get()
+                .uri(builder -> {
+                    builder.path("/discover/movie")
+                            .queryParam("page", Math.max(1, page))
+                            .queryParam("include_adult", false)
+                            .queryParam("language", "en-US")
+                            .queryParam("sort_by", StringUtils.hasText(sortBy) ? sortBy : "popularity.desc");
 
-                        if (providerId != null) {
-                            uriBuilder.queryParam("with_watch_providers", providerId);
-                            uriBuilder.queryParam("watch_region", "US");
-                        }
+                    if (genreId != null) builder.queryParam("with_genres", genreId);
+                    if (providerId != null) {
+                        builder.queryParam("with_watch_providers", providerId);
+                        builder.queryParam("watch_region", "US");
+                    }
+                    if (StringUtils.hasText(releaseDateGte)) builder.queryParam("primary_release_date.gte", releaseDateGte);
+                    if (StringUtils.hasText(releaseDateLte)) builder.queryParam("primary_release_date.lte", releaseDateLte);
+                    if (minRating != null && minRating > 0) {
+                        builder.queryParam("vote_average.gte", minRating);
+                        builder.queryParam("vote_count.gte", 50);
+                    }
+                    if (minRuntime != null && minRuntime > 0) builder.queryParam("with_runtime.gte", minRuntime);
+                    if (maxRuntime != null && maxRuntime > 0) builder.queryParam("with_runtime.lte", maxRuntime);
+                    if (StringUtils.hasText(language)) builder.queryParam("with_original_language", language);
 
-                        if (StringUtils.hasText(releaseDateGte)) {
-                            uriBuilder.queryParam("primary_release_date.gte", releaseDateGte);
-                        }
+                    return applyAuthParams(builder).build();
+                })
+                .retrieve()
+                .body(TmdbSearchResponse.class), "discoverMovies");
+    }
 
-                        if (StringUtils.hasText(releaseDateLte)) {
-                            uriBuilder.queryParam("primary_release_date.lte", releaseDateLte);
-                        }
+    private UriBuilder applyAuthParams(UriBuilder uriBuilder) {
+        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
+            uriBuilder.queryParam("api_key", properties.getKey());
+        }
+        return uriBuilder;
+    }
 
-                        if (minRating != null && minRating > 0) {
-                            uriBuilder.queryParam("vote_average.gte", minRating);
-                            uriBuilder.queryParam("vote_count.gte", 50);
-                        }
+    private <T> T executeWithRetry(Supplier<T> requestSupplier, String operationName) {
+        int maxRetries = Math.max(0, properties.getMaxRetries());
+        long backoffMs = Math.max(50, properties.getRetryBackoffMs());
 
-                        if (minRuntime != null && minRuntime > 0) {
-                            uriBuilder.queryParam("with_runtime.gte", minRuntime);
-                        }
+        int attempt = 0;
+        while (true) {
+            try {
+                return requestSupplier.get();
+            } catch (TmdbApiException e) {
+                boolean isRetriable = e.getMessage() != null &&
+                        (e.getMessage().contains("429") || e.getMessage().contains("500") ||
+                         e.getMessage().contains("502") || e.getMessage().contains("503") || e.getMessage().contains("504"));
 
-                        if (maxRuntime != null && maxRuntime > 0) {
-                            uriBuilder.queryParam("with_runtime.lte", maxRuntime);
-                        }
-
-                        if (StringUtils.hasText(language)) {
-                            uriBuilder.queryParam("with_original_language", language);
-                        }
-
-                        if (!StringUtils.hasText(properties.getAccessToken()) && StringUtils.hasText(properties.getKey())) {
-                            uriBuilder.queryParam("api_key", properties.getKey());
-                        }
-                        return uriBuilder.build();
-                    })
-                    .headers(headers -> {
-                        if (StringUtils.hasText(properties.getAccessToken())) {
-                            headers.setBearerAuth(properties.getAccessToken());
-                        }
-                    })
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, (request, response) -> {
-                        String errorBody = new String(response.getBody().readAllBytes());
-                        log.error("TMDB API returned error status for discover movies: {} - {}", response.getStatusCode(), errorBody);
-                        throw new TmdbApiException("TMDB API returned status " + response.getStatusCode() + ": " + errorBody);
-                    })
-                    .body(TmdbSearchResponse.class);
-        } catch (RestClientException e) {
-            log.error("Error discovering movies from TMDB: {}", e.getMessage(), e);
-            throw new TmdbApiException("Failed to discover movies from TMDB: " + e.getMessage(), e);
+                if (isRetriable && attempt < maxRetries) {
+                    attempt++;
+                    long delay = backoffMs * (1L << (attempt - 1));
+                    log.warn("TMDB API transient failure on {} (attempt {}/{}). Retrying in {}ms: {}",
+                            operationName, attempt, maxRetries, delay, e.getMessage());
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw e;
+                    }
+                    continue;
+                }
+                throw e;
+            } catch (RestClientException e) {
+                if (attempt < maxRetries) {
+                    attempt++;
+                    long delay = backoffMs * (1L << (attempt - 1));
+                    log.warn("TMDB connection error on {} (attempt {}/{}). Retrying in {}ms: {}",
+                            operationName, attempt, maxRetries, delay, e.getMessage());
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new TmdbApiException("Failed to communicate with TMDB API: " + e.getMessage(), e);
+                    }
+                    continue;
+                }
+                log.error("Error communicating with TMDB API on {}: {}", operationName, e.getMessage(), e);
+                throw new TmdbApiException("Failed to communicate with TMDB API: " + e.getMessage(), e);
+            }
         }
     }
 }
