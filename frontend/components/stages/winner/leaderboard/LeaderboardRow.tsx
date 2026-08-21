@@ -78,12 +78,17 @@ export const LeaderboardRow = React.memo(function LeaderboardRow({
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
             {movie.suggestedBy && (
-              <span className="flex items-center gap-1 text-[11px] text-text-muted">
-                <User className="h-3 w-3 text-brand-indigo" />
-                Suggested by{" "}
-                <span className="font-semibold text-text-main">
+              <span className="inline-flex items-center gap-1 text-[11px] text-text-muted max-w-full flex-wrap">
+                <User className="h-3 w-3 text-brand-indigo shrink-0" />
+                <span>Suggested by</span>
+                <span className="font-semibold text-text-main break-words">
                   {movie.suggestedBy}
                 </span>
+                {movie.nominators && movie.nominators.length > 1 && (
+                  <span className="inline-flex items-center px-1 py-0.2 rounded-full bg-brand-amber/15 text-brand-amber text-[9px] font-bold border border-brand-amber/30 shrink-0 ml-0.5">
+                    🔥 {movie.nominators.length}x
+                  </span>
+                )}
               </span>
             )}
 

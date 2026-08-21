@@ -67,16 +67,30 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
                     movieSuggestionRepository.findExistingTmdbIdsBySessionId(sessionId)
             );
             List<MovieSuggestion> toSave = new ArrayList<>();
+            List<MovieSuggestion> toUpdate = new ArrayList<>();
 
             for (MovieSubmissionDto movieDto : request.getMovies()) {
                 if (existingTmdbIds.contains(movieDto.getTmdbId())) {
-                    log.info("Movie tmdbId={} already exists in session id={}, skipping duplicate", movieDto.getTmdbId(), sessionId);
+                    log.info("Movie tmdbId={} already exists in session id={}, adding user id={} to nominators",
+                            movieDto.getTmdbId(), sessionId, user.getId());
+                    movieSuggestionRepository.findBySessionIdAndTmdbIdWithNominators(sessionId, movieDto.getTmdbId())
+                            .ifPresent(existingSuggestion -> {
+                                if (existingSuggestion.getNominators() == null) {
+                                    existingSuggestion.setNominators(new java.util.HashSet<>());
+                                }
+                                existingSuggestion.getNominators().add(user);
+                                toUpdate.add(existingSuggestion);
+                            });
                     continue;
                 }
+
+                java.util.Set<User> nominatorsSet = new java.util.HashSet<>();
+                nominatorsSet.add(user);
 
                 MovieSuggestion suggestion = MovieSuggestion.builder()
                         .session(session)
                         .user(user)
+                        .nominators(nominatorsSet)
                         .tmdbId(movieDto.getTmdbId())
                         .title(movieDto.getTitle())
                         .overview(movieDto.getOverview())
@@ -89,7 +103,10 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
             }
 
             if (!toSave.isEmpty()) {
-                savedSuggestions = movieSuggestionRepository.saveAll(toSave);
+                savedSuggestions.addAll(movieSuggestionRepository.saveAll(toSave));
+            }
+            if (!toUpdate.isEmpty()) {
+                savedSuggestions.addAll(movieSuggestionRepository.saveAll(toUpdate));
             }
         }
 
@@ -163,11 +180,24 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
     }
 
     private MovieSuggestionResponse mapToResponse(MovieSuggestion suggestion) {
+        List<String> nominatorNames = new ArrayList<>();
+        if (suggestion.getNominators() != null && !suggestion.getNominators().isEmpty()) {
+            nominatorNames = suggestion.getNominators().stream()
+                    .map(User::getDisplayName)
+                    .filter(org.springframework.util.StringUtils::hasText)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+        if (nominatorNames.isEmpty() && suggestion.getUser() != null && org.springframework.util.StringUtils.hasText(suggestion.getUser().getDisplayName())) {
+            nominatorNames = List.of(suggestion.getUser().getDisplayName());
+        }
+
         return MovieSuggestionResponse.builder()
                 .id(suggestion.getId())
                 .tmdbId(suggestion.getTmdbId())
                 .userId(suggestion.getUser() != null ? suggestion.getUser().getId() : null)
                 .userDisplayName(suggestion.getUser() != null ? suggestion.getUser().getDisplayName() : null)
+                .nominators(nominatorNames)
                 .title(suggestion.getTitle())
                 .overview(suggestion.getOverview())
                 .posterPath(suggestion.getPosterPath())

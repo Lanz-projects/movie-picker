@@ -6,6 +6,7 @@ export interface ScoredMovieDto {
   overview: string | null;
   releaseYear?: number | null;
   suggestedBy?: string | null;
+  nominators?: string[];
   score: number;
   yesVotes: number;
   superlikeVotes: number;

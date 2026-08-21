@@ -72,8 +72,9 @@ export interface SubmitMoviesRequest {
 export interface MovieSuggestionResponse {
   id: number;
   tmdbId: number;
-  userId: number;
-  userDisplayName: string;
+  userId?: number | null;
+  userDisplayName?: string | null;
+  nominators?: string[];
   title: string;
   overview: string | null;
   posterPath: string | null;

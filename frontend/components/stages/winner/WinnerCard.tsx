@@ -64,12 +64,17 @@ export const WinnerCard = React.memo(function WinnerCard({
                   </span>
                 )}
                 {winner.suggestedBy && (
-                  <span className="flex items-center gap-1 rounded-md bg-bg-surface px-2 py-0.5 border border-border-subtle text-text-secondary">
-                    <User className="h-3 w-3 text-brand-indigo" />
-                    Suggested by{" "}
-                    <strong className="text-text-main font-bold">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-bg-surface px-2.5 py-1 border border-border-subtle text-xs text-text-secondary max-w-full flex-wrap">
+                    <User className="h-3.5 w-3.5 text-brand-indigo shrink-0" />
+                    <span>Suggested by</span>
+                    <strong className="text-text-main font-bold break-words">
                       {winner.suggestedBy}
                     </strong>
+                    {winner.nominators && winner.nominators.length > 1 && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-brand-amber/15 text-brand-amber text-[10px] font-extrabold border border-brand-amber/30 shrink-0">
+                        🔥 {winner.nominators.length}x Pick
+                      </span>
+                    )}
                   </span>
                 )}
               </div>

@@ -161,4 +161,28 @@ public class ConsensusServiceTest {
                 .isInstanceOf(InvalidSessionStateException.class)
                 .hasMessageContaining("Results are only available for COMPLETED sessions");
     }
+
+    @Test
+    public void testCalculateResults_MultipleNominators_FormatsSuggestedBy() {
+        MovieSuggestion multiNominatedMovie = MovieSuggestion.builder()
+                .id(100L)
+                .session(session)
+                .user(user1)
+                .nominators(new java.util.HashSet<>(List.of(user1, user2)))
+                .tmdbId(550L)
+                .title("Fight Club")
+                .releaseYear(1999)
+                .build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
+        when(movieSuggestionRepository.findBySessionIdWithUser(1L)).thenReturn(List.of(multiNominatedMovie));
+        when(userRepository.findBySessionId(1L)).thenReturn(List.of(user1, user2));
+        when(voteRepository.findBySessionIdWithUserAndMovie(1L)).thenReturn(List.of());
+
+        SessionResultsResponse response = consensusService.calculateResults(1L);
+
+        assertThat(response.getWinner()).isNotNull();
+        assertThat(response.getWinner().getNominators()).containsExactlyInAnyOrder("Alice", "Bob");
+        assertThat(response.getWinner().getSuggestedBy()).contains("Alice").contains("Bob");
+    }
 }

@@ -17,13 +17,13 @@ const mockMovie: MovieSuggestionResponse = {
 };
 
 describe("SwipeCard Component", () => {
-  it("renders movie title, release year, nominator badge, and overview", () => {
+  it("renders movie title, release year, and overview for blind anonymous voting", () => {
     render(<SwipeCard movie={mockMovie} isTop={true} />);
 
     expect(screen.getByRole("article", { name: "Fight Club" })).toBeInTheDocument();
     expect(screen.getByText("Fight Club")).toBeInTheDocument();
     expect(screen.getByText("1999")).toBeInTheDocument();
-    expect(screen.getByText(/Nominated by Alice/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Nominated by/i)).not.toBeInTheDocument();
     expect(screen.getByText(/An insomniac office worker/i)).toBeInTheDocument();
   });
 

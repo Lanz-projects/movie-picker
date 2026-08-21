@@ -3,6 +3,8 @@ package com.moviepicker.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -20,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"session", "user"})
+@ToString(exclude = {"session", "user", "nominators"})
 public class MovieSuggestion {
 
     @Id
@@ -34,6 +36,15 @@ public class MovieSuggestion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "movie_suggestion_nominators",
+        joinColumns = @JoinColumn(name = "movie_suggestion_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Builder.Default
+    private Set<User> nominators = new HashSet<>();
 
     @Column(name = "tmdb_id", nullable = false)
     private Long tmdbId;

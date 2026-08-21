@@ -22,6 +22,10 @@ public class ScoredMovieDto {
     private String overview;
     private Integer releaseYear;
     private String suggestedBy;
+
+    @Builder.Default
+    private List<String> nominators = new ArrayList<>();
+
     private int score;
     private long yesVotes;
     private long superlikeVotes;

@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Film, Info, User } from "lucide-react";
+import { Film, Info } from "lucide-react";
 import { SwipeStamp } from "./SwipeStamp";
-import { Badge } from "@/components/ui/Badge";
 import type { MovieSuggestionResponse, VoteType } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -230,13 +229,6 @@ export const SwipeCard = React.memo(function SwipeCard({
           ) : (
             <span />
           )}
-
-          {movie.userDisplayName ? (
-            <Badge variant="subtle" size="sm" className="gap-1 bg-black/70 backdrop-blur-md border-white/10 text-[10px] sm:text-xs py-0.5">
-              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-brand-indigo" />
-              <span className="truncate max-w-28 sm:max-w-none">Nominated by {movie.userDisplayName}</span>
-            </Badge>
-          ) : null}
         </div>
 
         <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-5 flex flex-col justify-end z-10">

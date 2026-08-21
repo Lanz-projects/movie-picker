@@ -105,4 +105,17 @@ describe("WinnerCard Component", () => {
     expect(handleOpenDetails).toHaveBeenCalledTimes(1);
     expect(handleOpenDetails).toHaveBeenCalledWith(mockUnanimousWinner);
   });
+
+  it("renders multiple nominators and multi-pick badge when multiple users suggested the movie", () => {
+    const multiNominatorWinner: ScoredMovieDto = {
+      ...mockUnanimousWinner,
+      suggestedBy: "Alice & Bob",
+      nominators: ["Alice", "Bob"],
+    };
+
+    render(<WinnerCard winner={multiNominatorWinner} />);
+
+    expect(screen.getByText("Alice & Bob")).toBeInTheDocument();
+    expect(screen.getByText("🔥 2x Pick")).toBeInTheDocument();
+  });
 });

@@ -12,8 +12,11 @@ import java.util.List;
 public interface MovieSuggestionRepository extends JpaRepository<MovieSuggestion, Long> {
     List<MovieSuggestion> findBySessionId(Long sessionId);
 
-    @Query("SELECT m FROM MovieSuggestion m LEFT JOIN FETCH m.user WHERE m.session.id = :sessionId")
+    @Query("SELECT DISTINCT m FROM MovieSuggestion m LEFT JOIN FETCH m.user LEFT JOIN FETCH m.nominators WHERE m.session.id = :sessionId")
     List<MovieSuggestion> findBySessionIdWithUser(@Param("sessionId") Long sessionId);
+
+    @Query("SELECT m FROM MovieSuggestion m LEFT JOIN FETCH m.nominators WHERE m.session.id = :sessionId AND m.tmdbId = :tmdbId")
+    java.util.Optional<MovieSuggestion> findBySessionIdAndTmdbIdWithNominators(@Param("sessionId") Long sessionId, @Param("tmdbId") Long tmdbId);
 
     @Query("SELECT m.tmdbId FROM MovieSuggestion m WHERE m.session.id = :sessionId")
     java.util.Set<Long> findExistingTmdbIdsBySessionId(@Param("sessionId") Long sessionId);
@@ -21,6 +24,10 @@ public interface MovieSuggestionRepository extends JpaRepository<MovieSuggestion
     @org.springframework.data.jpa.repository.Modifying
     @Query("UPDATE MovieSuggestion m SET m.user = null WHERE m.user.id = :userId")
     void disassociateUserSuggestions(@Param("userId") Long userId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = "DELETE FROM movie_suggestion_nominators WHERE user_id = :userId", nativeQuery = true)
+    void removeUserFromNominators(@Param("userId") Long userId);
 
     @org.springframework.data.jpa.repository.Modifying
     @Query("DELETE FROM MovieSuggestion m WHERE m.session.id = :sessionId")

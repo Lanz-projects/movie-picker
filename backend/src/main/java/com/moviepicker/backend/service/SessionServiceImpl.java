@@ -170,6 +170,7 @@ public class SessionServiceImpl implements SessionService {
         voteRepository.deleteBySessionIdAndUserId(session.getId(), user.getId());
 
         // 2. Bulk disassociate user from movie suggestions to preserve pool data
+        movieSuggestionRepository.removeUserFromNominators(user.getId());
         movieSuggestionRepository.disassociateUserSuggestions(user.getId());
 
         boolean wasHost = session.getHostName().equalsIgnoreCase(user.getDisplayName().trim());
@@ -282,6 +283,7 @@ public class SessionServiceImpl implements SessionService {
         voteRepository.deleteBySessionIdAndUserId(session.getId(), targetUser.getId());
 
         // 2. Bulk disassociate user from movie suggestions to preserve pool data and prevent FK violations
+        movieSuggestionRepository.removeUserFromNominators(targetUser.getId());
         movieSuggestionRepository.disassociateUserSuggestions(targetUser.getId());
 
         // 3. Delete the user entity

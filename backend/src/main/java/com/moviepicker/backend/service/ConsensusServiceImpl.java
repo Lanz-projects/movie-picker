@@ -125,7 +125,19 @@ public class ConsensusServiceImpl implements ConsensusService {
                     .distinct()
                     .collect(Collectors.toList());
 
-            String suggestedBy = movie.getUser() != null ? movie.getUser().getDisplayName() : null;
+            List<String> nominators = new ArrayList<>();
+            if (movie.getNominators() != null && !movie.getNominators().isEmpty()) {
+                nominators = movie.getNominators().stream()
+                        .map(User::getDisplayName)
+                        .filter(org.springframework.util.StringUtils::hasText)
+                        .distinct()
+                        .collect(Collectors.toList());
+            }
+            if (nominators.isEmpty() && movie.getUser() != null && org.springframework.util.StringUtils.hasText(movie.getUser().getDisplayName())) {
+                nominators = List.of(movie.getUser().getDisplayName());
+            }
+
+            String suggestedBy = formatNominatorNames(nominators);
 
             scoredMovies.add(ScoredMovieDto.builder()
                     .movieSuggestionId(movie.getId())
@@ -135,6 +147,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                     .overview(movie.getOverview())
                     .releaseYear(movie.getReleaseYear())
                     .suggestedBy(suggestedBy)
+                    .nominators(nominators)
                     .score(score)
                     .yesVotes(yesVotes)
                     .superlikeVotes(superlikeVotes)
@@ -165,5 +178,18 @@ public class ConsensusServiceImpl implements ConsensusService {
                 .rankedMovies(scoredMovies)
                 .calculatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    private String formatNominatorNames(List<String> nominators) {
+        if (nominators == null || nominators.isEmpty()) {
+            return null;
+        }
+        if (nominators.size() == 1) {
+            return nominators.get(0);
+        }
+        if (nominators.size() == 2) {
+            return nominators.get(0) + " & " + nominators.get(1);
+        }
+        return String.join(", ", nominators.subList(0, nominators.size() - 1)) + " & " + nominators.get(nominators.size() - 1);
     }
 }
