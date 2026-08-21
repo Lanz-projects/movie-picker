@@ -40,6 +40,9 @@ public class MovieSubmissionControllerTest {
     @MockitoBean
     private MovieSubmissionService movieSubmissionService;
 
+    @MockitoBean
+    private com.moviepicker.backend.security.auth.SessionSecurityService sessionSecurityService;
+
     @Test
     public void testSubmitMovies_Success() throws Exception {
         MovieSubmissionDto movieDto = MovieSubmissionDto.builder()

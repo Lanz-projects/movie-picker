@@ -1,4 +1,5 @@
 import type { ErrorResponse } from "@/types";
+import { loadSessionAuth } from "@/lib/storage/sessionStorage";
 
 export function getApiBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
@@ -35,6 +36,12 @@ export async function request<T>(
 
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+
+  // Automatically attach ephemeral session token if available
+  const auth = loadSessionAuth();
+  if (auth?.sessionToken && !headers.has("X-Session-Token")) {
+    headers.set("X-Session-Token", auth.sessionToken);
   }
 
   const response = await fetch(url, {

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private Long id;
     private String displayName;
+    private String sessionToken;
     private LocalDateTime joinedAt;
     private Integer kickCount;
 
@@ -27,6 +28,7 @@ public class UserResponse {
         return UserResponse.builder()
                 .id(user.getId())
                 .displayName(user.getDisplayName())
+                .sessionToken(user.getSessionToken())
                 .joinedAt(user.getJoinedAt())
                 .kickCount(kickCount != null ? kickCount : 0)
                 .build();

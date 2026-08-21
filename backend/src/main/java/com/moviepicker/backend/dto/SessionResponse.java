@@ -25,6 +25,7 @@ public class SessionResponse {
     private Integer maxSuggestionsPerUser;
     private SessionStatus status;
     private LocalDateTime createdAt;
+    private String currentSessionToken;
     @Builder.Default
     private List<UserResponse> users = new ArrayList<>();
 

@@ -3,6 +3,7 @@ export interface StoredSessionAuth {
   userId: number;
   displayName: string;
   isHost: boolean;
+  sessionToken?: string;
   savedAt: number;
 }
 

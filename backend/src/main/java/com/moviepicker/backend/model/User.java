@@ -31,6 +31,10 @@ public class User {
     @Column(nullable = false, length = 100)
     private String displayName;
 
+    @Column(name = "session_token", length = 64)
+    @Builder.Default
+    private String sessionToken = java.util.UUID.randomUUID().toString();
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime joinedAt;
 
@@ -38,6 +42,9 @@ public class User {
     protected void onCreate() {
         if (joinedAt == null) {
             joinedAt = LocalDateTime.now();
+        }
+        if (sessionToken == null || sessionToken.isBlank()) {
+            sessionToken = java.util.UUID.randomUUID().toString();
         }
     }
 }

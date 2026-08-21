@@ -431,11 +431,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(newSession);
         setCurrentUser(me);
+        const sessionToken = newSession.currentSessionToken || me.sessionToken;
         saveSessionAuth({
           roomCode: newSession.roomCode,
           userId: me.id,
           displayName: me.displayName,
           isHost: true,
+          sessionToken,
           savedAt: Date.now(),
         });
         setHasSubmittedDeck(false);
@@ -472,11 +474,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(joinedSession);
         setCurrentUser(me);
+        const sessionToken = joinedSession.currentSessionToken || me.sessionToken;
         saveSessionAuth({
           roomCode: joinedSession.roomCode,
           userId: me.id,
           displayName: me.displayName,
           isHost: me.isHost ?? false,
+          sessionToken,
           savedAt: Date.now(),
         });
         setHasSubmittedDeck(false);

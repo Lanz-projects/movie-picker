@@ -35,6 +35,9 @@ public class SessionControllerTest {
     @Mock
     private SessionService sessionService;
 
+    @Mock
+    private com.moviepicker.backend.security.auth.SessionSecurityService sessionSecurityService;
+
     @InjectMocks
     private SessionController sessionController;
 

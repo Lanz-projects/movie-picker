@@ -59,10 +59,12 @@ public class SessionServiceImpl implements SessionService {
                 .session(savedSession)
                 .displayName(request.getHostName())
                 .build();
-        userRepository.save(hostUser);
+        User savedHost = userRepository.save(hostUser);
 
         List<User> users = userRepository.findBySessionId(savedSession.getId());
-        return SessionResponse.fromEntity(savedSession, users);
+        SessionResponse response = SessionResponse.fromEntity(savedSession, users);
+        response.setCurrentSessionToken(savedHost.getSessionToken());
+        return response;
     }
 
     @Override
@@ -122,7 +124,9 @@ public class SessionServiceImpl implements SessionService {
 
         roomEventPublisher.publishUserJoined(session.getRoomCode(), savedUser.getId(), savedUser.getDisplayName(), session.getHostName(), userResponses);
 
-        return SessionResponse.fromEntity(session, updatedUsers);
+        SessionResponse joinResponse = SessionResponse.fromEntity(session, updatedUsers);
+        joinResponse.setCurrentSessionToken(savedUser.getSessionToken());
+        return joinResponse;
     }
 
     @Override

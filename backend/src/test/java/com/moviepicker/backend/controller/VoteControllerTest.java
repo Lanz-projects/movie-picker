@@ -44,6 +44,9 @@ public class VoteControllerTest {
     private VoteService voteService;
 
     @MockitoBean
+    private com.moviepicker.backend.security.auth.SessionSecurityService sessionSecurityService;
+
+    @MockitoBean
     private ConsensusService consensusService;
 
     @MockitoBean

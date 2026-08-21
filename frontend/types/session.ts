@@ -11,6 +11,7 @@ export interface DeckSubmissionProgress {
 export interface UserResponse {
   id: number;
   displayName: string;
+  sessionToken?: string;
   isHost?: boolean;
   joinedAt: string;
   kickCount?: number;
@@ -23,6 +24,7 @@ export interface SessionResponse {
   status: SessionStatus;
   maxUsers: number;
   maxSuggestionsPerUser: number;
+  currentSessionToken?: string;
   users: UserResponse[];
   createdAt: string;
 }
