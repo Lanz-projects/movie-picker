@@ -30,4 +30,5 @@ public class MovieDto implements Serializable {
     private Double popularity;
     private String originalLanguage;
     private List<String> genres;
+    private String aiReasoning;
 }

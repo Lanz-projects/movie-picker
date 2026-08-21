@@ -11,4 +11,6 @@ public class GeminiProperties {
     private String key;
     private String model = "gemini-2.5-flash-lite";
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+    private Double temperature = 0.7;
+    private String systemInstructionPath = "classpath:prompts/gemini-system-instruction.txt";
 }
