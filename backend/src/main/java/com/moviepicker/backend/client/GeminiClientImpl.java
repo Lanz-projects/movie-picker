@@ -43,7 +43,7 @@ public class GeminiClientImpl implements GeminiClient {
             throw new IllegalStateException("GEMINI_API_KEY is not configured in backend environment");
         }
 
-        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-3.6-flash";
+        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-2.5-flash-lite";
         String endpoint = String.format("/models/%s:generateContent?key=%s", model, properties.getKey().trim());
 
         Map<String, Object> requestBody = Map.of(

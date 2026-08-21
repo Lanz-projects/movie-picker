@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "gemini.api")
 public class GeminiProperties {
     private String key;
-    private String model = "gemini-3.6-flash";
+    private String model = "gemini-2.5-flash-lite";
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta";
 }
