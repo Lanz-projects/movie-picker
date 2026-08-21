@@ -82,6 +82,19 @@ export interface SessionContextType {
   clearError: () => void;
 }
 
+function deduplicateMovieDeck(movies: MovieSuggestionResponse[]): MovieSuggestionResponse[] {
+  const seen = new Set<number>();
+  const result: MovieSuggestionResponse[] = [];
+  for (const m of movies) {
+    const key = m.tmdbId ?? m.id;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(m);
+    }
+  }
+  return result;
+}
+
 const SessionContext = React.createContext<SessionContextType | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
@@ -184,7 +197,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           setStage("SWIPER");
           try {
             const movies = await apiGetSessionMovies(effectiveSession.id);
-            if (isMounted) setMovieDeck(movies);
+            if (isMounted) setMovieDeck(deduplicateMovieDeck(movies));
             const prog = await apiGetProgress(effectiveSession.roomCode);
             if (isMounted) setProgress(prog);
           } catch {
@@ -337,7 +350,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           if (session?.id) {
             try {
               const movies = await apiGetSessionMovies(session.id);
-              setMovieDeck(movies);
+              setMovieDeck(deduplicateMovieDeck(movies));
               const initialProgress = await apiGetProgress(session.roomCode);
               setProgress(initialProgress);
             } catch (err) {
@@ -529,7 +542,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setStage("SEARCH");
       } else if (refreshed.status === "VOTING" && (stage === "LOBBY" || stage === "SEARCH")) {
         const movies = await apiGetSessionMovies(refreshed.id);
-        setMovieDeck(movies);
+        setMovieDeck(deduplicateMovieDeck(movies));
         setStage("SWIPER");
       } else if (refreshed.status === "COMPLETED" && stage !== "WINNER") {
         fetchConsensusResults();
@@ -595,7 +608,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(updated);
 
       const movies = await apiGetSessionMovies(session.id);
-      setMovieDeck(movies);
+      setMovieDeck(deduplicateMovieDeck(movies));
 
       const initialProgress = await apiGetProgress(session.roomCode);
       setProgress(initialProgress);

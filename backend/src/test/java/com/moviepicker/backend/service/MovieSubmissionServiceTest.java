@@ -273,4 +273,60 @@ public class MovieSubmissionServiceTest {
 
         verify(sessionRepository, never()).save(any(Session.class));
     }
+
+    @Test
+    public void testSubmitMovies_DeduplicatesSameMovieWithinSingleBatch() {
+        // User submits duplicate Fight Club twice in same payload
+        SubmitMoviesRequest request = SubmitMoviesRequest.builder()
+                .userId(sampleUser.getId())
+                .movies(List.of(movieDto1, movieDto1))
+                .build();
+
+        when(sessionRepository.findById(1L)).thenReturn(Optional.of(sampleSession));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
+        when(movieSuggestionRepository.countBySessionIdAndUserId(1L, 10L)).thenReturn(0L);
+        when(movieSuggestionRepository.findExistingTmdbIdsBySessionId(1L)).thenReturn(new java.util.HashSet<>());
+
+        MovieSuggestion saved1 = MovieSuggestion.builder()
+                .id(100L)
+                .session(sampleSession)
+                .user(sampleUser)
+                .tmdbId(550L)
+                .title("Fight Club")
+                .build();
+
+        when(movieSuggestionRepository.saveAll(any())).thenReturn(List.of(saved1));
+
+        List<MovieSuggestionResponse> responses = movieSubmissionService.submitMovies(1L, request);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).getTitle()).isEqualTo("Fight Club");
+    }
+
+    @Test
+    public void testGetSessionMovies_DeduplicatesByTmdbId() {
+        MovieSuggestion movieA = MovieSuggestion.builder()
+                .id(100L)
+                .session(sampleSession)
+                .user(sampleUser)
+                .tmdbId(550L)
+                .title("Fight Club")
+                .build();
+
+        MovieSuggestion movieB = MovieSuggestion.builder()
+                .id(101L)
+                .session(sampleSession)
+                .user(sampleUser)
+                .tmdbId(550L) // Duplicate TMDB id
+                .title("Fight Club")
+                .build();
+
+        when(sessionRepository.existsById(1L)).thenReturn(true);
+        when(movieSuggestionRepository.findBySessionIdWithUser(1L)).thenReturn(List.of(movieA, movieB));
+
+        List<MovieSuggestionResponse> responses = movieSubmissionService.getSessionMovies(1L);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).getTmdbId()).isEqualTo(550L);
+    }
 }

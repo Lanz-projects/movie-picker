@@ -63,7 +63,9 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
 
         List<MovieSuggestion> savedSuggestions = new ArrayList<>();
         if (request.getMovies() != null && !request.getMovies().isEmpty()) {
-            java.util.Set<Long> existingTmdbIds = movieSuggestionRepository.findExistingTmdbIdsBySessionId(sessionId);
+            java.util.Set<Long> existingTmdbIds = new java.util.HashSet<>(
+                    movieSuggestionRepository.findExistingTmdbIdsBySessionId(sessionId)
+            );
             List<MovieSuggestion> toSave = new ArrayList<>();
 
             for (MovieSubmissionDto movieDto : request.getMovies()) {
@@ -83,6 +85,7 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
                         .build();
 
                 toSave.add(suggestion);
+                existingTmdbIds.add(movieDto.getTmdbId());
             }
 
             if (!toSave.isEmpty()) {
@@ -118,9 +121,18 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
             throw new ResourceNotFoundException("Session not found with id: " + sessionId);
         }
 
-        return movieSuggestionRepository.findBySessionIdWithUser(sessionId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        List<MovieSuggestion> allSuggestions = movieSuggestionRepository.findBySessionIdWithUser(sessionId);
+        java.util.Set<Long> seenTmdbIds = new java.util.HashSet<>();
+        List<MovieSuggestionResponse> uniqueMovies = new ArrayList<>();
+
+        for (MovieSuggestion suggestion : allSuggestions) {
+            Long key = suggestion.getTmdbId();
+            if (key == null || seenTmdbIds.add(key)) {
+                uniqueMovies.add(mapToResponse(suggestion));
+            }
+        }
+
+        return uniqueMovies;
     }
 
     @Override

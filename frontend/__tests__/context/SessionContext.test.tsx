@@ -1233,5 +1233,74 @@ describe("SessionContext & useSession Hook", () => {
 
     expect(result.current.stage).toBe("SETUP");
   });
+
+  it("deduplicates movie deck if multiple users nominated the same movie", async () => {
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "DUP999",
+        userId: 10,
+        displayName: "Alice",
+        isHost: true,
+        savedAt: Date.now(),
+      })
+    );
+
+    const mockVotingSession: SessionResponse = {
+      id: 1,
+      roomCode: "DUP999",
+      hostName: "Alice",
+      status: "VOTING",
+      maxUsers: 5,
+      maxSuggestionsPerUser: 3,
+      users: [{ id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockVotingSession);
+    // Returns 2 copies of Fight Club (same tmdbId: 550)
+    vi.mocked(api.getSessionMovies).mockResolvedValue([
+      {
+        id: 101,
+        tmdbId: 550,
+        userId: 10,
+        userDisplayName: "Alice",
+        title: "Fight Club",
+        overview: "Overview",
+        posterPath: "/fc.jpg",
+        releaseYear: 1999,
+        suggestedAt: "2026-08-14T00:00:00",
+      },
+      {
+        id: 102,
+        tmdbId: 550,
+        userId: 11,
+        userDisplayName: "Bob",
+        title: "Fight Club",
+        overview: "Overview",
+        posterPath: "/fc.jpg",
+        releaseYear: 1999,
+        suggestedAt: "2026-08-14T00:00:00",
+      },
+    ]);
+    vi.mocked(api.getVotingProgressByRoomCode).mockResolvedValue({
+      sessionId: 1,
+      roomCode: "DUP999",
+      totalMovies: 1,
+      totalUsers: 1,
+      completedUserCount: 0,
+      allUsersCompleted: false,
+      users: [{ userId: 10, displayName: "Alice", votedCount: 0, completed: false }],
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.stage).toBe("SWIPER");
+    });
+
+    expect(result.current.movieDeck).toHaveLength(1);
+    expect(result.current.movieDeck[0].title).toBe("Fight Club");
+  });
 });
 
