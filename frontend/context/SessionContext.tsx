@@ -245,7 +245,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         console.error("[SessionContext] Failed to fetch consensus results:", err);
       }
     }
-  }, [session?.roomCode, session?.id]);
+  }, [session]);
 
   const handleRoomEvent = React.useCallback(
     async (event: RoomProgressEvent) => {
@@ -380,8 +380,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       }
     },
     [
-      session?.id,
-      session?.roomCode,
+      session,
       currentUser,
       clearMyDeckSelection,
       fetchConsensusResults,
@@ -714,7 +713,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     },
-    [session?.roomCode, currentUser?.id]
+    [session, currentUser]
   );
 
   const effectiveError = error || deckError;

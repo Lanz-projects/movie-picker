@@ -85,7 +85,7 @@ describe("WinnerScreen Stage Container", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useSession).mockReturnValue(defaultMockSession as any);
+    vi.mocked(useSession).mockReturnValue(defaultMockSession as unknown as ReturnType<typeof useSession>);
   });
 
   it("renders stage title, winner card, and leaderboard rankings", () => {
@@ -107,7 +107,7 @@ describe("WinnerScreen Stage Container", () => {
       isHost: true,
       playAgain: playAgainMock,
       resetToLobby: resetToLobbyMock,
-    } as any);
+    } as unknown as ReturnType<typeof useSession>);
 
     render(<WinnerScreen />);
 
@@ -132,7 +132,7 @@ describe("WinnerScreen Stage Container", () => {
     vi.mocked(useSession).mockReturnValue({
       ...defaultMockSession,
       isHost: false,
-    } as any);
+    } as unknown as ReturnType<typeof useSession>);
 
     render(<WinnerScreen />);
 

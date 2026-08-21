@@ -151,4 +151,32 @@ public class MovieControllerTest {
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.message").value("TMDB API 500 error"));
     }
+
+    @Test
+    public void testSearchMovies_V1Endpoint_Returns200OK() throws Exception {
+        MovieDto movie = MovieDto.builder()
+                .tmdbId(550L)
+                .title("Fight Club")
+                .overview("An insomniac office worker...")
+                .posterPath("/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg")
+                .releaseYear(1999)
+                .voteAverage(8.4)
+                .build();
+
+        MovieSearchResponse response = MovieSearchResponse.builder()
+                .page(1)
+                .totalPages(3)
+                .totalResults(60)
+                .movies(List.of(movie))
+                .build();
+
+        when(movieSearchService.searchMovies(eq("Fight Club"), eq(1))).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/movies/search")
+                        .param("query", "Fight Club")
+                        .param("page", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movies[0].title").value("Fight Club"));
+    }
 }

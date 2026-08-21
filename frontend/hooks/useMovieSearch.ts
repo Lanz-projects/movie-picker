@@ -64,15 +64,6 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
   // Keep track of the active request counter to prevent stale race conditions
   const activeRequestIdRef = React.useRef<number>(0);
 
-  const currentQueryRef = React.useRef<string>(initialQuery);
-  currentQueryRef.current = query;
-
-  const currentGenreRef = React.useRef<string | null>(initialGenre);
-  currentGenreRef.current = activeGenre;
-
-  const currentFiltersRef = React.useRef<FilterState>(initialFilters);
-  currentFiltersRef.current = filters;
-
   const mode: SearchMode = React.useMemo(() => {
     if (query.trim()) return "SEARCH";
     if (activeGenre || activeFilterCount > 0) return "DISCOVER";
@@ -123,16 +114,14 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
   React.useEffect(() => {
     const trimmed = query.trim();
     const currentReqId = ++activeRequestIdRef.current;
-    const abortController = new AbortController();
-
-    setIsLoading(true);
-    setIsSearchingMore(false);
-    setError(null);
 
     // If typing text query, debounce by debounceMs
     const delay = trimmed ? debounceMs : 0;
 
     const timer = setTimeout(async () => {
+      setIsLoading(true);
+      setIsSearchingMore(false);
+      setError(null);
       try {
         let response;
         if (trimmed) {
@@ -185,10 +174,8 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
     setIsSearchingMore(true);
     setError(null);
 
-    const trimmed = currentQueryRef.current.trim();
-    const genre = currentGenreRef.current;
-    const currentFilters = currentFiltersRef.current;
-    const isDiscover = Boolean(genre || countActiveFilters(currentFilters) > 0);
+    const trimmed = query.trim();
+    const isDiscover = Boolean(activeGenre || activeFilterCount > 0);
     const nextPage = page + 1;
 
     try {
@@ -197,14 +184,14 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
         response = await searchMovies(trimmed, nextPage);
       } else if (isDiscover) {
         response = await discoverMovies({
-          genre: genre || undefined,
-          provider: currentFilters.provider || undefined,
-          decade: currentFilters.decade || undefined,
-          minRating: currentFilters.minRating || undefined,
-          minRuntime: currentFilters.minRuntime || undefined,
-          maxRuntime: currentFilters.maxRuntime || undefined,
-          language: currentFilters.language || undefined,
-          sortBy: currentFilters.sortBy || undefined,
+          genre: activeGenre || undefined,
+          provider: filters.provider || undefined,
+          decade: filters.decade || undefined,
+          minRating: filters.minRating || undefined,
+          minRuntime: filters.minRuntime || undefined,
+          maxRuntime: filters.maxRuntime || undefined,
+          language: filters.language || undefined,
+          sortBy: filters.sortBy || undefined,
           page: nextPage,
         });
       } else {
@@ -231,7 +218,17 @@ export function useMovieSearch(options: UseMovieSearchOptions = {}): UseMovieSea
         setIsSearchingMore(false);
       }
     }
-  }, [page, totalPages, isLoading, isSearchingMore]);
+  }, [
+    query,
+    activeGenre,
+    filters,
+    activeFilterCount,
+    page,
+    totalPages,
+    totalResults,
+    isLoading,
+    isSearchingMore,
+  ]);
 
   return {
     query,

@@ -135,4 +135,21 @@ public class MovieSubmissionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Cannot start voting with zero submitted movies"));
     }
+
+    @Test
+    public void testStartVoting_V1Endpoint_Success() throws Exception {
+        SessionResponse sessionResponse = SessionResponse.builder()
+                .id(1L)
+                .roomCode("SUBMIT")
+                .hostName("Alice")
+                .status(SessionStatus.VOTING)
+                .build();
+
+        when(movieSubmissionService.startVoting(1L)).thenReturn(sessionResponse);
+
+        mockMvc.perform(post("/api/v1/sessions/1/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.status").value("VOTING"));
+    }
 }

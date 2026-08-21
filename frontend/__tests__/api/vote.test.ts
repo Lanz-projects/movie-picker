@@ -38,7 +38,7 @@ describe("Vote API Client", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/votes",
+      "http://localhost:8080/api/v1/sessions/1/votes",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -73,7 +73,7 @@ describe("Vote API Client", () => {
     const result = await getVotingProgressByRoomCode("ABCD");
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/ABCD/votes/progress",
+      "http://localhost:8080/api/v1/sessions/room/ABCD/votes/progress",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.allUsersCompleted).toBe(false);

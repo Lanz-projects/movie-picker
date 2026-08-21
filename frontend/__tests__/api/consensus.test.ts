@@ -39,7 +39,7 @@ describe("Consensus API Client", () => {
     rankedMovies: [],
   };
 
-  it("getResults calls GET /api/sessions/{id}/results", async () => {
+  it("getResults calls GET /api/v1/sessions/{id}/results", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockResults,
@@ -47,14 +47,14 @@ describe("Consensus API Client", () => {
 
     const result = await getResults(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/results",
+      "http://localhost:8080/api/v1/sessions/1/results",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.winner?.title).toBe("Fight Club");
     expect(result.winner?.suggestedBy).toBe("Alice");
   });
 
-  it("getResultsByRoomCode calls GET /api/sessions/room/{code}/results", async () => {
+  it("getResultsByRoomCode calls GET /api/v1/sessions/room/{code}/results", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockResults,
@@ -62,13 +62,13 @@ describe("Consensus API Client", () => {
 
     const result = await getResultsByRoomCode("WINR");
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/WINR/results",
+      "http://localhost:8080/api/v1/sessions/room/WINR/results",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.roomCode).toBe("WINR");
   });
 
-  it("calculateResults calls POST /api/sessions/{id}/calculate", async () => {
+  it("calculateResults calls POST /api/v1/sessions/{id}/calculate", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockResults,
@@ -76,13 +76,13 @@ describe("Consensus API Client", () => {
 
     const result = await calculateResults(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/calculate",
+      "http://localhost:8080/api/v1/sessions/1/calculate",
       expect.objectContaining({ method: "POST" })
     );
     expect(result.winner?.isUnanimous).toBe(true);
   });
 
-  it("calculateResultsByRoomCode calls POST /api/sessions/room/{code}/calculate", async () => {
+  it("calculateResultsByRoomCode calls POST /api/v1/sessions/room/{code}/calculate", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockResults,
@@ -90,7 +90,7 @@ describe("Consensus API Client", () => {
 
     const result = await calculateResultsByRoomCode("WINR");
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/WINR/calculate",
+      "http://localhost:8080/api/v1/sessions/room/WINR/calculate",
       expect.objectContaining({ method: "POST" })
     );
     expect(result.winner?.positiveVoters).toContain("Alice");

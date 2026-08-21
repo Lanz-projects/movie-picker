@@ -18,7 +18,7 @@ vi.mock("@/lib/websocket", () => ({
   },
 }));
 
-const mockGetSearchParams = vi.fn((_param: string): string | null => null);
+const mockGetSearchParams = vi.fn((param: string): string | null => (param ? null : null));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: (param: string) => mockGetSearchParams(param),

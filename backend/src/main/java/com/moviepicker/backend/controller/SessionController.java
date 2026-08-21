@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/sessions")
+@RequestMapping({"/api/v1/sessions", "/api/sessions"})
 @RequiredArgsConstructor
 public class SessionController {
 

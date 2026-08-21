@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/sessions")
+@RequestMapping({"/api/v1/sessions", "/api/sessions"})
 @RequiredArgsConstructor
 public class ConsensusController {
 

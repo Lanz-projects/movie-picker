@@ -13,7 +13,7 @@ import type {
 export async function createSession(
   requestData: CreateSessionRequest
 ): Promise<SessionResponse> {
-  return request<SessionResponse>("/api/sessions", {
+  return request<SessionResponse>("/api/v1/sessions", {
     method: "POST",
     body: JSON.stringify(requestData),
   });
@@ -23,7 +23,7 @@ export async function getSessionByRoomCode(
   roomCode: string
 ): Promise<SessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
-  return request<SessionResponse>(`/api/sessions/${code}`, {
+  return request<SessionResponse>(`/api/v1/sessions/${code}`, {
     method: "GET",
   });
 }
@@ -31,7 +31,7 @@ export async function getSessionByRoomCode(
 export async function joinSession(
   requestData: JoinSessionRequest
 ): Promise<SessionResponse> {
-  return request<SessionResponse>("/api/sessions/join", {
+  return request<SessionResponse>("/api/v1/sessions/join", {
     method: "POST",
     body: JSON.stringify({
       roomCode: requestData.roomCode.trim(),
@@ -46,7 +46,7 @@ export async function updateSessionStatus(
 ): Promise<SessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
   const body: UpdateSessionStatusRequest = { status };
-  return request<SessionResponse>(`/api/sessions/${code}/status`, {
+  return request<SessionResponse>(`/api/v1/sessions/${code}/status`, {
     method: "PATCH",
     body: JSON.stringify(body),
   });
@@ -58,7 +58,7 @@ export async function leaveSessionByRoomCode(
 ): Promise<LeaveSessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
   const body: LeaveSessionRequest = { userId };
-  return request<LeaveSessionResponse>(`/api/sessions/room/${code}/leave`, {
+  return request<LeaveSessionResponse>(`/api/v1/sessions/room/${code}/leave`, {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -72,7 +72,7 @@ export async function kickUser(
 ): Promise<LeaveSessionResponse> {
   const code = encodeURIComponent(roomCode.trim());
   const body: KickUserRequest = { hostUserId, targetUserId, banPermanently };
-  return request<LeaveSessionResponse>(`/api/sessions/room/${code}/kick`, {
+  return request<LeaveSessionResponse>(`/api/v1/sessions/room/${code}/kick`, {
     method: "POST",
     body: JSON.stringify(body),
   });

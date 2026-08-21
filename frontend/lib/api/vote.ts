@@ -9,7 +9,7 @@ export async function castVote(
   sessionId: number,
   requestData: CastVoteRequest
 ): Promise<VoteResponse> {
-  return request<VoteResponse>(`/api/sessions/${sessionId}/votes`, {
+  return request<VoteResponse>(`/api/v1/sessions/${sessionId}/votes`, {
     method: "POST",
     body: JSON.stringify(requestData),
   });
@@ -20,7 +20,7 @@ export async function getVotingProgressByRoomCode(
 ): Promise<VotingProgressResponse> {
   const code = encodeURIComponent(roomCode.trim());
   return request<VotingProgressResponse>(
-    `/api/sessions/room/${code}/votes/progress`,
+    `/api/v1/sessions/room/${code}/votes/progress`,
     {
       method: "GET",
     }

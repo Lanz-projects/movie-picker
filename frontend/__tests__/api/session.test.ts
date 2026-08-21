@@ -35,7 +35,7 @@ describe("Session API Client", () => {
     const result = await createSession({ hostName: "Alice" });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions",
+      "http://localhost:8080/api/v1/sessions",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ hostName: "Alice" }),
@@ -64,7 +64,7 @@ describe("Session API Client", () => {
     const result = await getSessionByRoomCode("ABCD");
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/ABCD",
+      "http://localhost:8080/api/v1/sessions/ABCD",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.roomCode).toBe("ABCD");
@@ -93,7 +93,7 @@ describe("Session API Client", () => {
     const result = await joinSession({ roomCode: " ABCD ", displayName: " Bob " });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/join",
+      "http://localhost:8080/api/v1/sessions/join",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ roomCode: "ABCD", displayName: "Bob" }),
@@ -122,7 +122,7 @@ describe("Session API Client", () => {
     const result = await updateSessionStatus("ABCD", "SUGGESTING");
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/ABCD/status",
+      "http://localhost:8080/api/v1/sessions/ABCD/status",
       expect.objectContaining({
         method: "PATCH",
         body: JSON.stringify({ status: "SUGGESTING" }),
@@ -146,7 +146,7 @@ describe("Session API Client", () => {
     const result = await leaveSessionByRoomCode("ABCD", 11);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/ABCD/leave",
+      "http://localhost:8080/api/v1/sessions/room/ABCD/leave",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ userId: 11 }),
@@ -211,7 +211,7 @@ describe("Session API Client", () => {
     const result = await kickUser("ABCD", 10, 11);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/ABCD/kick",
+      "http://localhost:8080/api/v1/sessions/room/ABCD/kick",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ hostUserId: 10, targetUserId: 11 }),
@@ -235,7 +235,7 @@ describe("Session API Client", () => {
     const result = await kickUser("ABCD", 10, 11, true);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/room/ABCD/kick",
+      "http://localhost:8080/api/v1/sessions/room/ABCD/kick",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ hostUserId: 10, targetUserId: 11, banPermanently: true }),

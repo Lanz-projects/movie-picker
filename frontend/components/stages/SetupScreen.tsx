@@ -20,12 +20,6 @@ function SetupScreenContent() {
   );
   const { createRoom, joinRoom, isLoading, error, clearError } = useSession();
 
-  React.useEffect(() => {
-    if (initialRoomCode) {
-      setActiveTab("join");
-    }
-  }, [initialRoomCode]);
-
   const handleHostSubmit = async (
     hostName: string,
     maxUsers: number,

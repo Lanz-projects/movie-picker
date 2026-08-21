@@ -15,7 +15,7 @@ export function getWebSocketUrl(): string {
   return "http://localhost:8080/ws";
 }
 
-const WS_BASE_URL = getWebSocketUrl();
+export const WS_BASE_URL = getWebSocketUrl();
 
 export interface WebSocketCallbacks {
   onConnect?: () => void;

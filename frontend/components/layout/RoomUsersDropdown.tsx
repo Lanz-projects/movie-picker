@@ -37,7 +37,6 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
 }: RoomUsersDropdownProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [confirmKickUserId, setConfirmKickUserId] = React.useState<number | null>(null);
-  const [isBanning, setIsBanning] = React.useState(false);
   const [isSubmittingAction, setIsSubmittingAction] = React.useState(false);
   const [copiedCode, setCopiedCode] = React.useState(false);
 
@@ -320,7 +319,6 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
                           type="button"
                           onClick={() => {
                             setConfirmKickUserId(user.id);
-                            setIsBanning(false);
                           }}
                           aria-label={`Kick ${user.displayName} from room`}
                           className="flex h-6 px-1.5 items-center justify-center rounded-lg text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 border border-transparent hover:border-brand-coral/30 text-[11px] font-medium transition-colors cursor-pointer"

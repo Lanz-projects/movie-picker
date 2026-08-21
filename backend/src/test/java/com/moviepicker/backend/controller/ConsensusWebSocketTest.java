@@ -155,8 +155,16 @@ public class ConsensusWebSocketTest {
         assertThat(receivedResults.getWinner().isUnanimous()).isTrue();
         assertThat(receivedResults.getRankedMovies()).hasSize(1);
 
-        // Verify session transitioned to COMPLETED in database
-        Session updatedSession = sessionRepository.findById(testSession.getId()).orElseThrow();
+        // Verify session transitioned to COMPLETED in database (polling with short timeout for async transaction commit)
+        Session updatedSession = null;
+        for (int i = 0; i < 20; i++) {
+            updatedSession = sessionRepository.findById(testSession.getId()).orElse(null);
+            if (updatedSession != null && updatedSession.getStatus() == SessionStatus.COMPLETED) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertThat(updatedSession).isNotNull();
         assertThat(updatedSession.getStatus()).isEqualTo(SessionStatus.COMPLETED);
 
         stompSession.disconnect();

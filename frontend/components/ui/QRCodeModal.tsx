@@ -12,8 +12,10 @@ export interface QRCodeModalProps {
   onClose: () => void;
 }
 
+const emptySubscribe = () => () => {};
+
 export function QRCodeModal({ isOpen, roomCode, onClose }: QRCodeModalProps) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [copied, setCopied] = React.useState(false);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
@@ -21,10 +23,6 @@ export function QRCodeModal({ isOpen, roomCode, onClose }: QRCodeModalProps) {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/?join=${encodeURIComponent(roomCode)}`;
   }, [roomCode]);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Render QR Code onto Canvas whenever isOpen or inviteUrl changes
   React.useEffect(() => {

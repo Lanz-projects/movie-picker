@@ -37,6 +37,8 @@ export function MovieGrid({
   onLoadMore,
   isDeckFull = false,
 }: MovieGridProps) {
+  const deckIdSet = React.useMemo(() => new Set(deckMovieIds), [deckMovieIds]);
+
   // 1. Initial Loading Skeleton Grid (8 cards)
   if (isLoading) {
     return (
@@ -110,7 +112,6 @@ export function MovieGrid({
   }
 
   const hasMorePages = page < totalPages;
-  const deckIdSet = React.useMemo(() => new Set(deckMovieIds), [deckMovieIds]);
 
   // 5. Active Movies Grid
   return (

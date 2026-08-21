@@ -259,4 +259,32 @@ public class SessionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
+
+    @Test
+    public void testCreateSession_V1Endpoint_Returns201Created() throws Exception {
+        CreateSessionRequest request = CreateSessionRequest.builder()
+                .hostName("Alice")
+                .maxUsers(10)
+                .maxSuggestionsPerUser(5)
+                .build();
+
+        when(sessionService.createSession(any(CreateSessionRequest.class))).thenReturn(sampleResponse);
+
+        mockMvc.perform(post("/api/v1/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.roomCode").value("ROOM99"))
+                .andExpect(jsonPath("$.hostName").value("Alice"));
+    }
+
+    @Test
+    public void testGetSessionByRoomCode_V1Endpoint_Returns200OK() throws Exception {
+        when(sessionService.getSessionByRoomCode("ROOM99")).thenReturn(sampleResponse);
+
+        mockMvc.perform(get("/api/v1/sessions/ROOM99"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomCode").value("ROOM99"))
+                .andExpect(jsonPath("$.hostName").value("Alice"));
+    }
 }

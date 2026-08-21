@@ -136,4 +136,33 @@ public class VoteControllerTest {
                 .andExpect(jsonPath("$.allUsersCompleted").value(true))
                 .andExpect(jsonPath("$.users[0].displayName").value("Alice"));
     }
+
+    @Test
+    public void testCastVote_V1Endpoint_Returns201Created() throws Exception {
+        CastVoteRequest request = CastVoteRequest.builder()
+                .userId(10L)
+                .movieSuggestionId(100L)
+                .voteType(VoteType.YES)
+                .build();
+
+        VoteResponse voteResponse = VoteResponse.builder()
+                .id(500L)
+                .sessionId(1L)
+                .userId(10L)
+                .userDisplayName("Alice")
+                .movieSuggestionId(100L)
+                .movieTitle("Fight Club")
+                .voteType(VoteType.YES)
+                .votedAt(LocalDateTime.now())
+                .build();
+
+        when(voteService.castVoteAndBroadcast(eq(1L), any(CastVoteRequest.class))).thenReturn(voteResponse);
+
+        mockMvc.perform(post("/api/v1/sessions/1/votes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(500))
+                .andExpect(jsonPath("$.voteType").value("YES"));
+    }
 }

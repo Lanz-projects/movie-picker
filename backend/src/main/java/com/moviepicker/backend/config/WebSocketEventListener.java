@@ -3,6 +3,7 @@ package com.moviepicker.backend.config;
 import java.time.Instant;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.scheduling.TaskScheduler;
@@ -14,12 +15,10 @@ import com.moviepicker.backend.exception.ResourceNotFoundException;
 import com.moviepicker.backend.service.SessionService;
 import com.moviepicker.backend.service.WebSocketPresenceService;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class WebSocketEventListener {
 
     private final SessionService sessionService;
@@ -27,6 +26,15 @@ public class WebSocketEventListener {
     private final TaskScheduler taskScheduler;
 
     private static final long RECONNECT_GRACE_PERIOD_SECONDS = 5;
+
+    public WebSocketEventListener(
+            SessionService sessionService,
+            WebSocketPresenceService presenceService,
+            @Qualifier("taskScheduler") TaskScheduler taskScheduler) {
+        this.sessionService = sessionService;
+        this.presenceService = presenceService;
+        this.taskScheduler = taskScheduler;
+    }
 
     @EventListener
     public void handleSessionDisconnect(SessionDisconnectEvent event) {

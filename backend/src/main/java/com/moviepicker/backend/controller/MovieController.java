@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/movies")
+@RequestMapping({"/api/v1/movies", "/api/movies"})
 @RequiredArgsConstructor
 @Validated
 public class MovieController {

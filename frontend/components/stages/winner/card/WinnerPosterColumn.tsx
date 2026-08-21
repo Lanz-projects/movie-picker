@@ -7,13 +7,11 @@ import { Film } from "lucide-react";
 export interface WinnerPosterColumnProps {
   title: string;
   posterPath: string | null;
-  tmdbId?: number;
 }
 
 export const WinnerPosterColumn = React.memo(function WinnerPosterColumn({
   title,
   posterPath,
-  tmdbId,
 }: WinnerPosterColumnProps) {
   const [failedPosterUrl, setFailedPosterUrl] = React.useState<string | null>(null);
 

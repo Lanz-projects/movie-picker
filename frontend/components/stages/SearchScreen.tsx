@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { StageContainer } from "@/components/layout/StageContainer";
-import { SearchBar } from "./search/SearchBar";
 import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
@@ -28,7 +27,6 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     removeFromDeck,
     submitMyDeck,
     startVotingDeck,
-    kickUser,
     isLoading: isSessionLoading,
     error: sessionError,
     clearError,

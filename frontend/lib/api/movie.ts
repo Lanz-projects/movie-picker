@@ -15,7 +15,7 @@ export async function searchMovies(
   const encodedQuery = encodeURIComponent(query.trim());
   const safePage = Math.max(1, page);
   return request<MovieSearchResponse>(
-    `/api/movies/search?query=${encodedQuery}&page=${safePage}`,
+    `/api/v1/movies/search?query=${encodedQuery}&page=${safePage}`,
     {
       method: "GET",
       signal,
@@ -29,7 +29,7 @@ export async function getTrendingMovies(
 ): Promise<MovieSearchResponse> {
   const safePage = Math.max(1, page);
   return request<MovieSearchResponse>(
-    `/api/movies/trending?page=${safePage}`,
+    `/api/v1/movies/trending?page=${safePage}`,
     {
       method: "GET",
       signal,
@@ -66,7 +66,7 @@ export async function discoverMovies(
   searchParams.set("page", String(safePage));
 
   return request<MovieSearchResponse>(
-    `/api/movies/discover?${searchParams.toString()}`,
+    `/api/v1/movies/discover?${searchParams.toString()}`,
     {
       method: "GET",
       signal: params.signal,
@@ -78,7 +78,7 @@ export async function getMovieDetails(
   tmdbId: number,
   signal?: AbortSignal
 ): Promise<MovieDetailsDto> {
-  return request<MovieDetailsDto>(`/api/movies/${tmdbId}`, {
+  return request<MovieDetailsDto>(`/api/v1/movies/${tmdbId}`, {
     method: "GET",
     signal,
   });
@@ -88,7 +88,7 @@ export async function submitMovies(
   sessionId: number,
   requestData: SubmitMoviesRequest
 ): Promise<MovieSuggestionResponse[]> {
-  return request<MovieSuggestionResponse[]>(`/api/sessions/${sessionId}/movies`, {
+  return request<MovieSuggestionResponse[]>(`/api/v1/sessions/${sessionId}/movies`, {
     method: "POST",
     body: JSON.stringify(requestData),
   });
@@ -97,7 +97,7 @@ export async function submitMovies(
 export async function getSessionMovies(
   sessionId: number
 ): Promise<MovieSuggestionResponse[]> {
-  return request<MovieSuggestionResponse[]>(`/api/sessions/${sessionId}/movies`, {
+  return request<MovieSuggestionResponse[]>(`/api/v1/sessions/${sessionId}/movies`, {
     method: "GET",
   });
 }
@@ -105,7 +105,7 @@ export async function getSessionMovies(
 export async function startVoting(
   sessionId: number
 ): Promise<SessionResponse> {
-  return request<SessionResponse>(`/api/sessions/${sessionId}/start`, {
+  return request<SessionResponse>(`/api/v1/sessions/${sessionId}/start`, {
     method: "POST",
   });
 }

@@ -42,7 +42,7 @@ describe("Movie API Client", () => {
     const result = await searchMovies("Inception & Interstellar", 2);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/movies/search?query=Inception%20%26%20Interstellar&page=2",
+      "http://localhost:8080/api/v1/movies/search?query=Inception%20%26%20Interstellar&page=2",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.movies[0].title).toBe("Inception");
@@ -82,7 +82,7 @@ describe("Movie API Client", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/movies",
+      "http://localhost:8080/api/v1/sessions/1/movies",
       expect.objectContaining({ method: "POST" })
     );
     expect(result).toHaveLength(1);
@@ -98,7 +98,7 @@ describe("Movie API Client", () => {
     const result = await getSessionMovies(1);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/movies",
+      "http://localhost:8080/api/v1/sessions/1/movies",
       expect.objectContaining({ method: "GET" })
     );
     expect(result).toEqual([]);
@@ -124,13 +124,13 @@ describe("Movie API Client", () => {
     const result = await startVoting(1);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/sessions/1/start",
+      "http://localhost:8080/api/v1/sessions/1/start",
       expect.objectContaining({ method: "POST" })
     );
     expect(result.status).toBe("VOTING");
   });
 
-  it("getMovieDetails sends GET to /api/movies/{tmdbId}", async () => {
+  it("getMovieDetails sends GET to /api/v1/movies/{tmdbId}", async () => {
     const mockDetails = {
       tmdbId: 27205,
       title: "Inception",
@@ -154,7 +154,7 @@ describe("Movie API Client", () => {
     const result = await getMovieDetails(27205);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8080/api/movies/27205",
+      "http://localhost:8080/api/v1/movies/27205",
       expect.objectContaining({ method: "GET" })
     );
     expect(result.title).toBe("Inception");

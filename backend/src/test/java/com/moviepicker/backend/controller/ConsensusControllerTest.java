@@ -96,4 +96,37 @@ public class ConsensusControllerTest {
                 .andExpect(jsonPath("$.roomCode").value("WINNER"))
                 .andExpect(jsonPath("$.winner.title").value("Fight Club"));
     }
+
+    @Test
+    public void testCalculateResults_V1Endpoint_Returns200OK() throws Exception {
+        ScoredMovieDto winner = ScoredMovieDto.builder()
+                .movieSuggestionId(100L)
+                .tmdbId(550L)
+                .title("Fight Club")
+                .suggestedBy("Alice")
+                .positiveVoters(List.of("Alice", "Bob"))
+                .score(3)
+                .yesVotes(1)
+                .superlikeVotes(1)
+                .matchPercentage(100.0)
+                .isUnanimous(true)
+                .build();
+
+        SessionResultsResponse response = SessionResultsResponse.builder()
+                .sessionId(1L)
+                .roomCode("WINNER")
+                .totalParticipants(2)
+                .totalMovies(1)
+                .winner(winner)
+                .rankedMovies(List.of(winner))
+                .calculatedAt(LocalDateTime.now())
+                .build();
+
+        when(consensusService.calculateResults(1L)).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/sessions/1/calculate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomCode").value("WINNER"))
+                .andExpect(jsonPath("$.winner.title").value("Fight Club"));
+    }
 }

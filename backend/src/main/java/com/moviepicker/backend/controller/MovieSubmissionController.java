@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sessions/{sessionId}")
+@RequestMapping({"/api/v1/sessions/{sessionId}", "/api/sessions/{sessionId}"})
 @RequiredArgsConstructor
 public class MovieSubmissionController {
 

@@ -11,16 +11,14 @@ export interface KickedModalProps {
   onDismiss: () => void;
 }
 
+const emptySubscribe = () => () => {};
+
 export function KickedModal({
   isOpen,
   message = "You have been removed from the session by the host.",
   onDismiss,
 }: KickedModalProps) {
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   if (!isOpen || !mounted) return null;
 

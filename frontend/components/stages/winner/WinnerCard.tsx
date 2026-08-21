@@ -46,7 +46,6 @@ export const WinnerCard = React.memo(function WinnerCard({
         <WinnerPosterColumn
           title={winner.title}
           posterPath={winner.posterPath}
-          tmdbId={winner.tmdbId}
         />
 
         {/* Info Column */}

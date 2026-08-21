@@ -22,12 +22,6 @@ export function JoinRoomForm({
   const [codeError, setCodeError] = React.useState<string | null>(null);
   const [nameError, setNameError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (initialRoomCode) {
-      setRoomCode(initialRoomCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6));
-    }
-  }, [initialRoomCode]);
-
   const handleRoomCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uppercase = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     setRoomCode(uppercase);
