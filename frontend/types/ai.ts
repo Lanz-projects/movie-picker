@@ -24,3 +24,17 @@ export interface AiRecommendationResponse {
   modelUsed?: string;
   cached?: boolean;
 }
+
+export interface AiChatTurn {
+  id: string;
+  prompt: string;
+  timestamp: Date;
+  replyMessage: string;
+  movies: MovieDto[];
+  totalResultsCount: number;
+  hasMore: boolean;
+  page: number;
+  modelUsed?: string;
+  isLoadingMore?: boolean;
+}
+

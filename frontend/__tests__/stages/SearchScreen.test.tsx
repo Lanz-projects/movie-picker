@@ -127,9 +127,9 @@ describe("SearchScreen Stage Component", () => {
     expect(screen.getByText(/Nominate Your Movie Picks/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /search movies/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /trending/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /action/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /action$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open filter options/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /open vibe matcher/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /I'm Lost \(AI Concierge\)/i })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(movieApi.getTrendingMovies).toHaveBeenCalledWith(1);
@@ -166,15 +166,14 @@ describe("SearchScreen Stage Component", () => {
 
     const { user } = await renderSearchScreen(true);
 
-    const vibeBtn = screen.getByRole("button", { name: /open vibe matcher/i });
-    await user.click(vibeBtn);
+    const aiTabBtn = screen.getByRole("button", { name: /I'm Lost \(AI Concierge\)/i });
+    await user.click(aiTabBtn);
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Match the Vibe" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cozy Feel-Good Comfort" })).toBeInTheDocument();
+    expect(screen.getByText("Movie Concierge AI")).toBeInTheDocument();
+    expect(screen.getByText("Cozy Rainy Night")).toBeInTheDocument();
 
-    // Click a preset chip inside modal
-    const presetChip = screen.getByRole("button", { name: "Cozy Feel-Good Comfort" });
+    // Click a preset chip inside AI tab
+    const presetChip = screen.getByRole("button", { name: "Cozy Rainy Night" });
     await user.click(presetChip);
 
     await waitFor(() => {
@@ -351,4 +350,20 @@ describe("SearchScreen Stage Component", () => {
       expect(api.startVoting).toHaveBeenCalledWith(1);
     });
   });
+
+  it("switches to I'm Lost (AI Concierge) tab and back to Browse & Search", async () => {
+    const { user } = await renderSearchScreen(true);
+
+    const aiTabBtn = screen.getByRole("button", { name: /I'm Lost \(AI Concierge\)/i });
+    await user.click(aiTabBtn);
+
+    expect(screen.getByText("Movie Concierge AI")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Ask the Movie Concierge/i)).toBeInTheDocument();
+
+    const browseTabBtn = screen.getByRole("button", { name: /Browse & Search/i });
+    await user.click(browseTabBtn);
+
+    expect(screen.getByPlaceholderText(/search tmdb/i)).toBeInTheDocument();
+  });
 });
+

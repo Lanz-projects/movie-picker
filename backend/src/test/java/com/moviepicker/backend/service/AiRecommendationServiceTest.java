@@ -248,6 +248,31 @@ public class AiRecommendationServiceTest {
     }
 
     @Test
+    public void testGetRecommendations_OffTopicPrompt_ReturnsWittyMessageAndZeroMovies() {
+        when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
+
+        AiRawGeminiResult geminiResult = AiRawGeminiResult.builder()
+                .replyMessage("I only write movie scripts, not Python scripts! Tell me your favorite movie genre instead.")
+                .suggestions(List.of())
+                .build();
+
+        when(geminiClient.generateRecommendations(eq("give me a python script"), any(), any(), anyInt()))
+                .thenReturn(geminiResult);
+
+        AiRecommendationRequest request = AiRecommendationRequest.builder()
+                .prompt("give me a python script")
+                .build();
+
+        AiRecommendationResponse response = aiRecommendationService.getRecommendations(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getReplyMessage()).contains("I only write movie scripts, not Python scripts!");
+        assertThat(response.getMovies()).isEmpty();
+        assertThat(response.getTotalResults()).isEqualTo(0);
+        assertThat(response.isHasMore()).isFalse();
+    }
+
+    @Test
     public void testGetRecommendations_GeminiFails_ReturnsGracefulNotice() {
         when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
 

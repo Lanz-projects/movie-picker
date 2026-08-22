@@ -6,11 +6,11 @@ import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { SearchFilterToolbar } from "./search/SearchFilterToolbar";
-import { VibeMatcherModal } from "./search/VibeMatcherModal";
+import { AiConciergeTab } from "./search/AiConciergeTab";
 import { ScrollNavFab } from "@/components/ui/ScrollNavFab";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
-import { AlertCircle, X, Sparkles } from "lucide-react";
+import { AlertCircle, X, Sparkles, Search } from "lucide-react";
 import type { MovieDto, MovieSubmissionDto } from "@/types";
 
 export interface SearchScreenProps {
@@ -59,9 +59,9 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
     clearError: clearSearchError,
   } = useMovieSearch({ debounceMs });
 
+  const [activeTab, setActiveTab] = React.useState<"browse" | "ai">("browse");
   const [selectedMovieForModal, setSelectedMovieForModal] = React.useState<MovieDto | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-  const [isVibeModalOpen, setIsVibeModalOpen] = React.useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [isStartingVoting, setIsStartingVoting] = React.useState<boolean>(false);
 
@@ -171,64 +171,107 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           </p>
         </div>
 
-        {/* Search Bar Input, Category Filters, & Dynamic Heading Toolbar */}
-        <SearchFilterToolbar
-          query={query}
-          onQueryChange={setQuery}
-          onClearQuery={clearSearch}
-          isLoading={isSearching}
-          activeGenre={activeGenre}
-          onSelectGenre={setActiveGenre}
-          filters={filters}
-          onFiltersChange={setFilters}
-          activeFilterCount={activeFilterCount}
-          onClearFilters={clearFilters}
-          mode={mode}
-          sectionTitle={sectionTitle}
-          totalResults={totalResults}
-          currentResultsCount={movies.length}
-          onOpenVibeMatcher={() => setIsVibeModalOpen(true)}
-        />
-
-        {/* Global Error Banner */}
-        {effectiveError ? (
-          <div
-            role="alert"
-            className="flex items-center justify-between gap-3 w-full max-w-3xl p-3.5 rounded-2xl border border-brand-coral/30 bg-brand-coral/10 text-text-main shadow-lg"
-          >
-            <div className="flex items-center gap-2.5">
-              <AlertCircle className="h-5 w-5 text-brand-coral flex-shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-brand-coral">
-                {effectiveError}
-              </span>
-            </div>
+        {/* Mode Navigation Tabs */}
+        <div className="flex justify-center w-full">
+          <div className="inline-flex p-1.5 rounded-2xl bg-bg-card border border-border-subtle shadow-lg gap-1.5">
             <button
               type="button"
-              onClick={handleDismissError}
-              aria-label="Dismiss error"
-              className="p-1 rounded-lg text-brand-coral hover:bg-brand-coral/20 transition-colors cursor-pointer"
+              onClick={() => setActiveTab("browse")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-display text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                activeTab === "browse"
+                  ? "bg-bg-elevated text-text-main shadow-md"
+                  : "text-text-secondary hover:text-text-main hover:bg-bg-surface/50"
+              }`}
             >
-              <X className="h-4 w-4" />
+              <Search className="w-4 h-4" />
+              <span>Browse & Search</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("ai")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-display text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                activeTab === "ai"
+                  ? "bg-gradient-to-r from-brand-violet/25 to-brand-indigo/25 border border-brand-violet/40 text-text-main shadow-lg shadow-brand-violet/15"
+                  : "text-text-secondary hover:text-text-main hover:bg-bg-surface/50"
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-brand-violet" />
+              <span>I&apos;m Lost (AI Concierge)</span>
             </button>
           </div>
-        ) : null}
+        </div>
 
-        {/* Movie Results Grid */}
-        <MovieGrid
-          movies={movies}
-          deckMovieIds={selectedMovieIds}
-          onToggleDeck={handleToggleDeck}
-          onSelectMovie={handleSelectMovie}
-          isLoading={isSearching && movies.length === 0}
-          isSearchingMore={isSearchingMore}
-          hasSearched={hasSearched}
-          query={query}
-          error={searchError}
-          page={page}
-          totalPages={totalPages}
-          onLoadMore={loadMore}
-          isDeckFull={isDeckFull}
-        />
+        {/* TAB 1: BROWSE & SEARCH */}
+        <div className={activeTab === "browse" ? "w-full flex flex-col items-center gap-5" : "hidden"}>
+          {/* Search Bar Input, Category Filters, & Dynamic Heading Toolbar */}
+          <SearchFilterToolbar
+            query={query}
+            onQueryChange={setQuery}
+            onClearQuery={clearSearch}
+            isLoading={isSearching}
+            activeGenre={activeGenre}
+            onSelectGenre={setActiveGenre}
+            filters={filters}
+            onFiltersChange={setFilters}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={clearFilters}
+            mode={mode}
+            sectionTitle={sectionTitle}
+            totalResults={totalResults}
+            currentResultsCount={movies.length}
+          />
+
+          {/* Global Error Banner */}
+          {effectiveError ? (
+            <div
+              role="alert"
+              className="flex items-center justify-between gap-3 w-full max-w-3xl p-3.5 rounded-2xl border border-brand-coral/30 bg-brand-coral/10 text-text-main shadow-lg"
+            >
+              <div className="flex items-center gap-2.5">
+                <AlertCircle className="h-5 w-5 text-brand-coral flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium text-brand-coral">
+                  {effectiveError}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDismissError}
+                aria-label="Dismiss error"
+                className="p-1 rounded-lg text-brand-coral hover:bg-brand-coral/20 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : null}
+
+          {/* Movie Results Grid */}
+          <MovieGrid
+            movies={movies}
+            deckMovieIds={selectedMovieIds}
+            onToggleDeck={handleToggleDeck}
+            onSelectMovie={handleSelectMovie}
+            isLoading={isSearching && movies.length === 0}
+            isSearchingMore={isSearchingMore}
+            hasSearched={hasSearched}
+            query={query}
+            error={searchError}
+            page={page}
+            totalPages={totalPages}
+            onLoadMore={loadMore}
+            isDeckFull={isDeckFull}
+          />
+        </div>
+
+        {/* TAB 2: AI CONCIERGE CHAT INTERFACE */}
+        <div className={activeTab === "ai" ? "w-full" : "hidden"}>
+          <AiConciergeTab
+            roomCode={session?.roomCode}
+            deckMovieIds={selectedMovieIds}
+            onToggleDeck={handleToggleDeck}
+            isDeckFull={isDeckFull}
+          />
+        </div>
 
         {/* Extra Bottom Spacer for Scroll Clearance */}
         <div className="h-20 sm:h-24 w-full pointer-events-none" aria-hidden="true" />
@@ -262,16 +305,6 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
         isInDeck={isModalMovieInDeck}
         onToggleDeck={handleToggleDeck}
         disabled={!isModalMovieInDeck && isDeckFull}
-      />
-
-      {/* Vibe Matcher Curator Modal */}
-      <VibeMatcherModal
-        isOpen={isVibeModalOpen}
-        onClose={() => setIsVibeModalOpen(false)}
-        roomCode={session?.roomCode}
-        deckMovieIds={selectedMovieIds}
-        onToggleDeck={handleToggleDeck}
-        isDeckFull={isDeckFull}
       />
 
       {/* Floating Smart Scroll Navigation FAB */}

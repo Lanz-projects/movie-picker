@@ -208,11 +208,11 @@ public class GeminiClientImpl implements GeminiClient {
         }
 
         StringBuilder finalPrompt = new StringBuilder(prompt.trim());
-        finalPrompt.append(String.format("\n[Instruction: Recommend exactly %d movies.", limit));
+        finalPrompt.append(String.format("\n[Instruction: If this is a movie recommendation request, recommend up to %d movies.", limit));
         if (excludedTitles != null && !excludedTitles.isEmpty()) {
-            finalPrompt.append(" Do NOT suggest any of these titles: ").append(String.join(", ", excludedTitles));
+            finalPrompt.append(" Do NOT suggest any of these titles: ").append(String.join(", ", excludedTitles)).append(".");
         }
-        finalPrompt.append("]");
+        finalPrompt.append(" If this request is unrelated to movies or cinema, return an empty suggestions array.]");
 
         contents.add(Map.of(
                 "role", "user",
