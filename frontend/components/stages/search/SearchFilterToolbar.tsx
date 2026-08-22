@@ -4,7 +4,8 @@ import * as React from "react";
 import { SearchBar } from "./SearchBar";
 import { GenreFilterChips } from "./GenreFilterChips";
 import { SearchFilterModal, type FilterState } from "./SearchFilterModal";
-import { RotateCcw, SlidersHorizontal, X } from "lucide-react";
+import { ActiveFilterBadges } from "./ActiveFilterBadges";
+import { RotateCcw, SlidersHorizontal, Sparkles } from "lucide-react";
 import type { SearchMode } from "@/hooks/useMovieSearch";
 
 export interface SearchFilterToolbarProps {
@@ -22,6 +23,7 @@ export interface SearchFilterToolbarProps {
   sectionTitle: string;
   totalResults: number;
   currentResultsCount: number;
+  onOpenVibeMatcher?: () => void;
 }
 
 export function SearchFilterToolbar({
@@ -39,29 +41,10 @@ export function SearchFilterToolbar({
   sectionTitle,
   totalResults,
   currentResultsCount,
+  onOpenVibeMatcher,
 }: SearchFilterToolbarProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = React.useState<boolean>(false);
   const isFiltered = mode !== "TRENDING";
-
-  const handleRemoveProvider = () => {
-    onFiltersChange({ ...filters, provider: null });
-  };
-
-  const handleRemoveDecade = () => {
-    onFiltersChange({ ...filters, decade: null });
-  };
-
-  const handleRemoveRating = () => {
-    onFiltersChange({ ...filters, minRating: null });
-  };
-
-  const handleRemoveRuntime = () => {
-    onFiltersChange({ ...filters, minRuntime: null, maxRuntime: null });
-  };
-
-  const handleRemoveLanguage = () => {
-    onFiltersChange({ ...filters, language: null });
-  };
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3.5">
@@ -88,7 +71,20 @@ export function SearchFilterToolbar({
 
         {/* Filter Controls & Active Badges Row */}
         <div className="flex flex-wrap items-center gap-2 px-1 pt-1 border-t border-border-subtle/50">
-          {/* Sleek Filter Options Button */}
+          {/* Match the Vibe Curator Button */}
+          {onOpenVibeMatcher ? (
+            <button
+              type="button"
+              onClick={onOpenVibeMatcher}
+              aria-label="Open vibe matcher"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer bg-gradient-to-r from-brand-violet/15 to-brand-indigo/15 hover:from-brand-violet/25 hover:to-brand-indigo/25 border border-brand-violet/35 text-brand-violet hover:text-white shadow-sm"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-brand-violet" />
+              <span>Match the Vibe</span>
+            </button>
+          ) : null}
+
+          {/* Filter Options Button */}
           <button
             type="button"
             onClick={() => setIsFilterModalOpen(true)}
@@ -109,77 +105,14 @@ export function SearchFilterToolbar({
           </button>
 
           {/* Quick Active Filter Badges */}
-          {filters.provider ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30 animate-in fade-in">
-              <span>📺 {filters.provider}</span>
-              <button
-                type="button"
-                onClick={handleRemoveProvider}
-                aria-label={`Remove ${filters.provider} filter`}
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ) : null}
-
-          {filters.decade ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-violet/15 text-brand-violet border border-brand-violet/30 animate-in fade-in">
-              <span>📅 {filters.decade === "vintage" ? "Vintage" : filters.decade}</span>
-              <button
-                type="button"
-                onClick={handleRemoveDecade}
-                aria-label={`Remove ${filters.decade} filter`}
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ) : null}
-
-          {filters.minRating ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-amber/15 text-brand-amber border border-brand-amber/30 animate-in fade-in">
-              <span>⭐ {filters.minRating}+</span>
-              <button
-                type="button"
-                onClick={handleRemoveRating}
-                aria-label="Remove rating filter"
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ) : null}
-
-          {filters.minRuntime !== null || filters.maxRuntime !== null ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-coral/15 text-brand-coral border border-brand-coral/30 animate-in fade-in">
-              <span>
-                ⏱️ {filters.maxRuntime && !filters.minRuntime ? "<90m" : filters.minRuntime && filters.maxRuntime ? "90-120m" : ">120m"}
-              </span>
-              <button
-                type="button"
-                onClick={handleRemoveRuntime}
-                aria-label="Remove runtime filter"
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ) : null}
-
-          {filters.language ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-indigo/15 text-brand-indigo border border-brand-indigo/30 animate-in fade-in">
-              <span>🌐 {filters.language.toUpperCase()}</span>
-              <button
-                type="button"
-                onClick={handleRemoveLanguage}
-                aria-label="Remove language filter"
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ) : null}
+          <ActiveFilterBadges
+            filters={filters}
+            onRemoveProvider={() => onFiltersChange({ ...filters, provider: null })}
+            onRemoveDecade={() => onFiltersChange({ ...filters, decade: null })}
+            onRemoveRating={() => onFiltersChange({ ...filters, minRating: null })}
+            onRemoveRuntime={() => onFiltersChange({ ...filters, minRuntime: null, maxRuntime: null })}
+            onRemoveLanguage={() => onFiltersChange({ ...filters, language: null })}
+          />
         </div>
       </div>
 

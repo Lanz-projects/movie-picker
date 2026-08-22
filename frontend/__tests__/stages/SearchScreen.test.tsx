@@ -5,10 +5,12 @@ import { SearchScreen } from "@/components/stages/SearchScreen";
 import { SessionProvider, useSession } from "@/context/SessionContext";
 import * as api from "@/lib/api";
 import * as movieApi from "@/lib/api/movie";
-import type { SessionResponse, MovieDto, MovieSearchResponse } from "@/types";
+import * as aiApi from "@/lib/api/ai";
+import type { SessionResponse, MovieDto, MovieSearchResponse, AiRecommendationResponse } from "@/types";
 
 vi.mock("@/lib/api");
 vi.mock("@/lib/api/movie");
+vi.mock("@/lib/api/ai");
 vi.mock("@/lib/websocket", () => ({
   stompService: {
     connect: vi.fn(),
@@ -127,6 +129,7 @@ describe("SearchScreen Stage Component", () => {
     expect(screen.getByRole("button", { name: /trending/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /action/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open filter options/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open vibe matcher/i })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(movieApi.getTrendingMovies).toHaveBeenCalledWith(1);
@@ -135,6 +138,49 @@ describe("SearchScreen Stage Component", () => {
     });
 
     expect(screen.getByRole("region", { name: /movie selection rack/i })).toBeInTheDocument();
+  });
+
+  it("opens Vibe Matcher modal when Match the Vibe button is clicked", async () => {
+    const mockVibeResponse: AiRecommendationResponse = {
+      prompt: "Cozy Feel-Good Comfort",
+      replyMessage: "Here are some cozy picks:",
+      movies: [
+        {
+          tmdbId: 19995,
+          title: "Avatar",
+          overview: "In the 22nd century...",
+          posterPath: "/avatar.jpg",
+          releaseYear: 2009,
+          voteAverage: 7.6,
+          aiReasoning: "Immersive world-building and great visuals.",
+        },
+      ],
+      page: 1,
+      pageSize: 5,
+      totalResults: 1,
+      hasMore: false,
+      modelUsed: "gemini-2.5-flash-lite",
+      cached: false,
+    };
+    vi.mocked(aiApi.getAiRecommendations).mockResolvedValue(mockVibeResponse);
+
+    const { user } = await renderSearchScreen(true);
+
+    const vibeBtn = screen.getByRole("button", { name: /open vibe matcher/i });
+    await user.click(vibeBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Match the Vibe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cozy Feel-Good Comfort" })).toBeInTheDocument();
+
+    // Click a preset chip inside modal
+    const presetChip = screen.getByRole("button", { name: "Cozy Feel-Good Comfort" });
+    await user.click(presetChip);
+
+    await waitFor(() => {
+      expect(screen.getByText("Avatar")).toBeInTheDocument();
+      expect(screen.getByText(/Immersive world-building/i)).toBeInTheDocument();
+    });
   });
 
   it("performs movie search and renders result cards", async () => {

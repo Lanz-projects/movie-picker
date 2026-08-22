@@ -59,6 +59,35 @@ describe("SearchFilterToolbar Component", () => {
     expect(screen.getByText("Discovery Filters")).toBeInTheDocument();
   });
 
+  it("renders Match the Vibe button and invokes onOpenVibeMatcher on click", () => {
+    const handleOpenVibeMatcher = vi.fn();
+    render(
+      <SearchFilterToolbar
+        query=""
+        onQueryChange={vi.fn()}
+        onClearQuery={vi.fn()}
+        isLoading={false}
+        activeGenre={null}
+        onSelectGenre={vi.fn()}
+        filters={DEFAULT_FILTER_STATE}
+        onFiltersChange={vi.fn()}
+        activeFilterCount={0}
+        onClearFilters={vi.fn()}
+        mode="TRENDING"
+        sectionTitle="🔥 Trending This Week"
+        totalResults={20}
+        currentResultsCount={20}
+        onOpenVibeMatcher={handleOpenVibeMatcher}
+      />
+    );
+
+    const vibeBtn = screen.getByRole("button", { name: /open vibe matcher/i });
+    expect(vibeBtn).toBeInTheDocument();
+    fireEvent.click(vibeBtn);
+
+    expect(handleOpenVibeMatcher).toHaveBeenCalledTimes(1);
+  });
+
   it("renders active filter chips and allows removing individual filters", () => {
     const handleFiltersChange = vi.fn();
     render(

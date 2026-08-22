@@ -6,6 +6,7 @@ import { MovieGrid } from "./search/MovieGrid";
 import { SelectionRack } from "./search/SelectionRack";
 import { MovieDetailsModal } from "./search/MovieDetailsModal";
 import { SearchFilterToolbar } from "./search/SearchFilterToolbar";
+import { VibeMatcherModal } from "./search/VibeMatcherModal";
 import { ScrollNavFab } from "@/components/ui/ScrollNavFab";
 import { useSession } from "@/context/SessionContext";
 import { useMovieSearch } from "@/hooks/useMovieSearch";
@@ -60,6 +61,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
 
   const [selectedMovieForModal, setSelectedMovieForModal] = React.useState<MovieDto | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
+  const [isVibeModalOpen, setIsVibeModalOpen] = React.useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [isStartingVoting, setIsStartingVoting] = React.useState<boolean>(false);
 
@@ -185,6 +187,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
           sectionTitle={sectionTitle}
           totalResults={totalResults}
           currentResultsCount={movies.length}
+          onOpenVibeMatcher={() => setIsVibeModalOpen(true)}
         />
 
         {/* Global Error Banner */}
@@ -259,6 +262,16 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
         isInDeck={isModalMovieInDeck}
         onToggleDeck={handleToggleDeck}
         disabled={!isModalMovieInDeck && isDeckFull}
+      />
+
+      {/* Vibe Matcher Curator Modal */}
+      <VibeMatcherModal
+        isOpen={isVibeModalOpen}
+        onClose={() => setIsVibeModalOpen(false)}
+        roomCode={session?.roomCode}
+        deckMovieIds={selectedMovieIds}
+        onToggleDeck={handleToggleDeck}
+        isDeckFull={isDeckFull}
       />
 
       {/* Floating Smart Scroll Navigation FAB */}

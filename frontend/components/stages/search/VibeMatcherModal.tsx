@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { Sparkles, X, Loader2, RefreshCw, AlertCircle } from "lucide-react";
-import { getAiRecommendations } from "@/lib/api/ai";
 import { VibePresetChips } from "./vibe/VibePresetChips";
 import { VibeCardItem } from "./vibe/VibeCardItem";
-import type { MovieDto, AiRecommendationResponse } from "@/types";
+import { useVibeRecommendations } from "./vibe/useVibeRecommendations";
+import type { MovieDto } from "@/types";
 
 export interface VibeMatcherModalProps {
   isOpen: boolean;
@@ -33,19 +33,21 @@ export function VibeMatcherModal({
   onToggleDeck,
   isDeckFull,
 }: VibeMatcherModalProps) {
-  const [prompt, setPrompt] = React.useState<string>("");
-  const [activePrompt, setActivePrompt] = React.useState<string>("");
-  const [recommendations, setRecommendations] = React.useState<MovieDto[]>([]);
-  const [replyMessage, setReplyMessage] = React.useState<string>("");
-  const [page, setPage] = React.useState<number>(1);
-  const [hasMore, setHasMore] = React.useState<boolean>(false);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [isLoadingMore, setIsLoadingMore] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [cooldownSeconds, setCooldownSeconds] = React.useState<number>(0);
+  const {
+    prompt,
+    setPrompt,
+    recommendations,
+    replyMessage,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    error,
+    cooldownSeconds,
+    fetchRecommendations,
+    loadMore,
+  } = useVibeRecommendations({ roomCode, deckMovieIds });
 
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const cooldownTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -65,79 +67,16 @@ export function VibeMatcherModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  React.useEffect(() => {
-    if (cooldownSeconds > 0) {
-      cooldownTimerRef.current = setTimeout(() => {
-        setCooldownSeconds((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => {
-      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-    };
-  }, [cooldownSeconds]);
-
-  const handleFetchRecommendations = React.useCallback(
-    async (vibePrompt: string, targetPage: number = 1) => {
-      if (!vibePrompt.trim() || isLoading) return;
-
-      const isFirstPage = targetPage === 1;
-      if (isFirstPage) {
-        setIsLoading(true);
-        setError(null);
-      } else {
-        setIsLoadingMore(true);
-      }
-
-      try {
-        const response: AiRecommendationResponse = await getAiRecommendations(
-          roomCode || "GLOBAL",
-          {
-            prompt: vibePrompt.trim(),
-            page: targetPage,
-            limit: 5,
-            excludedTmdbIds: deckMovieIds,
-          }
-        );
-
-        if (isFirstPage) {
-          setRecommendations(response.movies || []);
-          setReplyMessage(response.replyMessage || "");
-          setActivePrompt(vibePrompt.trim());
-          setPage(1);
-          setCooldownSeconds(3);
-        } else {
-          setRecommendations((prev) => [...prev, ...(response.movies || [])]);
-          setPage(targetPage);
-        }
-
-        setHasMore(response.hasMore || false);
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Could not fetch recommendations. Please try again.";
-        setError(message);
-      } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-      }
-    },
-    [isLoading, roomCode, deckMovieIds]
-  );
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cooldownSeconds > 0) return;
-    handleFetchRecommendations(prompt, 1);
+    fetchRecommendations(prompt, 1);
   };
 
   const handleSelectPresetVibe = (preset: string) => {
     if (cooldownSeconds > 0) return;
     setPrompt(preset);
-    handleFetchRecommendations(preset, 1);
-  };
-
-  const handleLoadMore = () => {
-    if (!hasMore || isLoadingMore || !activePrompt) return;
-    handleFetchRecommendations(activePrompt, page + 1);
+    fetchRecommendations(preset, 1);
   };
 
   if (!isOpen) return null;
@@ -257,7 +196,7 @@ export function VibeMatcherModal({
                 <div className="flex justify-center pt-2">
                   <button
                     type="button"
-                    onClick={handleLoadMore}
+                    onClick={loadMore}
                     disabled={isLoadingMore}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-bg-surface hover:bg-bg-elevated border border-border-subtle text-xs font-semibold text-text-secondary hover:text-text-main transition-colors cursor-pointer disabled:opacity-50"
                   >
