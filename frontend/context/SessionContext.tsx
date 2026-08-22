@@ -360,11 +360,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         if (event.sessionStatus === "SUGGESTING") {
           setMovieDeck([]);
           clearMyDeckSelection();
-          if (session?.roomCode && currentUser?.id) {
-            clearVotedSuggestionIds(session.roomCode, currentUser.id);
+          if ((event.roomCode || session?.roomCode) && currentUser?.id) {
+            clearVotedSuggestionIds(event.roomCode || session?.roomCode, currentUser.id);
           }
           setHasSubmittedDeck(false);
-          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 0), readyUserIds: [] });
+          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 1), readyUserIds: [] });
           setProgress(null);
           setResults(null);
           setStage("SEARCH");
@@ -393,11 +393,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         } else if (event.sessionStatus === "WAITING") {
           setMovieDeck([]);
           clearMyDeckSelection();
-          if (session?.roomCode && currentUser?.id) {
-            clearVotedSuggestionIds(session.roomCode, currentUser.id);
+          if ((event.roomCode || session?.roomCode) && currentUser?.id) {
+            clearVotedSuggestionIds(event.roomCode || session?.roomCode, currentUser.id);
           }
           setHasSubmittedDeck(false);
-          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 0), readyUserIds: [] });
+          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 1), readyUserIds: [] });
           setProgress(null);
           setResults(null);
           setStage("LOBBY");
@@ -579,7 +579,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setSession(refreshed);
 
       if (refreshed.status === "SUGGESTING") {
-        if (stage === "LOBBY") {
+        if (stage !== "SEARCH") {
+          setMovieDeck([]);
+          clearMyDeckSelection();
+          if ((refreshed.roomCode || session.roomCode) && currentUser?.id) {
+            clearVotedSuggestionIds(refreshed.roomCode || session.roomCode, currentUser.id);
+          }
+          setProgress(null);
+          setResults(null);
           setStage("SEARCH");
         }
         try {
@@ -590,17 +597,21 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           });
           if (currentUser?.id && readyIds.has(currentUser.id)) {
             setHasSubmittedDeck(true);
+          } else {
+            setHasSubmittedDeck(false);
           }
-          setSubmissionProgress((prev) => ({
-            submittedCount: Math.max(prev.submittedCount, readyIds.size),
-            totalCount: refreshed.users ? refreshed.users.length : prev.totalCount,
-            readyUserIds: Array.from(new Set([...prev.readyUserIds, ...readyIds])),
-          }));
+          setSubmissionProgress({
+            submittedCount: readyIds.size,
+            totalCount: refreshed.users ? refreshed.users.length : (session?.users?.length || 1),
+            readyUserIds: Array.from(readyIds),
+          });
         } catch {
           // ignore
         }
-      } else if (refreshed.status === "VOTING" && (stage === "LOBBY" || stage === "SEARCH")) {
-        setStage("SWIPER");
+      } else if (refreshed.status === "VOTING") {
+        if (stage !== "SWIPER") {
+          setStage("SWIPER");
+        }
         try {
           const movies = await apiGetSessionMovies(refreshed.id);
           setMovieDeck(deduplicateMovieDeck(movies));
@@ -609,19 +620,32 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         } catch (err) {
           console.error("[SessionContext] Failed to load voting data during refresh:", err);
         }
+      } else if (refreshed.status === "WAITING") {
+        if (stage !== "LOBBY" && stage !== "SETUP") {
+          setMovieDeck([]);
+          clearMyDeckSelection();
+          if ((refreshed.roomCode || session.roomCode) && currentUser?.id) {
+            clearVotedSuggestionIds(refreshed.roomCode || session.roomCode, currentUser.id);
+          }
+          setHasSubmittedDeck(false);
+          setSubmissionProgress({ submittedCount: 0, totalCount: refreshed.users ? refreshed.users.length : 1, readyUserIds: [] });
+          setProgress(null);
+          setResults(null);
+          setStage("LOBBY");
+        }
       } else if (refreshed.status === "COMPLETED" && stage !== "WINNER") {
         fetchConsensusResults();
       }
     } catch {
       // Background refresh failure ignored
     }
-  }, [session, stage, currentUser, fetchConsensusResults]);
+  }, [session, stage, currentUser, fetchConsensusResults, clearMyDeckSelection]);
 
   refreshSessionRef.current = refreshSession;
 
   // Synchronize room state when user re-focuses or tabs back into the app
   React.useEffect(() => {
-    if (!session?.roomCode || stage === "SETUP" || stage === "WINNER") {
+    if (!session?.roomCode || stage === "SETUP") {
       return;
     }
 
@@ -639,6 +663,21 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener("visibilitychange", handleFocusSync);
     };
   }, [session?.roomCode, stage, refreshSession]);
+
+  // Fallback polling while non-host is waiting for host actions (e.g. WINNER or LOBBY)
+  React.useEffect(() => {
+    if (!session?.roomCode || stage === "SETUP" || isHost) {
+      return;
+    }
+
+    if (stage === "WINNER" || stage === "LOBBY") {
+      const interval = setInterval(() => {
+        refreshSession();
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }
+  }, [session?.roomCode, stage, isHost, refreshSession]);
 
   const advanceToSearch = React.useCallback(async () => {
     if (!session) return;

@@ -1302,5 +1302,135 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.movieDeck).toHaveLength(1);
     expect(result.current.movieDeck[0].title).toBe("Fight Club");
   });
+
+  it("transitions non-host user from WINNER to SEARCH when host starts another round via STAGE_CHANGED", async () => {
+    let capturedRoomCallback: ((event: RoomProgressEvent) => void) | null = null;
+    vi.mocked(stompService.subscribeToRoom).mockImplementation((_roomCode, callback) => {
+      capturedRoomCallback = callback;
+      return vi.fn();
+    });
+
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "WIN1",
+      hostName: "Alice",
+      status: "COMPLETED",
+      maxUsers: 5,
+      maxSuggestionsPerUser: 3,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", isHost: false, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+    vi.mocked(api.getResultsByRoomCode).mockResolvedValue({
+      sessionId: 1,
+      roomCode: "WIN1",
+      totalParticipants: 2,
+      totalMovies: 1,
+      unanimousMatch: false,
+      winner: {
+        tmdbId: 550,
+        title: "Fight Club",
+        score: 2,
+        yesVotes: 2,
+        noVotes: 0,
+        totalVotes: 2,
+        isUnanimous: true,
+      },
+      rankedMovies: [],
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("WIN1", "Bob");
+    });
+
+    // Simulate winning transition
+    await act(async () => {
+      await result.current.fetchConsensusResults();
+    });
+
+    expect(result.current.stage).toBe("WINNER");
+    expect(result.current.isHost).toBe(false);
+
+    // Host triggers Play Again -> STAGE_CHANGED event with SUGGESTING
+    act(() => {
+      capturedRoomCallback?.({
+        eventType: "STAGE_CHANGED",
+        roomCode: "WIN1",
+        sessionStatus: "SUGGESTING",
+        users: mockSession.users,
+      });
+    });
+
+    expect(result.current.stage).toBe("SEARCH");
+    expect(result.current.results).toBeNull();
+    expect(result.current.hasSubmittedDeck).toBe(false);
+  });
+
+  it("transitions non-host user from WINNER to SEARCH during refreshSession", async () => {
+    const mockSession: SessionResponse = {
+      id: 1,
+      roomCode: "WIN2",
+      hostName: "Alice",
+      status: "COMPLETED",
+      maxUsers: 5,
+      maxSuggestionsPerUser: 3,
+      users: [
+        { id: 10, displayName: "Alice", isHost: true, joinedAt: "2026-08-14T00:00:00" },
+        { id: 11, displayName: "Bob", isHost: false, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSession);
+    vi.mocked(api.getResultsByRoomCode).mockResolvedValue({
+      sessionId: 1,
+      roomCode: "WIN2",
+      totalParticipants: 2,
+      totalMovies: 1,
+      unanimousMatch: false,
+      winner: {
+        tmdbId: 550,
+        title: "Fight Club",
+        score: 2,
+        yesVotes: 2,
+        noVotes: 0,
+        totalVotes: 2,
+        isUnanimous: true,
+      },
+      rankedMovies: [],
+    });
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await result.current.joinRoom("WIN2", "Bob");
+    });
+
+    await act(async () => {
+      await result.current.fetchConsensusResults();
+    });
+
+    expect(result.current.stage).toBe("WINNER");
+
+    // Session status on backend is updated to SUGGESTING
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue({
+      ...mockSession,
+      status: "SUGGESTING",
+    });
+    vi.mocked(api.getSessionMovies).mockResolvedValue([]);
+
+    await act(async () => {
+      await result.current.refreshSession();
+    });
+
+    expect(result.current.stage).toBe("SEARCH");
+    expect(result.current.results).toBeNull();
+  });
 });
 

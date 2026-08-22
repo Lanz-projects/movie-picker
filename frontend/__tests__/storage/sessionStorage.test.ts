@@ -6,6 +6,9 @@ import {
   saveVotedSuggestionId,
   loadVotedSuggestionIds,
   clearVotedSuggestionIds,
+  saveAiChatHistory,
+  loadAiChatHistory,
+  clearAiChatHistory,
   type StoredSessionAuth,
 } from "@/lib/storage/sessionStorage";
 
@@ -95,5 +98,70 @@ describe("sessionStorage helper", () => {
     clearVotedSuggestionIds("KTQH", 1);
     expect(loadVotedSuggestionIds("KTQH", 1)).toEqual([]);
     expect(loadVotedSuggestionIds("OTHER", 2)).toEqual([202]);
+  });
+
+  it("saves, loads, and clears AI chat history for a specific room", () => {
+    const mockTurns = [
+      {
+        id: "turn-1",
+        prompt: "90s sci-fi",
+        timestamp: new Date("2026-08-22T10:00:00Z"),
+        replyMessage: "Here is The Matrix:",
+        movies: [
+          {
+            tmdbId: 603,
+            title: "The Matrix",
+            overview: "A computer hacker learns...",
+            posterPath: "/matrix.jpg",
+            releaseYear: 1999,
+            voteAverage: 8.2,
+          },
+        ],
+        totalResultsCount: 1,
+        hasMore: false,
+        page: 1,
+      },
+    ];
+
+    saveAiChatHistory("ROOM12", mockTurns);
+    const loaded = loadAiChatHistory("ROOM12");
+
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0].prompt).toBe("90s sci-fi");
+    expect(loaded[0].movies[0].title).toBe("The Matrix");
+    expect(loaded[0].timestamp).toBeInstanceOf(Date);
+
+    // Clear specific room
+    clearAiChatHistory("ROOM12");
+    expect(loadAiChatHistory("ROOM12")).toEqual([]);
+  });
+
+  it("clears all AI chat histories and voted suggestions on clearSessionAuth", () => {
+    saveSessionAuth({
+      roomCode: "ROOM12",
+      userId: 1,
+      displayName: "Alice",
+      isHost: true,
+      savedAt: Date.now(),
+    });
+    saveVotedSuggestionId("ROOM12", 1, 999);
+    saveAiChatHistory("ROOM12", [
+      {
+        id: "turn-1",
+        prompt: "comedies",
+        timestamp: new Date(),
+        replyMessage: "Fun picks",
+        movies: [],
+        totalResultsCount: 0,
+        hasMore: false,
+        page: 1,
+      },
+    ]);
+
+    clearSessionAuth();
+
+    expect(loadSessionAuth()).toBeNull();
+    expect(loadVotedSuggestionIds("ROOM12", 1)).toEqual([]);
+    expect(loadAiChatHistory("ROOM12")).toEqual([]);
   });
 });

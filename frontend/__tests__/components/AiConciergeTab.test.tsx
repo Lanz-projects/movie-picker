@@ -196,4 +196,54 @@ describe("AiConciergeTab Component", () => {
 
     expect(mockOnToggleDeck).toHaveBeenCalledWith(sampleMoviesTurn1[0]);
   });
+
+  it("loads persisted conversation from sessionStorage on mount and clears on clear button click", () => {
+    // Pre-populate sessionStorage with a past turn
+    sessionStorage.setItem(
+      "movie_picker_ai_chat_ROOM12",
+      JSON.stringify([
+        {
+          id: "persisted-1",
+          prompt: "classic film noir",
+          timestamp: new Date().toISOString(),
+          replyMessage: "Here is Chinatown:",
+          movies: [
+            {
+              tmdbId: 329,
+              title: "Chinatown",
+              overview: "A private detective...",
+              posterPath: "/chinatown.jpg",
+              releaseYear: 1974,
+              voteAverage: 8.2,
+            },
+          ],
+          totalResultsCount: 1,
+          hasMore: false,
+          page: 1,
+        },
+      ])
+    );
+
+    render(
+      <AiConciergeTab
+        roomCode="ROOM12"
+        deckMovieIds={[]}
+        onToggleDeck={mockOnToggleDeck}
+        isDeckFull={false}
+      />
+    );
+
+    // Persisted prompt and movie should be rendered immediately on mount
+    expect(screen.getByText("classic film noir")).toBeInTheDocument();
+    expect(screen.getByText("Chinatown")).toBeInTheDocument();
+
+    // Click clear conversation button (trash icon)
+    const clearBtn = screen.getByTitle(/clear conversation history/i);
+    fireEvent.click(clearBtn);
+
+    expect(screen.queryByText("classic film noir")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chinatown")).not.toBeInTheDocument();
+    expect(sessionStorage.getItem("movie_picker_ai_chat_ROOM12")).toBeNull();
+  });
 });
+

@@ -49,6 +49,7 @@ export function clearSessionAuth(): void {
   try {
     sessionStorage.removeItem(STORAGE_KEY);
     clearVotedSuggestionIds();
+    clearAiChatHistory();
   } catch (err) {
     console.warn("[sessionStorage] Failed to clear session auth:", err);
   }
@@ -103,3 +104,62 @@ export function clearVotedSuggestionIds(roomCode?: string, userId?: number): voi
     console.warn("[sessionStorage] Failed to clear voted suggestions:", err);
   }
 }
+
+const AI_CHAT_KEY_PREFIX = "movie_picker_ai_chat_";
+
+import type { AiChatTurn } from "@/types/ai";
+
+export function saveAiChatHistory(roomCode: string, turns: AiChatTurn[]): void {
+  if (typeof window === "undefined" || !roomCode) return;
+  try {
+    const key = `${AI_CHAT_KEY_PREFIX}${roomCode.trim().toUpperCase()}`;
+    if (!turns || turns.length === 0) {
+      sessionStorage.removeItem(key);
+    } else {
+      sessionStorage.setItem(key, JSON.stringify(turns));
+    }
+  } catch (err) {
+    console.warn("[sessionStorage] Failed to save AI chat history:", err);
+  }
+}
+
+export function loadAiChatHistory(roomCode: string): AiChatTurn[] {
+  if (typeof window === "undefined" || !roomCode) return [];
+  try {
+    const key = `${AI_CHAT_KEY_PREFIX}${roomCode.trim().toUpperCase()}`;
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    // Ensure Date objects are re-instantiated
+    return parsed.map((t: AiChatTurn) => ({
+      ...t,
+      timestamp: t.timestamp ? new Date(t.timestamp) : new Date(),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export function clearAiChatHistory(roomCode?: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (roomCode) {
+      const key = `${AI_CHAT_KEY_PREFIX}${roomCode.trim().toUpperCase()}`;
+      sessionStorage.removeItem(key);
+    } else {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith(AI_CHAT_KEY_PREFIX)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+    }
+  } catch (err) {
+    console.warn("[sessionStorage] Failed to clear AI chat history:", err);
+  }
+}
+

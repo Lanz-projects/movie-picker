@@ -1,7 +1,10 @@
-"use client";
-
 import * as React from "react";
 import { getAiRecommendations } from "@/lib/api/ai";
+import {
+  loadAiChatHistory,
+  saveAiChatHistory,
+  clearAiChatHistory,
+} from "@/lib/storage/sessionStorage";
 import type { AiChatTurn, AiChatMessage, AiRecommendationResponse } from "@/types";
 
 export interface UseAiConversationOptions {
@@ -13,7 +16,9 @@ export function useAiConversation({
   roomCode,
   deckMovieIds,
 }: UseAiConversationOptions) {
-  const [turns, setTurns] = React.useState<AiChatTurn[]>([]);
+  const [turns, setTurns] = React.useState<AiChatTurn[]>(() => {
+    return roomCode ? loadAiChatHistory(roomCode) : [];
+  });
   const [prompt, setPrompt] = React.useState<string>("");
   const [isGenerating, setIsGenerating] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,6 +26,20 @@ export function useAiConversation({
 
   const cooldownTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  // Sync state when roomCode changes
+  React.useEffect(() => {
+    if (roomCode) {
+      setTurns(loadAiChatHistory(roomCode));
+    }
+  }, [roomCode]);
+
+  // Persist turns to sessionStorage on update
+  React.useEffect(() => {
+    if (roomCode) {
+      saveAiChatHistory(roomCode, turns);
+    }
+  }, [roomCode, turns]);
 
   // Cooldown countdown timer
   React.useEffect(() => {
@@ -170,7 +189,10 @@ export function useAiConversation({
   const clearConversation = React.useCallback(() => {
     setTurns([]);
     setError(null);
-  }, []);
+    if (roomCode) {
+      clearAiChatHistory(roomCode);
+    }
+  }, [roomCode]);
 
   return {
     turns,
