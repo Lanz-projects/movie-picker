@@ -46,8 +46,9 @@ export function SwiperScreen({
   const [isProcessingVote, setIsProcessingVote] = React.useState<boolean>(false);
 
   const totalMovies = movieDeck.length;
-  const isFinished = currentIndex >= totalMovies;
-  const currentMovie = !isFinished ? movieDeck[currentIndex] : null;
+  const isFinished = totalMovies > 0 && currentIndex >= totalMovies;
+  const isLoadingDeck = totalMovies === 0;
+  const currentMovie = !isFinished && !isLoadingDeck ? movieDeck[currentIndex] : null;
 
   // Preload upcoming movie poster images into browser cache for instant rendering
   React.useEffect(() => {
@@ -142,7 +143,17 @@ export function SwiperScreen({
       className={cn("flex-1 flex flex-col items-center justify-center px-3 py-2 sm:py-6 sm:px-4", className)}
     >
       <div className="flex flex-col items-center gap-3 sm:gap-4 w-full max-w-[420px] mx-auto animate-stage-in">
-        {isFinished ? (
+        {isLoadingDeck ? (
+          <div className="flex flex-col items-center justify-center p-12 gap-3 animate-fade-in text-center">
+            <div className="relative flex h-10 w-10 items-center justify-center">
+              <div className="absolute h-10 w-10 animate-ping rounded-full bg-brand-violet/30" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-violet border-t-transparent" />
+            </div>
+            <p className="text-sm font-semibold text-text-secondary tracking-wide">
+              Loading movie deck...
+            </p>
+          </div>
+        ) : isFinished ? (
           <SwiperFinishedView
             progress={progress}
             users={session?.users}

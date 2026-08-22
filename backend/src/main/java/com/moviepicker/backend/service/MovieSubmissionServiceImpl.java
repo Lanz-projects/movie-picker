@@ -112,17 +112,26 @@ public class MovieSubmissionServiceImpl implements MovieSubmissionService {
 
         List<User> users = userRepository.findBySessionId(sessionId);
         List<MovieSuggestion> allSuggestions = movieSuggestionRepository.findBySessionIdWithUser(sessionId);
-        long submittedUsersCount = allSuggestions.stream()
-                .map(s -> s.getUser() != null ? s.getUser().getId() : null)
-                .filter(java.util.Objects::nonNull)
-                .distinct()
-                .count();
+        java.util.Set<Long> submittedUserIds = new java.util.HashSet<>();
+        for (MovieSuggestion s : allSuggestions) {
+            if (s.getUser() != null && s.getUser().getId() != null) {
+                submittedUserIds.add(s.getUser().getId());
+            }
+            if (s.getNominators() != null) {
+                for (User u : s.getNominators()) {
+                    if (u != null && u.getId() != null) {
+                        submittedUserIds.add(u.getId());
+                    }
+                }
+            }
+        }
+        int submittedUsersCount = submittedUserIds.size();
 
         roomEventPublisher.publishDeckSubmitted(
                 session.getRoomCode(),
                 user.getId(),
                 user.getDisplayName(),
-                (int) submittedUsersCount,
+                submittedUsersCount,
                 users.size()
         );
 

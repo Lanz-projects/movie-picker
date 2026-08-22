@@ -193,6 +193,25 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         if (effectiveSession.status === "SUGGESTING") {
           setStage("SEARCH");
+          try {
+            const movies = await apiGetSessionMovies(effectiveSession.id);
+            const readyIds = new Set<number>();
+            movies.forEach((m) => {
+              if (m.userId) readyIds.add(m.userId);
+            });
+            if (isMounted) {
+              if (effectiveMe?.id && readyIds.has(effectiveMe.id)) {
+                setHasSubmittedDeck(true);
+              }
+              setSubmissionProgress({
+                submittedCount: readyIds.size,
+                totalCount: effectiveSession.users ? effectiveSession.users.length : 1,
+                readyUserIds: Array.from(readyIds),
+              });
+            }
+          } catch {
+            // Keep default progress
+          }
         } else if (effectiveSession.status === "VOTING") {
           setStage("SWIPER");
           try {
@@ -341,18 +360,27 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         if (event.sessionStatus === "SUGGESTING") {
           setMovieDeck([]);
           clearMyDeckSelection();
+          if (session?.roomCode && currentUser?.id) {
+            clearVotedSuggestionIds(session.roomCode, currentUser.id);
+          }
           setHasSubmittedDeck(false);
-          setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 0), readyUserIds: [] });
           setProgress(null);
           setResults(null);
           setStage("SEARCH");
         } else if (event.sessionStatus === "VOTING") {
-          if (session?.id) {
+          const targetSessionId = session?.id;
+          const targetRoomCode = event.roomCode || session?.roomCode;
+          if (targetSessionId) {
             try {
-              const movies = await apiGetSessionMovies(session.id);
+              const [movies, initialProgress] = await Promise.all([
+                apiGetSessionMovies(targetSessionId),
+                targetRoomCode ? apiGetProgress(targetRoomCode) : Promise.resolve(null),
+              ]);
               setMovieDeck(deduplicateMovieDeck(movies));
-              const initialProgress = await apiGetProgress(session.roomCode);
-              setProgress(initialProgress);
+              if (initialProgress) {
+                setProgress(initialProgress);
+              }
             } catch (err) {
               console.error("[SessionContext] Failed to load movies on VOTING stage start:", err);
             }
@@ -365,8 +393,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         } else if (event.sessionStatus === "WAITING") {
           setMovieDeck([]);
           clearMyDeckSelection();
+          if (session?.roomCode && currentUser?.id) {
+            clearVotedSuggestionIds(session.roomCode, currentUser.id);
+          }
           setHasSubmittedDeck(false);
-          setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+          setSubmissionProgress({ submittedCount: 0, totalCount: event.users ? event.users.length : (session?.users?.length || 0), readyUserIds: [] });
           setProgress(null);
           setResults(null);
           setStage("LOBBY");
@@ -400,12 +431,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     ]
   );
 
+  const refreshSessionRef = React.useRef<() => Promise<void>>(() => Promise.resolve());
+
   const { isConnected } = useRoomWebSocket({
     roomCode: session?.roomCode,
     userId: currentUser?.id,
     displayName: currentUser?.displayName,
     onRoomEvent: handleRoomEvent,
     onResults: handleResults,
+    onReconnect: () => {
+      refreshSessionRef.current?.();
+    },
   });
 
   const clearError = React.useCallback(() => setError(null), []);
@@ -542,19 +578,67 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const refreshed = await apiGetSession(session.roomCode);
       setSession(refreshed);
 
-      if (refreshed.status === "SUGGESTING" && stage === "LOBBY") {
-        setStage("SEARCH");
+      if (refreshed.status === "SUGGESTING") {
+        if (stage === "LOBBY") {
+          setStage("SEARCH");
+        }
+        try {
+          const movies = await apiGetSessionMovies(refreshed.id);
+          const readyIds = new Set<number>();
+          movies.forEach((m) => {
+            if (m.userId) readyIds.add(m.userId);
+          });
+          if (currentUser?.id && readyIds.has(currentUser.id)) {
+            setHasSubmittedDeck(true);
+          }
+          setSubmissionProgress((prev) => ({
+            submittedCount: Math.max(prev.submittedCount, readyIds.size),
+            totalCount: refreshed.users ? refreshed.users.length : prev.totalCount,
+            readyUserIds: Array.from(new Set([...prev.readyUserIds, ...readyIds])),
+          }));
+        } catch {
+          // ignore
+        }
       } else if (refreshed.status === "VOTING" && (stage === "LOBBY" || stage === "SEARCH")) {
-        const movies = await apiGetSessionMovies(refreshed.id);
-        setMovieDeck(deduplicateMovieDeck(movies));
         setStage("SWIPER");
+        try {
+          const movies = await apiGetSessionMovies(refreshed.id);
+          setMovieDeck(deduplicateMovieDeck(movies));
+          const initialProgress = await apiGetProgress(refreshed.roomCode);
+          setProgress(initialProgress);
+        } catch (err) {
+          console.error("[SessionContext] Failed to load voting data during refresh:", err);
+        }
       } else if (refreshed.status === "COMPLETED" && stage !== "WINNER") {
         fetchConsensusResults();
       }
     } catch {
       // Background refresh failure ignored
     }
-  }, [session, stage, fetchConsensusResults]);
+  }, [session, stage, currentUser, fetchConsensusResults]);
+
+  refreshSessionRef.current = refreshSession;
+
+  // Synchronize room state when user re-focuses or tabs back into the app
+  React.useEffect(() => {
+    if (!session?.roomCode || stage === "SETUP" || stage === "WINNER") {
+      return;
+    }
+
+    const handleFocusSync = () => {
+      if (document.visibilityState === "visible") {
+        refreshSession();
+      }
+    };
+
+    window.addEventListener("focus", handleFocusSync);
+    document.addEventListener("visibilitychange", handleFocusSync);
+
+    return () => {
+      window.removeEventListener("focus", handleFocusSync);
+      document.removeEventListener("visibilitychange", handleFocusSync);
+    };
+  }, [session?.roomCode, stage, refreshSession]);
 
   const advanceToSearch = React.useCallback(async () => {
     if (!session) return;
@@ -566,7 +650,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setMovieDeck([]);
       clearMyDeckSelection();
       setHasSubmittedDeck(false);
-      setSubmissionProgress({ submittedCount: 0, totalCount: 0, readyUserIds: [] });
+      setSubmissionProgress({ submittedCount: 0, totalCount: updated.users ? updated.users.length : (session.users?.length || 0), readyUserIds: [] });
       setProgress(null);
       setResults(null);
       setStage("SEARCH");
@@ -594,6 +678,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         movies: myDeckSelection,
       });
       setHasSubmittedDeck(true);
+      setSubmissionProgress((prev) => ({
+        submittedCount: prev.readyUserIds.includes(currentUser.id)
+          ? prev.submittedCount
+          : Math.max(1, prev.submittedCount + 1),
+        totalCount: session.users ? session.users.length : Math.max(1, prev.totalCount),
+        readyUserIds: Array.from(new Set([...prev.readyUserIds, currentUser.id])),
+      }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to submit movies.";
       setError(message);
@@ -608,13 +699,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      const updated = await apiStartVoting(session.id);
+      const [updated, movies, initialProgress] = await Promise.all([
+        apiStartVoting(session.id),
+        apiGetSessionMovies(session.id),
+        apiGetProgress(session.roomCode),
+      ]);
       setSession(updated);
-
-      const movies = await apiGetSessionMovies(session.id);
       setMovieDeck(deduplicateMovieDeck(movies));
-
-      const initialProgress = await apiGetProgress(session.roomCode);
       setProgress(initialProgress);
 
       setStage("SWIPER");

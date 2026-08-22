@@ -82,9 +82,8 @@ public class GeminiClientImpl implements GeminiClient {
         if (restClient != null) {
             this.restClient = restClient;
         } else {
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            int timeoutSec = (properties != null && properties.getTimeoutSeconds() > 0) ? properties.getTimeoutSeconds() : 30;
-            requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+            org.springframework.http.client.JdkClientHttpRequestFactory requestFactory = new org.springframework.http.client.JdkClientHttpRequestFactory();
+            int timeoutSec = (properties != null && properties.getTimeoutSeconds() > 0) ? properties.getTimeoutSeconds() : 90;
             requestFactory.setReadTimeout(Duration.ofSeconds(timeoutSec));
 
             this.restClient = RestClient.builder()
@@ -221,11 +220,11 @@ public class GeminiClientImpl implements GeminiClient {
         ));
 
         double temp = (properties.getTemperature() != null) ? properties.getTemperature() : 0.7;
-        Map<String, Object> generationConfig = Map.of(
-                "responseMimeType", "application/json",
-                "responseSchema", GEMINI_SCHEMA,
-                "temperature", temp
-        );
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("responseMimeType", "application/json");
+        generationConfig.put("responseSchema", GEMINI_SCHEMA);
+        generationConfig.put("temperature", temp);
+        generationConfig.put("maxOutputTokens", 1024);
 
         Map<String, Object> systemInstructionPayload = Map.of(
                 "parts", List.of(Map.of("text", loadedSystemInstruction))

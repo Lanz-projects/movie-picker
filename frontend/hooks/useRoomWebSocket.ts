@@ -11,6 +11,7 @@ export interface UseRoomWebSocketOptions {
   onRoomEvent?: (event: RoomProgressEvent) => void;
   onProgress?: (event: RoomProgressEvent) => void;
   onResults?: (results: SessionResultsResponse) => void;
+  onReconnect?: () => void;
 }
 
 export function useRoomWebSocket({
@@ -20,8 +21,21 @@ export function useRoomWebSocket({
   onRoomEvent,
   onProgress,
   onResults,
+  onReconnect,
 }: UseRoomWebSocketOptions) {
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
+
+  const onRoomEventRef = React.useRef(onRoomEvent);
+  onRoomEventRef.current = onRoomEvent;
+
+  const onProgressRef = React.useRef(onProgress);
+  onProgressRef.current = onProgress;
+
+  const onResultsRef = React.useRef(onResults);
+  onResultsRef.current = onResults;
+
+  const onReconnectRef = React.useRef(onReconnect);
+  onReconnectRef.current = onReconnect;
 
   React.useEffect(() => {
     if (!roomCode) {
@@ -29,6 +43,7 @@ export function useRoomWebSocket({
     }
 
     const cleanCode = roomCode.trim();
+    let hasConnectedOnce = false;
 
     stompService.connect({
       onConnect: () => {
@@ -36,20 +51,24 @@ export function useRoomWebSocket({
         if (userId && displayName) {
           stompService.registerPresence?.(cleanCode, userId, displayName);
         }
+        if (hasConnectedOnce) {
+          onReconnectRef.current?.();
+        }
+        hasConnectedOnce = true;
       },
       onDisconnect: () => setIsConnected(false),
       onError: () => setIsConnected(false),
     });
 
     const unsubRoom = stompService.subscribeToRoom(cleanCode, (event: RoomProgressEvent) => {
-      onRoomEvent?.(event);
-      onProgress?.(event);
+      onRoomEventRef.current?.(event);
+      onProgressRef.current?.(event);
     });
 
     const unsubResults = stompService.subscribeToResults(
       cleanCode,
       (results: SessionResultsResponse) => {
-        onResults?.(results);
+        onResultsRef.current?.(results);
       }
     );
 
@@ -58,7 +77,7 @@ export function useRoomWebSocket({
       unsubResults();
       setIsConnected(false);
     };
-  }, [roomCode, userId, displayName, onRoomEvent, onProgress, onResults]);
+  }, [roomCode, userId, displayName]);
 
   React.useEffect(() => {
     if (roomCode && userId && displayName && stompService.isConnected()) {
@@ -68,4 +87,3 @@ export function useRoomWebSocket({
 
   return { isConnected };
 }
-

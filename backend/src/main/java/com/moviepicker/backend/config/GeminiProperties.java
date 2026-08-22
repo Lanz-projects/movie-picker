@@ -15,5 +15,5 @@ public class GeminiProperties {
     private String systemInstructionPath = "classpath:prompts/gemini-system-instruction.txt";
     private int fetchTarget = 8;
     private int cacheTtlMinutes = 15;
-    private int timeoutSeconds = 30;
+    private int timeoutSeconds = 90;
 }
