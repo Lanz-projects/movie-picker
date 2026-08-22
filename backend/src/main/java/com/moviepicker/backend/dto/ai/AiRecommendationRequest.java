@@ -32,7 +32,11 @@ public class AiRecommendationRequest {
     private Set<Long> excludedTmdbIds = new HashSet<>();
 
     @Builder.Default
+    @Min(value = 1, message = "Page must be at least 1")
+    private int page = 1;
+
+    @Builder.Default
     @Min(value = 1, message = "Limit must be at least 1")
     @Max(value = 10, message = "Limit must not exceed 10")
-    private int limit = 4;
+    private int limit = 5;
 }

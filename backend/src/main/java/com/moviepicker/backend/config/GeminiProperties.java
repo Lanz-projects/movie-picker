@@ -13,4 +13,6 @@ public class GeminiProperties {
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta";
     private Double temperature = 0.7;
     private String systemInstructionPath = "classpath:prompts/gemini-system-instruction.txt";
+    private int fetchTarget = 8;
+    private int cacheTtlMinutes = 15;
 }

@@ -1,5 +1,7 @@
 package com.moviepicker.backend.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.moviepicker.backend.client.GeminiClient;
 import com.moviepicker.backend.config.GeminiProperties;
 import com.moviepicker.backend.dto.MovieDto;
@@ -13,12 +15,14 @@ import com.moviepicker.backend.model.MovieSuggestion;
 import com.moviepicker.backend.model.Session;
 import com.moviepicker.backend.repository.MovieSuggestionRepository;
 import com.moviepicker.backend.repository.SessionRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,18 +34,50 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiRecommendationServiceImpl implements AiRecommendationService {
 
     private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-z0-9\\s]");
-    private static final int DEFAULT_LIMIT = 4;
-    private static final int MAX_LIMIT = 10;
+    private static final int DEFAULT_PAGE = 1;
+    private static final int DEFAULT_PAGE_SIZE = 5;
+    private static final int MAX_PAGE_SIZE = 10;
 
     private final GeminiClient geminiClient;
     private final MovieSearchService movieSearchService;
     private final SessionRepository sessionRepository;
     private final MovieSuggestionRepository movieSuggestionRepository;
     private final GeminiProperties geminiProperties;
+    private final Cache<String, CachedAiResult> recommendationCache;
+
+    public AiRecommendationServiceImpl(
+            GeminiClient geminiClient,
+            MovieSearchService movieSearchService,
+            SessionRepository sessionRepository,
+            MovieSuggestionRepository movieSuggestionRepository,
+            GeminiProperties geminiProperties) {
+
+        this.geminiClient = geminiClient;
+        this.movieSearchService = movieSearchService;
+        this.sessionRepository = sessionRepository;
+        this.movieSuggestionRepository = movieSuggestionRepository;
+        this.geminiProperties = geminiProperties;
+
+        int ttlMinutes = (geminiProperties != null && geminiProperties.getCacheTtlMinutes() > 0)
+                ? geminiProperties.getCacheTtlMinutes()
+                : 15;
+
+        this.recommendationCache = Caffeine.newBuilder()
+                .maximumSize(5_000)
+                .expireAfterWrite(Duration.ofMinutes(ttlMinutes))
+                .build();
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class CachedAiResult {
+        private final String replyMessage;
+        private final List<MovieDto> allMovies;
+        private final String modelUsed;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -55,8 +91,10 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
             excludedTmdbIds.addAll(request.getExcludedTmdbIds());
         }
 
+        String normalizedRoomCode = null;
         if (StringUtils.hasText(roomCode)) {
-            Session session = sessionRepository.findByRoomCode(roomCode.trim().toUpperCase())
+            normalizedRoomCode = roomCode.trim().toUpperCase();
+            Session session = sessionRepository.findByRoomCode(normalizedRoomCode)
                     .orElseThrow(() -> new ResourceNotFoundException("Session not found with room code: " + roomCode));
 
             List<MovieSuggestion> sessionSuggestions = movieSuggestionRepository.findBySessionId(session.getId());
@@ -70,7 +108,7 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
             }
         }
 
-        return executeRecommendationPipeline(request, excludedTitles, excludedTmdbIds);
+        return executeRecommendationPipeline(normalizedRoomCode, request, excludedTitles, excludedTmdbIds);
     }
 
     @Override
@@ -79,28 +117,63 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
     }
 
     private AiRecommendationResponse executeRecommendationPipeline(
+            String roomCode,
             AiRecommendationRequest request,
             Set<String> excludedTitles,
             Set<Long> excludedTmdbIds) {
 
         String prompt = request != null ? request.getPrompt() : null;
+        int page = resolvePage(request != null ? request.getPage() : DEFAULT_PAGE);
+        int pageSize = resolvePageSize(request != null ? request.getLimit() : DEFAULT_PAGE_SIZE);
+
         if (!StringUtils.hasText(prompt)) {
             return AiRecommendationResponse.builder()
                     .prompt(prompt != null ? prompt : "")
                     .replyMessage("Please provide a mood, genre, or vibe to get movie recommendations.")
                     .movies(Collections.emptyList())
+                    .page(page)
+                    .pageSize(pageSize)
+                    .totalResults(0)
+                    .hasMore(false)
                     .modelUsed(resolveModelName())
                     .cached(false)
                     .build();
         }
 
-        int limit = resolveLimit(request != null ? request.getLimit() : DEFAULT_LIMIT);
-        AiRawGeminiResult rawResult = geminiClient.generateRecommendations(
-                prompt.trim(),
-                request != null ? request.getConversationHistory() : Collections.emptyList(),
-                excludedTitles,
-                limit
-        );
+        String cacheKey = (StringUtils.hasText(roomCode) ? roomCode : "GLOBAL") + ":" + prompt.trim().toLowerCase();
+        CachedAiResult cached = recommendationCache.getIfPresent(cacheKey);
+
+        if (cached != null) {
+            log.debug("Serving AI recommendations from cache for key='{}' (page={}, pageSize={})", cacheKey, page, pageSize);
+            return paginateResult(prompt, cached.getReplyMessage(), cached.getAllMovies(), cached.getModelUsed(), page, pageSize, true);
+        }
+
+        int targetFetch = (geminiProperties != null && geminiProperties.getFetchTarget() > 0)
+                ? geminiProperties.getFetchTarget()
+                : 8;
+
+        AiRawGeminiResult rawResult;
+        try {
+            rawResult = geminiClient.generateRecommendations(
+                    prompt.trim(),
+                    request != null ? request.getConversationHistory() : Collections.emptyList(),
+                    excludedTitles,
+                    targetFetch
+            );
+        } catch (Exception ex) {
+            log.warn("Gemini API call failed or rate-limited: {}", ex.getMessage());
+            return AiRecommendationResponse.builder()
+                    .prompt(prompt)
+                    .replyMessage("The AI Concierge is currently experiencing high demand. Please try again in a few moments!")
+                    .movies(Collections.emptyList())
+                    .page(page)
+                    .pageSize(pageSize)
+                    .totalResults(0)
+                    .hasMore(false)
+                    .modelUsed(resolveModelName())
+                    .cached(false)
+                    .build();
+        }
 
         if (rawResult == null || rawResult.getSuggestions() == null || rawResult.getSuggestions().isEmpty()) {
             String reply = (rawResult != null && StringUtils.hasText(rawResult.getReplyMessage()))
@@ -111,6 +184,10 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
                     .prompt(prompt)
                     .replyMessage(reply)
                     .movies(Collections.emptyList())
+                    .page(page)
+                    .pageSize(pageSize)
+                    .totalResults(0)
+                    .hasMore(false)
                     .modelUsed(resolveModelName())
                     .cached(false)
                     .build();
@@ -126,29 +203,59 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        List<MovieDto> finalMovies = new ArrayList<>();
+        List<MovieDto> allMovies = new ArrayList<>();
         Set<Long> seenTmdbIds = new HashSet<>(excludedTmdbIds);
 
         for (MovieDto movie : enrichedResults) {
             if (movie.getTmdbId() != null) {
                 if (seenTmdbIds.add(movie.getTmdbId())) {
-                    finalMovies.add(movie);
+                    allMovies.add(movie);
                 }
             } else {
-                finalMovies.add(movie);
-            }
-
-            if (finalMovies.size() >= limit) {
-                break;
+                allMovies.add(movie);
             }
         }
 
+        String modelUsed = resolveModelName();
+        if (!allMovies.isEmpty()) {
+            recommendationCache.put(cacheKey, new CachedAiResult(rawResult.getReplyMessage(), allMovies, modelUsed));
+        }
+
+        return paginateResult(prompt, rawResult.getReplyMessage(), allMovies, modelUsed, page, pageSize, false);
+    }
+
+    private AiRecommendationResponse paginateResult(
+            String prompt,
+            String replyMessage,
+            List<MovieDto> allMovies,
+            String modelUsed,
+            int page,
+            int pageSize,
+            boolean isCached) {
+
+        int totalResults = allMovies != null ? allMovies.size() : 0;
+        int startIndex = (page - 1) * pageSize;
+
+        List<MovieDto> pageSlice;
+        if (allMovies == null || startIndex >= totalResults) {
+            pageSlice = Collections.emptyList();
+        } else {
+            int endIndex = Math.min(startIndex + pageSize, totalResults);
+            pageSlice = allMovies.subList(startIndex, endIndex);
+        }
+
+        boolean hasMore = (startIndex + pageSlice.size()) < totalResults;
+
         return AiRecommendationResponse.builder()
                 .prompt(prompt)
-                .replyMessage(rawResult.getReplyMessage())
-                .movies(finalMovies)
-                .modelUsed(resolveModelName())
-                .cached(false)
+                .replyMessage(replyMessage)
+                .movies(pageSlice)
+                .page(page)
+                .pageSize(pageSize)
+                .totalResults(totalResults)
+                .hasMore(hasMore)
+                .modelUsed(modelUsed)
+                .cached(isCached)
                 .build();
     }
 
@@ -271,16 +378,24 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
         return cleaned;
     }
 
-    private int resolveLimit(int requestedLimit) {
+    private int resolvePage(int requestedPage) {
+        return Math.max(1, requestedPage);
+    }
+
+    private int resolvePageSize(int requestedLimit) {
         if (requestedLimit <= 0) {
-            return DEFAULT_LIMIT;
+            return DEFAULT_PAGE_SIZE;
         }
-        return Math.min(requestedLimit, MAX_LIMIT);
+        return Math.min(requestedLimit, MAX_PAGE_SIZE);
     }
 
     private String resolveModelName() {
         return (geminiProperties != null && StringUtils.hasText(geminiProperties.getModel()))
                 ? geminiProperties.getModel()
                 : "gemini-2.5-flash-lite";
+    }
+
+    public void clearCache() {
+        recommendationCache.invalidateAll();
     }
 }

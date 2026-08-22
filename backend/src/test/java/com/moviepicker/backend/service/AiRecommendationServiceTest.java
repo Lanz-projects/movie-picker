@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +59,7 @@ public class AiRecommendationServiceTest {
 
     @BeforeEach
     public void setUp() {
+        aiRecommendationService.clearCache();
         testSession = Session.builder()
                 .id(100L)
                 .roomCode("VIBE12")
@@ -65,7 +67,7 @@ public class AiRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendations_WithRoomCode_SuccessEnrichment() {
+    public void testGetRecommendations_WithRoomCode_SuccessEnrichmentAndPagination() {
         when(sessionRepository.findByRoomCode("VIBE12")).thenReturn(Optional.of(testSession));
         when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
 
@@ -88,7 +90,7 @@ public class AiRecommendationServiceTest {
                 eq("90s sci fi"),
                 any(),
                 eq(Set.of("The Matrix")),
-                eq(2)
+                anyInt()
         )).thenReturn(geminiResult);
 
         MovieDto tmdbDarkCity = MovieDto.builder()
@@ -114,26 +116,47 @@ public class AiRecommendationServiceTest {
         when(movieSearchService.searchMovies(eq("Inception"), eq(1)))
                 .thenReturn(MovieSearchResponse.builder().movies(List.of(tmdbInception)).build());
 
-        AiRecommendationRequest request = AiRecommendationRequest.builder()
+        AiRecommendationRequest requestPage1 = AiRecommendationRequest.builder()
                 .prompt("90s sci fi")
-                .limit(2)
+                .page(1)
+                .limit(1)
                 .build();
 
-        AiRecommendationResponse response = aiRecommendationService.getRecommendations("VIBE12", request);
+        AiRecommendationResponse response1 = aiRecommendationService.getRecommendations("VIBE12", requestPage1);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getReplyMessage()).isEqualTo("Here are some great sci-fi movies:");
-        assertThat(response.getMovies()).hasSize(2);
+        assertThat(response1).isNotNull();
+        assertThat(response1.getReplyMessage()).isEqualTo("Here are some great sci-fi movies:");
+        assertThat(response1.getMovies()).hasSize(1);
+        assertThat(response1.getTotalResults()).isEqualTo(2);
+        assertThat(response1.isHasMore()).isTrue();
+        assertThat(response1.isCached()).isFalse();
 
-        MovieDto first = response.getMovies().get(0);
+        MovieDto first = response1.getMovies().get(0);
         assertThat(first.getTitle()).isEqualTo("Dark City");
         assertThat(first.getTmdbId()).isEqualTo(268L);
         assertThat(first.getAiReasoning()).isEqualTo("Dark dystopian neo-noir.");
 
-        MovieDto second = response.getMovies().get(1);
+        // Request Page 2 (should hit cache, no extra Gemini call)
+        AiRecommendationRequest requestPage2 = AiRecommendationRequest.builder()
+                .prompt("90s sci fi")
+                .page(2)
+                .limit(1)
+                .build();
+
+        AiRecommendationResponse response2 = aiRecommendationService.getRecommendations("VIBE12", requestPage2);
+
+        assertThat(response2).isNotNull();
+        assertThat(response2.getMovies()).hasSize(1);
+        assertThat(response2.getTotalResults()).isEqualTo(2);
+        assertThat(response2.isHasMore()).isFalse();
+        assertThat(response2.isCached()).isTrue();
+
+        MovieDto second = response2.getMovies().get(0);
         assertThat(second.getTitle()).isEqualTo("Inception");
         assertThat(second.getTmdbId()).isEqualTo(27205L);
-        assertThat(second.getAiReasoning()).isEqualTo("Mind-bending dream layers.");
+
+        // Verify Gemini client was only called ONCE thanks to caching
+        verify(geminiClient, times(1)).generateRecommendations(anyString(), any(), any(), anyInt());
     }
 
     @Test
@@ -161,6 +184,8 @@ public class AiRecommendationServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getReplyMessage()).contains("I am a movie recommender");
         assertThat(response.getMovies()).isEmpty();
+        assertThat(response.getTotalResults()).isEqualTo(0);
+        assertThat(response.isHasMore()).isFalse();
     }
 
     @Test
@@ -187,6 +212,7 @@ public class AiRecommendationServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getReplyMessage()).contains("Please provide a mood, genre, or vibe");
         assertThat(response.getMovies()).isEmpty();
+        assertThat(response.getTotalResults()).isEqualTo(0);
     }
 
     @Test
@@ -219,5 +245,24 @@ public class AiRecommendationServiceTest {
         assertThat(fallback.getTitle()).isEqualTo("Obscure Underground Film");
         assertThat(fallback.getReleaseYear()).isEqualTo(1995);
         assertThat(fallback.getAiReasoning()).isEqualTo("Ultra rare indie film.");
+    }
+
+    @Test
+    public void testGetRecommendations_GeminiFails_ReturnsGracefulNotice() {
+        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
+
+        when(geminiClient.generateRecommendations(anyString(), any(), any(), anyInt()))
+                .thenThrow(new RuntimeException("Resource exhausted (quota limit)"));
+
+        AiRecommendationRequest request = AiRecommendationRequest.builder()
+                .prompt("popular movies")
+                .build();
+
+        AiRecommendationResponse response = aiRecommendationService.getRecommendations(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getReplyMessage()).contains("AI Concierge is currently experiencing high demand");
+        assertThat(response.getMovies()).isEmpty();
+        assertThat(response.getTotalResults()).isEqualTo(0);
     }
 }

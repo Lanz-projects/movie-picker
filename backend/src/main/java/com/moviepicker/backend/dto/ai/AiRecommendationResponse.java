@@ -20,6 +20,11 @@ public class AiRecommendationResponse {
     @Builder.Default
     private List<MovieDto> movies = new ArrayList<>();
 
+    private int page;
+    private int pageSize;
+    private int totalResults;
+    private boolean hasMore;
+
     private String modelUsed;
     private boolean cached;
 }

@@ -20,6 +20,7 @@ public class RateLimiterServiceTest {
         properties.setJoinSessionLimit(5);
         properties.setMovieSearchLimit(10);
         properties.setSessionActionLimit(20);
+        properties.setAiRecommendationLimit(2);
         properties.setDefaultLimit(20);
         properties.setWindowSeconds(60);
 
@@ -59,6 +60,12 @@ public class RateLimiterServiceTest {
 
         assertThat(service.resolveCategory("/api/v1/sessions/ABCD/movies", "POST"))
                 .isEqualTo(EndpointCategory.SESSION_ACTION);
+
+        assertThat(service.resolveCategory("/api/v1/sessions/ABCD/ai/recommendations", "POST"))
+                .isEqualTo(EndpointCategory.AI_RECOMMENDATION);
+
+        assertThat(service.resolveCategory("/api/v1/ai/recommendations", "POST"))
+                .isEqualTo(EndpointCategory.AI_RECOMMENDATION);
     }
 
     @Test
@@ -72,6 +79,21 @@ public class RateLimiterServiceTest {
         assertThat(service.checkRateLimit(request).isAllowed()).isTrue();
 
         // 4th request rejected
+        RateLimitResult result = service.checkRateLimit(request);
+        assertThat(result.isAllowed()).isFalse();
+        assertThat(result.getRetryAfterSeconds()).isGreaterThan(0);
+    }
+
+    @Test
+    public void testCheckRateLimit_AiRecommendationLimitEnforced() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/sessions/VIBE12/ai/recommendations");
+        request.setRemoteAddr("10.0.0.99");
+
+        // 2 requests allowed for AI_RECOMMENDATION
+        assertThat(service.checkRateLimit(request).isAllowed()).isTrue();
+        assertThat(service.checkRateLimit(request).isAllowed()).isTrue();
+
+        // 3rd request rejected
         RateLimitResult result = service.checkRateLimit(request);
         assertThat(result.isAllowed()).isFalse();
         assertThat(result.getRetryAfterSeconds()).isGreaterThan(0);

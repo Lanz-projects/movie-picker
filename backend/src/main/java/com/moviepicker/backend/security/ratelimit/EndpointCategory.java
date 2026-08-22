@@ -8,5 +8,6 @@ public enum EndpointCategory {
     JOIN_SESSION,
     MOVIE_SEARCH,
     SESSION_ACTION,
+    AI_RECOMMENDATION,
     DEFAULT
 }

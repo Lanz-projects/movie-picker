@@ -14,6 +14,7 @@ public class RateLimitProperties {
     private int joinSessionLimit = 15;        // 15 requests per minute
     private int movieSearchLimit = 40;        // 40 requests per minute
     private int sessionActionLimit = 120;     // 120 requests per minute
+    private int aiRecommendationLimit = 6;    // 6 requests per minute (Gemini free-tier protection)
     private int defaultLimit = 120;           // 120 requests per minute
     private int windowSeconds = 60;           // 60-second window
 }

@@ -70,6 +70,12 @@ public class RateLimiterService {
         }
 
         String normalizedUri = uri.toLowerCase();
+
+        // AI Recommendations: /api/v1/sessions/*/ai/* or /api/v1/ai/* or /api/sessions/*/ai/* or /api/ai/*
+        if (normalizedUri.contains("/ai/")) {
+            return EndpointCategory.AI_RECOMMENDATION;
+        }
+
         // Room Creation: POST /api/v1/sessions or POST /api/sessions
         if ("POST".equalsIgnoreCase(method) &&
                 (normalizedUri.equals("/api/v1/sessions") || normalizedUri.equals("/api/v1/sessions/") ||
@@ -103,6 +109,7 @@ public class RateLimiterService {
             case JOIN_SESSION -> properties.getJoinSessionLimit();
             case MOVIE_SEARCH -> properties.getMovieSearchLimit();
             case SESSION_ACTION -> properties.getSessionActionLimit();
+            case AI_RECOMMENDATION -> properties.getAiRecommendationLimit();
             case DEFAULT -> properties.getDefaultLimit();
         };
     }
