@@ -41,6 +41,7 @@ export interface MovieDto {
   popularity?: number;
   originalLanguage?: string;
   genres?: string[];
+  aiReasoning?: string | null;
 }
 
 export interface MovieSearchResponse {
