@@ -392,7 +392,7 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
     private String resolveModelName() {
         return (geminiProperties != null && StringUtils.hasText(geminiProperties.getModel()))
                 ? geminiProperties.getModel()
-                : "gemini-2.5-flash-lite";
+                : "gemini-3.5-flash-lite";
     }
 
     public void clearCache() {

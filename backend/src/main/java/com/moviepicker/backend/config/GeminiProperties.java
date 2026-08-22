@@ -9,10 +9,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "gemini.api")
 public class GeminiProperties {
     private String key;
-    private String model = "gemini-2.5-flash-lite";
+    private String model = "gemini-3.5-flash-lite";
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta";
     private Double temperature = 0.7;
     private String systemInstructionPath = "classpath:prompts/gemini-system-instruction.txt";
     private int fetchTarget = 8;
     private int cacheTtlMinutes = 15;
+    private int timeoutSeconds = 30;
 }

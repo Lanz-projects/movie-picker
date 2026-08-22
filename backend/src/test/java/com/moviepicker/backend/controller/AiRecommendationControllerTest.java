@@ -63,7 +63,7 @@ public class AiRecommendationControllerTest {
                 .pageSize(5)
                 .totalResults(8)
                 .hasMore(true)
-                .modelUsed("gemini-2.5-flash-lite")
+                .modelUsed("gemini-3.5-flash-lite")
                 .cached(false)
                 .build();
 

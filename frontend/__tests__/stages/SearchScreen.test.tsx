@@ -159,7 +159,7 @@ describe("SearchScreen Stage Component", () => {
       pageSize: 5,
       totalResults: 1,
       hasMore: false,
-      modelUsed: "gemini-2.5-flash-lite",
+      modelUsed: "gemini-3.5-flash-lite",
       cached: false,
     };
     vi.mocked(aiApi.getAiRecommendations).mockResolvedValue(mockVibeResponse);

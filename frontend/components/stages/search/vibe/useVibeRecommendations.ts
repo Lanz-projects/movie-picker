@@ -25,6 +25,7 @@ export function useVibeRecommendations({
   const [cooldownSeconds, setCooldownSeconds] = React.useState<number>(0);
 
   const cooldownTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   // Cooldown countdown timer
   React.useEffect(() => {
@@ -38,9 +39,27 @@ export function useVibeRecommendations({
     };
   }, [cooldownSeconds]);
 
+  // Clean up on unmount
+  React.useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+    };
+  }, []);
+
   const fetchRecommendations = React.useCallback(
     async (vibePrompt: string, targetPage: number = 1) => {
       if (!vibePrompt.trim() || isLoading) return;
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       const isFirstPage = targetPage === 1;
       if (isFirstPage) {
@@ -58,7 +77,8 @@ export function useVibeRecommendations({
             page: targetPage,
             limit: 5,
             excludedTmdbIds: deckMovieIds,
-          }
+          },
+          controller.signal
         );
 
         if (isFirstPage) {
@@ -74,6 +94,9 @@ export function useVibeRecommendations({
 
         setHasMore(response.hasMore || false);
       } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return; // Intentionally aborted
+        }
         const message =
           err instanceof Error ? err.message : "Could not fetch recommendations. Please try again.";
         setError(message);

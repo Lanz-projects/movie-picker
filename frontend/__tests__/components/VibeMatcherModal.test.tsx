@@ -37,7 +37,7 @@ describe("VibeMatcherModal Component", () => {
     pageSize: 5,
     totalResults: 6,
     hasMore: true,
-    modelUsed: "gemini-2.5-flash-lite",
+    modelUsed: "gemini-3.5-flash-lite",
     cached: false,
   };
 
@@ -97,12 +97,16 @@ describe("VibeMatcherModal Component", () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith("ROOM12", {
-        prompt: "90s mind bending thriller",
-        page: 1,
-        limit: 5,
-        excludedTmdbIds: [],
-      });
+      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith(
+        "ROOM12",
+        {
+          prompt: "90s mind bending thriller",
+          page: 1,
+          limit: 5,
+          excludedTmdbIds: [],
+        },
+        expect.anything()
+      );
     });
 
     expect(await screen.findByText("The Matrix")).toBeInTheDocument();
@@ -129,12 +133,16 @@ describe("VibeMatcherModal Component", () => {
     fireEvent.click(presetChip);
 
     await waitFor(() => {
-      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith("ROOM12", {
-        prompt: "90s Nostalgia Thriller",
-        page: 1,
-        limit: 5,
-        excludedTmdbIds: [],
-      });
+      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith(
+        "ROOM12",
+        {
+          prompt: "90s Nostalgia Thriller",
+          page: 1,
+          limit: 5,
+          excludedTmdbIds: [],
+        },
+        expect.anything()
+      );
     });
   });
 
@@ -216,12 +224,16 @@ describe("VibeMatcherModal Component", () => {
     fireEvent.click(loadMoreBtn);
 
     await waitFor(() => {
-      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith("ROOM12", {
-        prompt: "90s Nostalgia Thriller",
-        page: 2,
-        limit: 5,
-        excludedTmdbIds: [],
-      });
+      expect(aiApi.getAiRecommendations).toHaveBeenCalledWith(
+        "ROOM12",
+        {
+          prompt: "90s Nostalgia Thriller",
+          page: 2,
+          limit: 5,
+          excludedTmdbIds: [],
+        },
+        expect.anything()
+      );
     });
 
     expect(await screen.findByText("Dark City")).toBeInTheDocument();

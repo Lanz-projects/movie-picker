@@ -12,6 +12,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -19,6 +20,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -63,19 +65,33 @@ public class GeminiClientImpl implements GeminiClient {
     private String loadedSystemInstruction;
 
     @Autowired
+    public GeminiClientImpl(GeminiProperties properties) {
+        this(properties, (RestClient) null, new ObjectMapper(), new DefaultResourceLoader());
+    }
+
     public GeminiClientImpl(GeminiProperties properties, RestClient.Builder restClientBuilder) {
-        this(properties, restClientBuilder, new ObjectMapper(), new DefaultResourceLoader());
+        this(properties, restClientBuilder != null ? restClientBuilder.baseUrl(properties.getBaseUrl()).build() : null, new ObjectMapper(), new DefaultResourceLoader());
     }
 
-    public GeminiClientImpl(GeminiProperties properties, RestClient.Builder restClientBuilder, ObjectMapper objectMapper) {
-        this(properties, restClientBuilder, objectMapper, new DefaultResourceLoader());
+    public GeminiClientImpl(GeminiProperties properties, RestClient restClient, ObjectMapper objectMapper) {
+        this(properties, restClient, objectMapper, new DefaultResourceLoader());
     }
 
-    public GeminiClientImpl(GeminiProperties properties, RestClient.Builder restClientBuilder, ObjectMapper objectMapper, ResourceLoader resourceLoader) {
+    public GeminiClientImpl(GeminiProperties properties, RestClient restClient, ObjectMapper objectMapper, ResourceLoader resourceLoader) {
         this.properties = properties;
-        this.restClient = restClientBuilder
-                .baseUrl(properties.getBaseUrl())
-                .build();
+        if (restClient != null) {
+            this.restClient = restClient;
+        } else {
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            int timeoutSec = (properties != null && properties.getTimeoutSeconds() > 0) ? properties.getTimeoutSeconds() : 30;
+            requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+            requestFactory.setReadTimeout(Duration.ofSeconds(timeoutSec));
+
+            this.restClient = RestClient.builder()
+                    .baseUrl(properties.getBaseUrl())
+                    .requestFactory(requestFactory)
+                    .build();
+        }
         this.objectMapper = (objectMapper != null) ? objectMapper : new ObjectMapper();
         this.resourceLoader = (resourceLoader != null) ? resourceLoader : new DefaultResourceLoader();
         this.loadedSystemInstruction = loadSystemInstructionPrompt();
@@ -86,7 +102,7 @@ public class GeminiClientImpl implements GeminiClient {
         validateApiKey();
 
         int targetLimit = (limit > 0 && limit <= 10) ? limit : 4;
-        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-2.5-flash-lite";
+        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-3.5-flash-lite";
         String endpoint = String.format("/models/%s:generateContent?key=%s", model, properties.getKey().trim());
 
         Map<String, Object> requestBody = buildRecommendationPayload(prompt, history, excludedTitles, targetLimit);
@@ -96,6 +112,7 @@ public class GeminiClientImpl implements GeminiClient {
             String rawJson = restClient.post()
                     .uri(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .body(requestBody)
                     .retrieve()
                     .body(String.class);
@@ -114,7 +131,7 @@ public class GeminiClientImpl implements GeminiClient {
     public String testPing(String prompt) {
         validateApiKey();
 
-        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-2.5-flash-lite";
+        String model = StringUtils.hasText(properties.getModel()) ? properties.getModel() : "gemini-3.5-flash-lite";
         String endpoint = String.format("/models/%s:generateContent?key=%s", model, properties.getKey().trim());
 
         Map<String, Object> requestBody = Map.of(
@@ -127,6 +144,7 @@ public class GeminiClientImpl implements GeminiClient {
             String rawJson = restClient.post()
                     .uri(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .body(requestBody)
                     .retrieve()
                     .body(String.class);

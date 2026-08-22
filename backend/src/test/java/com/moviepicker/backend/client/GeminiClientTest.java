@@ -32,13 +32,13 @@ public class GeminiClientTest {
     public void setUp() {
         properties = new GeminiProperties();
         properties.setKey("test-api-key");
-        properties.setModel("gemini-2.5-flash-lite");
+        properties.setModel("gemini-3.5-flash-lite");
         properties.setBaseUrl("https://generativelanguage.googleapis.com/v1beta");
 
         objectMapper = new ObjectMapper();
-        RestClient.Builder builder = RestClient.builder();
+        RestClient.Builder builder = RestClient.builder().baseUrl(properties.getBaseUrl());
         mockServer = MockRestServiceServer.bindTo(builder).build();
-        geminiClient = new GeminiClientImpl(properties, builder, objectMapper);
+        geminiClient = new GeminiClientImpl(properties, builder.build(), objectMapper);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class GeminiClientTest {
                 }
                 """, objectMapper.valueToTree(innerJson).toString());
 
-        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=test-api-key"))
+        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=test-api-key"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(outerGeminiResponse, MediaType.APPLICATION_JSON));
 
@@ -126,7 +126,7 @@ public class GeminiClientTest {
                 }
                 """, objectMapper.valueToTree(innerJson).toString());
 
-        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=test-api-key"))
+        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=test-api-key"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(outerGeminiResponse, MediaType.APPLICATION_JSON));
 
@@ -174,7 +174,7 @@ public class GeminiClientTest {
                 }
                 """, objectMapper.valueToTree(innerJson).toString());
 
-        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=test-api-key"))
+        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=test-api-key"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(outerGeminiResponse, MediaType.APPLICATION_JSON));
 
@@ -227,7 +227,7 @@ public class GeminiClientTest {
                 }
                 """, objectMapper.valueToTree(innerJson).toString());
 
-        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=test-api-key"))
+        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=test-api-key"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(outerGeminiResponse, MediaType.APPLICATION_JSON));
 
@@ -257,7 +257,7 @@ public class GeminiClientTest {
                 }
                 """;
 
-        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=test-api-key"))
+        mockServer.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=test-api-key"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(geminiResponse, MediaType.APPLICATION_JSON));
 

@@ -69,7 +69,7 @@ public class AiRecommendationServiceTest {
     @Test
     public void testGetRecommendations_WithRoomCode_SuccessEnrichmentAndPagination() {
         when(sessionRepository.findByRoomCode("VIBE12")).thenReturn(Optional.of(testSession));
-        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
+        when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
 
         MovieSuggestion existingMovie = MovieSuggestion.builder()
                 .id(1L)
@@ -161,7 +161,7 @@ public class AiRecommendationServiceTest {
 
     @Test
     public void testGetRecommendations_OffTopicPrompt_ReturnsEmptyMoviesWithPoliteReply() {
-        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
+        when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
 
         AiRawGeminiResult geminiResult = AiRawGeminiResult.builder()
                 .replyMessage("I am a movie recommender. I cannot solve math problems.")
@@ -217,7 +217,7 @@ public class AiRecommendationServiceTest {
 
     @Test
     public void testGetRecommendations_TmdbSearchEmpty_ReturnsFallbackDtoWithVibeMatch() {
-        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
+        when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
 
         AiRawGeminiResult geminiResult = AiRawGeminiResult.builder()
                 .replyMessage("Here is an obscure indie gem:")
@@ -249,7 +249,7 @@ public class AiRecommendationServiceTest {
 
     @Test
     public void testGetRecommendations_GeminiFails_ReturnsGracefulNotice() {
-        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
+        when(geminiProperties.getModel()).thenReturn("gemini-3.5-flash-lite");
 
         when(geminiClient.generateRecommendations(anyString(), any(), any(), anyInt()))
                 .thenThrow(new RuntimeException("Resource exhausted (quota limit)"));
