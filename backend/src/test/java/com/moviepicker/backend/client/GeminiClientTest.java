@@ -266,4 +266,29 @@ public class GeminiClientTest {
 
         mockServer.verify();
     }
+
+    @Test
+    public void testGenerateRecommendationsFallback_ReturnsDegradedResponse() {
+        AiRawGeminiResult fallbackResult = geminiClient.generateRecommendationsFallback(
+                "sci-fi",
+                null,
+                null,
+                5,
+                new RuntimeException("Simulated upstream outage")
+        );
+
+        assertThat(fallbackResult).isNotNull();
+        assertThat(fallbackResult.getReplyMessage()).contains("momentarily unavailable");
+        assertThat(fallbackResult.getSuggestions()).isEmpty();
+    }
+
+    @Test
+    public void testTestPingFallback_ReturnsFriendlyDegradedString() {
+        String pingFallback = geminiClient.testPingFallback(
+                "ping",
+                new RuntimeException("Simulated upstream outage")
+        );
+
+        assertThat(pingFallback).contains("temporarily unavailable");
+    }
 }

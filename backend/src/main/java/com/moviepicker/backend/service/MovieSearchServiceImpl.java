@@ -9,6 +9,8 @@ import com.moviepicker.backend.dto.tmdb.TmdbMovieDetailsResponse;
 import com.moviepicker.backend.dto.tmdb.TmdbMovieDto;
 import com.moviepicker.backend.dto.tmdb.TmdbSearchResponse;
 import com.moviepicker.backend.util.TmdbMappingUtil;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,6 +31,8 @@ public class MovieSearchServiceImpl implements MovieSearchService {
 
     @Override
     @Cacheable(value = "movieSearches", key = "#query.trim().toLowerCase() + '_' + #page")
+    @CircuitBreaker(name = "tmdbApi", fallbackMethod = "searchMoviesFallback")
+    @Retry(name = "tmdbApi")
     public MovieSearchResponse searchMovies(String query, int page) {
         log.info("Executing TMDB search for query='{}', page={}", query, page);
 
@@ -64,8 +68,20 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .build();
     }
 
+    public MovieSearchResponse searchMoviesFallback(String query, int page, Throwable ex) {
+        log.warn("TMDB search fallback triggered for query='{}', page={}. Cause: {}", query, page, ex != null ? ex.getMessage() : "Unknown");
+        return MovieSearchResponse.builder()
+                .page(Math.max(1, page))
+                .totalPages(0)
+                .totalResults(0)
+                .movies(Collections.emptyList())
+                .build();
+    }
+
     @Override
     @Cacheable(value = "movieTrending", key = "#page")
+    @CircuitBreaker(name = "tmdbApi", fallbackMethod = "getTrendingMoviesFallback")
+    @Retry(name = "tmdbApi")
     public MovieSearchResponse getTrendingMovies(int page) {
         log.info("Executing TMDB trending movies for page={}", page);
         TmdbSearchResponse rawResponse = tmdbClient.getTrendingMovies(Math.max(1, page));
@@ -91,6 +107,16 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .build();
     }
 
+    public MovieSearchResponse getTrendingMoviesFallback(int page, Throwable ex) {
+        log.warn("TMDB trending fallback triggered for page={}. Cause: {}", page, ex != null ? ex.getMessage() : "Unknown");
+        return MovieSearchResponse.builder()
+                .page(Math.max(1, page))
+                .totalPages(0)
+                .totalResults(0)
+                .movies(Collections.emptyList())
+                .build();
+    }
+
     @Override
     @Cacheable(value = "movieDiscover", key = "(#genre != null ? #genre.trim().toLowerCase() : 'all') + '_' + " +
             "(#provider != null ? #provider.trim().toLowerCase() : 'all') + '_' + " +
@@ -100,6 +126,8 @@ public class MovieSearchServiceImpl implements MovieSearchService {
             "(#maxRuntime != null ? #maxRuntime : 0) + '_' + " +
             "(#language != null ? #language.trim().toLowerCase() : 'all') + '_' + " +
             "(#sortBy != null ? #sortBy.trim() : 'popularity.desc') + '_' + #page")
+    @CircuitBreaker(name = "tmdbApi", fallbackMethod = "discoverMoviesFallback")
+    @Retry(name = "tmdbApi")
     public MovieSearchResponse discoverMovies(
             String genre,
             String provider,
@@ -154,8 +182,30 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .build();
     }
 
+    public MovieSearchResponse discoverMoviesFallback(
+            String genre,
+            String provider,
+            String decade,
+            Double minRating,
+            Integer minRuntime,
+            Integer maxRuntime,
+            String language,
+            String sortBy,
+            int page,
+            Throwable ex) {
+        log.warn("TMDB discover fallback triggered. Cause: {}", ex != null ? ex.getMessage() : "Unknown");
+        return MovieSearchResponse.builder()
+                .page(Math.max(1, page))
+                .totalPages(0)
+                .totalResults(0)
+                .movies(Collections.emptyList())
+                .build();
+    }
+
     @Override
     @Cacheable(value = "movieDetails", key = "#tmdbId")
+    @CircuitBreaker(name = "tmdbApi", fallbackMethod = "getMovieDetailsFallback")
+    @Retry(name = "tmdbApi")
     public MovieDetailsDto getMovieDetails(Long tmdbId) {
         log.info("Fetching rich TMDB details for movie id={}", tmdbId);
         if (tmdbId == null) {
@@ -168,6 +218,11 @@ public class MovieSearchServiceImpl implements MovieSearchService {
         }
 
         return mapToMovieDetailsDto(raw);
+    }
+
+    public MovieDetailsDto getMovieDetailsFallback(Long tmdbId, Throwable ex) {
+        log.warn("TMDB movie details fallback triggered for id={}. Cause: {}", tmdbId, ex != null ? ex.getMessage() : "Unknown");
+        return null;
     }
 
     private MovieDto mapToMovieDto(TmdbMovieDto dto) {
