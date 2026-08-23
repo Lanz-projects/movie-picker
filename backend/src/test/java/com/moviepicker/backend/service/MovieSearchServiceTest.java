@@ -136,4 +136,40 @@ public class MovieSearchServiceTest {
                 28, 8, "1990-01-01", "1999-12-31", 7.0, 90, 120, "en", "popularity.desc", 1
         );
     }
+
+    @Test
+    public void testSearchMoviesFallback_ReturnsEmptyResponse() {
+        MovieSearchResponse fallback = movieSearchService.searchMoviesFallback("Inception", 1, new RuntimeException("TMDB 500 error"));
+
+        assertThat(fallback).isNotNull();
+        assertThat(fallback.getPage()).isEqualTo(1);
+        assertThat(fallback.getTotalPages()).isEqualTo(0);
+        assertThat(fallback.getTotalResults()).isEqualTo(0);
+        assertThat(fallback.getMovies()).isEmpty();
+    }
+
+    @Test
+    public void testGetTrendingMoviesFallback_ReturnsEmptyResponse() {
+        MovieSearchResponse fallback = movieSearchService.getTrendingMoviesFallback(2, new RuntimeException("TMDB 429 rate limit"));
+
+        assertThat(fallback).isNotNull();
+        assertThat(fallback.getPage()).isEqualTo(2);
+        assertThat(fallback.getMovies()).isEmpty();
+    }
+
+    @Test
+    public void testDiscoverMoviesFallback_ReturnsEmptyResponse() {
+        MovieSearchResponse fallback = movieSearchService.discoverMoviesFallback(
+                "Action", "Netflix", "90s", 7.0, 90, 120, "en", "popularity.desc", 1, new RuntimeException("TMDB network timeout")
+        );
+
+        assertThat(fallback).isNotNull();
+        assertThat(fallback.getPage()).isEqualTo(1);
+        assertThat(fallback.getMovies()).isEmpty();
+    }
+
+    @Test
+    public void testGetMovieDetailsFallback_ReturnsNull() {
+        assertThat(movieSearchService.getMovieDetailsFallback(550L, new RuntimeException("TMDB unavailable"))).isNull();
+    }
 }
