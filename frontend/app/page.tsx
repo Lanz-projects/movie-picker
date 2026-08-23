@@ -7,6 +7,7 @@ import { LobbyScreen } from "@/components/stages/LobbyScreen";
 import { SearchScreen } from "@/components/stages/SearchScreen";
 import { SwiperScreen } from "@/components/stages/SwiperScreen";
 import { WinnerScreen } from "@/components/stages/WinnerScreen";
+import { Footer } from "@/components/layout/Footer";
 import { useSession } from "@/context/SessionContext";
 
 export default function Home() {
@@ -57,14 +58,17 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <>
+        <div className="flex-1 flex flex-col">
           {stage === "SETUP" && <SetupScreen />}
           {stage === "LOBBY" && <LobbyScreen />}
           {stage === "SEARCH" && <SearchScreen />}
           {stage === "SWIPER" && <SwiperScreen />}
           {stage === "WINNER" && <WinnerScreen />}
-        </>
+        </div>
       )}
+
+      {/* Global Footer */}
+      <Footer />
     </div>
   );
 }
