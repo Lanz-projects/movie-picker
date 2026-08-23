@@ -6,6 +6,8 @@ import com.moviepicker.backend.config.GeminiProperties;
 import com.moviepicker.backend.dto.ai.AiChatMessage;
 import com.moviepicker.backend.dto.ai.AiMovieSuggestion;
 import com.moviepicker.backend.dto.ai.AiRawGeminiResult;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -97,6 +99,8 @@ public class GeminiClientImpl implements GeminiClient {
     }
 
     @Override
+    @CircuitBreaker(name = "geminiApi", fallbackMethod = "generateRecommendationsFallback")
+    @Retry(name = "geminiApi")
     public AiRawGeminiResult generateRecommendations(String prompt, List<AiChatMessage> history, Set<String> excludedTitles, int limit) {
         validateApiKey();
 
@@ -126,7 +130,17 @@ public class GeminiClientImpl implements GeminiClient {
         }
     }
 
+    public AiRawGeminiResult generateRecommendationsFallback(String prompt, List<AiChatMessage> history, Set<String> excludedTitles, int limit, Throwable ex) {
+        log.warn("Gemini API circuit breaker/retry fallback triggered for prompt='{}'. Reason: {}", prompt, ex != null ? ex.getMessage() : "Unknown");
+        return AiRawGeminiResult.builder()
+                .replyMessage("The AI Concierge is momentarily unavailable. Please explore our trending movies or try again in a moment.")
+                .suggestions(Collections.emptyList())
+                .build();
+    }
+
     @Override
+    @CircuitBreaker(name = "geminiApi", fallbackMethod = "testPingFallback")
+    @Retry(name = "geminiApi")
     public String testPing(String prompt) {
         validateApiKey();
 
@@ -163,6 +177,11 @@ public class GeminiClientImpl implements GeminiClient {
             log.error("Failed to ping Gemini API", ex);
             throw new RuntimeException("Failed to ping Gemini API: " + ex.getMessage(), ex);
         }
+    }
+
+    public String testPingFallback(String prompt, Throwable ex) {
+        log.warn("Gemini API ping fallback triggered. Reason: {}", ex != null ? ex.getMessage() : "Unknown");
+        return "Gemini API is temporarily unavailable (fallback active).";
     }
 
     private void validateApiKey() {
