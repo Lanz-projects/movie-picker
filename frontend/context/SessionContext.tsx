@@ -641,7 +641,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session, stage, currentUser, fetchConsensusResults, clearMyDeckSelection]);
 
-  refreshSessionRef.current = refreshSession;
+  React.useEffect(() => {
+    refreshSessionRef.current = refreshSession;
+  });
 
   // Synchronize room state when user re-focuses or tabs back into the app
   React.useEffect(() => {

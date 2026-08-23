@@ -26,16 +26,16 @@ export function useRoomWebSocket({
   const [isConnected, setIsConnected] = React.useState<boolean>(false);
 
   const onRoomEventRef = React.useRef(onRoomEvent);
-  onRoomEventRef.current = onRoomEvent;
-
   const onProgressRef = React.useRef(onProgress);
-  onProgressRef.current = onProgress;
-
   const onResultsRef = React.useRef(onResults);
-  onResultsRef.current = onResults;
-
   const onReconnectRef = React.useRef(onReconnect);
-  onReconnectRef.current = onReconnect;
+
+  React.useEffect(() => {
+    onRoomEventRef.current = onRoomEvent;
+    onProgressRef.current = onProgress;
+    onResultsRef.current = onResults;
+    onReconnectRef.current = onReconnect;
+  });
 
   React.useEffect(() => {
     if (!roomCode) {

@@ -16,6 +16,7 @@ export function useAiConversation({
   roomCode,
   deckMovieIds,
 }: UseAiConversationOptions) {
+  const [prevRoomCode, setPrevRoomCode] = React.useState<string | undefined>(roomCode);
   const [turns, setTurns] = React.useState<AiChatTurn[]>(() => {
     return roomCode ? loadAiChatHistory(roomCode) : [];
   });
@@ -27,12 +28,10 @@ export function useAiConversation({
   const cooldownTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Sync state when roomCode changes
-  React.useEffect(() => {
-    if (roomCode) {
-      setTurns(loadAiChatHistory(roomCode));
-    }
-  }, [roomCode]);
+  if (prevRoomCode !== roomCode) {
+    setPrevRoomCode(roomCode);
+    setTurns(roomCode ? loadAiChatHistory(roomCode) : []);
+  }
 
   // Persist turns to sessionStorage on update
   React.useEffect(() => {

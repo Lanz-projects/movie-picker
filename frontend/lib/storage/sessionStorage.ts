@@ -1,3 +1,4 @@
+import type { AiChatTurn } from "@/types/ai";
 export interface StoredSessionAuth {
   roomCode: string;
   userId: number;
@@ -106,8 +107,6 @@ export function clearVotedSuggestionIds(roomCode?: string, userId?: number): voi
 }
 
 const AI_CHAT_KEY_PREFIX = "movie_picker_ai_chat_";
-
-import type { AiChatTurn } from "@/types/ai";
 
 export function saveAiChatHistory(roomCode: string, turns: AiChatTurn[]): void {
   if (typeof window === "undefined" || !roomCode) return;

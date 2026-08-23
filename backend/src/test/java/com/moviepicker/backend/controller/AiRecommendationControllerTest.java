@@ -202,4 +202,49 @@ public class AiRecommendationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void testGetRoomRecommendations_WithModelAndAssistantRoles_Success() throws Exception {
+        AiRecommendationResponse mockResponse = AiRecommendationResponse.builder()
+                .prompt("sci fi")
+                .replyMessage("Here are picks:")
+                .movies(List.of())
+                .page(1)
+                .pageSize(5)
+                .totalResults(0)
+                .hasMore(false)
+                .build();
+
+        when(aiRecommendationService.getRecommendations(eq("ROOM12"), any(AiRecommendationRequest.class)))
+                .thenReturn(mockResponse);
+
+        AiRecommendationRequest request = AiRecommendationRequest.builder()
+                .prompt("sci fi")
+                .conversationHistory(List.of(
+                        AiChatMessage.builder().role("user").content("first prompt").build(),
+                        AiChatMessage.builder().role("model").content("first reply").build(),
+                        AiChatMessage.builder().role("assistant").content("second reply").build()
+                ))
+                .build();
+
+        mockMvc.perform(post("/api/v1/sessions/ROOM12/ai/recommendations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetRoomRecommendations_WithInvalidRole_ReturnsBadRequest() throws Exception {
+        AiRecommendationRequest request = AiRecommendationRequest.builder()
+                .prompt("sci fi")
+                .conversationHistory(List.of(
+                        AiChatMessage.builder().role("invalid_role").content("bad message").build()
+                ))
+                .build();
+
+        mockMvc.perform(post("/api/v1/sessions/ROOM12/ai/recommendations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
 }

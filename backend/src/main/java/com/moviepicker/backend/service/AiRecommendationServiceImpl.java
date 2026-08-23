@@ -123,8 +123,8 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
             Set<Long> excludedTmdbIds) {
 
         String prompt = request != null ? request.getPrompt() : null;
-        int page = resolvePage(request != null ? request.getPage() : DEFAULT_PAGE);
-        int pageSize = resolvePageSize(request != null ? request.getLimit() : DEFAULT_PAGE_SIZE);
+        int page = resolvePage(request != null ? request.getPage() : null);
+        int pageSize = resolvePageSize(request != null ? request.getLimit() : null);
 
         if (!StringUtils.hasText(prompt)) {
             return AiRecommendationResponse.builder()
@@ -378,12 +378,15 @@ public class AiRecommendationServiceImpl implements AiRecommendationService {
         return cleaned;
     }
 
-    private int resolvePage(int requestedPage) {
-        return Math.max(1, requestedPage);
+    private int resolvePage(Integer requestedPage) {
+        if (requestedPage == null || requestedPage < 1) {
+            return DEFAULT_PAGE;
+        }
+        return requestedPage;
     }
 
-    private int resolvePageSize(int requestedLimit) {
-        if (requestedLimit <= 0) {
+    private int resolvePageSize(Integer requestedLimit) {
+        if (requestedLimit == null || requestedLimit <= 0) {
             return DEFAULT_PAGE_SIZE;
         }
         return Math.min(requestedLimit, MAX_PAGE_SIZE);

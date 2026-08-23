@@ -33,10 +33,10 @@ public class AiRecommendationRequest {
 
     @Builder.Default
     @Min(value = 1, message = "Page must be at least 1")
-    private int page = 1;
+    private Integer page = 1;
 
     @Builder.Default
     @Min(value = 1, message = "Limit must be at least 1")
     @Max(value = 10, message = "Limit must not exceed 10")
-    private int limit = 5;
+    private Integer limit = 5;
 }
