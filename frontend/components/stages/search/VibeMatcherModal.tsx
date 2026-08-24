@@ -5,6 +5,7 @@ import { Sparkles, X, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { VibePresetChips } from "./vibe/VibePresetChips";
 import { VibeCardItem } from "./vibe/VibeCardItem";
 import { useVibeRecommendations } from "./vibe/useVibeRecommendations";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { MovieDto } from "@/types";
 
 export interface VibeMatcherModalProps {
@@ -48,14 +49,7 @@ export function VibeMatcherModal({
   } = useVibeRecommendations({ roomCode, deckMovieIds });
 
   const inputRef = React.useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  }, [isOpen]);
+  const trapRef = useFocusTrap({ isOpen, autoFocusFirst: true });
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -88,7 +82,10 @@ export function VibeMatcherModal({
       aria-labelledby="vibe-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
     >
-      <div className="relative flex flex-col w-full max-w-2xl max-h-[90vh] bg-bg-card border border-border-subtle rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div
+        ref={trapRef}
+        className="relative flex flex-col w-full max-w-2xl max-h-[90vh] bg-bg-card border border-border-subtle rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border-subtle bg-bg-surface/30">
           <div className="flex items-center gap-3">
@@ -109,7 +106,7 @@ export function VibeMatcherModal({
             type="button"
             onClick={onClose}
             aria-label="Close vibe matcher"
-            className="p-1.5 rounded-xl text-text-muted hover:text-text-main hover:bg-bg-elevated transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-bg-elevated transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -118,11 +115,13 @@ export function VibeMatcherModal({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-4">
           {/* Preset Chips */}
-          <VibePresetChips
-            presets={PRESET_VIBES}
-            onSelectPreset={handleSelectPresetVibe}
-            disabled={isLoading || cooldownSeconds > 0}
-          />
+          <div className="overflow-x-auto scroll-mask-right scrollbar-none pb-1">
+            <VibePresetChips
+              presets={PRESET_VIBES}
+              onSelectPreset={handleSelectPresetVibe}
+              disabled={isLoading || cooldownSeconds > 0}
+            />
+          </div>
 
           {/* Search Input Bar */}
           <form onSubmit={handleSubmit} className="flex gap-2">
@@ -133,11 +132,13 @@ export function VibeMatcherModal({
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g. cozy rainy day mystery with great plot twists..."
               maxLength={500}
-              className="flex-1 px-4 py-2.5 rounded-2xl bg-bg-surface border border-border-subtle focus:border-brand-violet/60 focus:outline-none text-sm text-text-main placeholder:text-text-muted transition-colors"
+              aria-label="Movie vibe description"
+              className="flex-1 px-4 py-2.5 rounded-2xl bg-bg-surface border border-border-subtle focus:border-brand-violet/60 focus:outline-none text-base sm:text-sm text-text-main placeholder:text-text-muted transition-colors"
             />
             <button
               type="submit"
               disabled={!prompt.trim() || isLoading || cooldownSeconds > 0}
+              aria-label={isLoading ? "Curating recommendations" : "Find Matches"}
               className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-brand-indigo to-brand-violet hover:from-brand-indigo/90 hover:to-brand-violet/90 text-white font-semibold text-xs sm:text-sm transition-all shadow-md disabled:opacity-50 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               {isLoading ? (

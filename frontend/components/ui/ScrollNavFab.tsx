@@ -54,7 +54,7 @@ export function ScrollNavFab({ threshold = 350, className }: ScrollNavFabProps) 
   return (
     <div
       className={cn(
-        "fixed bottom-24 sm:bottom-28 right-4 sm:right-6 z-50 transition-all duration-300 animate-in fade-in zoom-in-95",
+        "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-28 right-3.5 sm:right-6 z-30 transition-all duration-300 animate-in fade-in zoom-in-95",
         className
       )}
     >
@@ -63,7 +63,7 @@ export function ScrollNavFab({ threshold = 350, className }: ScrollNavFabProps) 
           type="button"
           onClick={handleReturnToPosition}
           aria-label="Return to previous scroll position"
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-bg-surface/90 hover:bg-bg-elevated border border-brand-cyan/40 text-brand-cyan text-xs sm:text-sm font-semibold shadow-xl shadow-black/40 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-brand-cyan/20"
+          className="min-h-[44px] flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-bg-surface/90 hover:bg-bg-elevated border border-brand-cyan/40 text-brand-cyan text-xs sm:text-sm font-semibold shadow-xl shadow-black/40 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-brand-cyan/20"
         >
           <ArrowDown className="h-4 w-4 animate-bounce" />
           <span>Return</span>
@@ -73,7 +73,7 @@ export function ScrollNavFab({ threshold = 350, className }: ScrollNavFabProps) 
           type="button"
           onClick={handleScrollToTop}
           aria-label="Scroll to top of page"
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-bg-surface/90 hover:bg-bg-elevated border border-border-subtle hover:border-brand-violet/40 text-text-main text-xs sm:text-sm font-semibold shadow-xl shadow-black/40 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          className="min-h-[44px] flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-bg-surface/90 hover:bg-bg-elevated border border-border-subtle hover:border-brand-violet/40 text-text-main text-xs sm:text-sm font-semibold shadow-xl shadow-black/40 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
         >
           <ArrowUp className="h-4 w-4 text-brand-cyan" />
           <span>Top</span>

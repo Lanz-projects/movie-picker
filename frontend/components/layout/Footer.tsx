@@ -8,7 +8,7 @@ export function Footer() {
 
   return (
     <>
-      <footer className="mt-auto border-t border-white/5 py-4 px-4 text-center text-xs text-text-tertiary">
+      <footer className="mt-auto border-t border-white/5 py-4 px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] text-center text-xs text-text-tertiary z-10">
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
           <span>Movie Picker</span>
           <span className="text-white/20">·</span>
@@ -16,7 +16,7 @@ export function Footer() {
           <span className="text-white/20">·</span>
           <button
             onClick={() => setIsLegalOpen(true)}
-            className="text-text-secondary hover:text-brand-violet transition-colors underline-offset-2 hover:underline focus:outline-none focus:ring-1 focus:ring-brand-violet rounded"
+            className="text-text-secondary hover:text-brand-violet transition-colors underline-offset-2 hover:underline focus:outline-none focus:ring-1 focus:ring-brand-violet rounded cursor-pointer"
           >
             Privacy & Attributions
           </button>

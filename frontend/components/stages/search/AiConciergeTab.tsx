@@ -88,7 +88,8 @@ export function AiConciergeTab({
               type="button"
               onClick={clearConversation}
               title="Clear conversation history"
-              className="p-2 rounded-xl text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
+              aria-label="Clear conversation history"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -97,7 +98,12 @@ export function AiConciergeTab({
       </div>
 
       {/* Chat Conversation Feed */}
-      <div className="flex-1 flex flex-col gap-5 p-4 sm:p-6 max-h-[600px] overflow-y-auto scrollbar-thin">
+      <div
+        role="log"
+        aria-live="polite"
+        aria-busy={isGenerating}
+        className="flex-1 flex flex-col gap-5 p-4 sm:p-6 min-h-0 max-h-[50vh] sm:max-h-[600px] overflow-y-auto scrollbar-thin"
+      >
         {/* Initial AI Welcome Message */}
         <div className="flex items-start gap-3 max-w-[90%] sm:max-w-[80%]">
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-violet/20 border border-brand-violet/40 text-brand-violet shrink-0 mt-0.5">
@@ -169,7 +175,7 @@ export function AiConciergeTab({
                       type="button"
                       onClick={() => loadMoreForTurn(turn.id)}
                       disabled={turn.isLoadingMore}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-bg-elevated hover:bg-bg-elevated/80 border border-border-subtle hover:border-brand-violet/40 text-text-secondary hover:text-text-main transition-colors cursor-pointer"
+                      className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-bg-elevated hover:bg-bg-elevated/80 border border-border-subtle hover:border-brand-violet/40 text-text-secondary hover:text-text-main transition-colors cursor-pointer"
                     >
                       {turn.isLoadingMore ? (
                         <>
@@ -215,7 +221,7 @@ export function AiConciergeTab({
       </div>
 
       {/* Quick Mood Chips */}
-      <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 border-t border-border-subtle bg-bg-surface/30 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 border-t border-border-subtle bg-bg-surface/30 overflow-x-auto scroll-mask-right scrollbar-none pb-2">
         <span className="text-xs font-semibold text-text-muted uppercase tracking-wider shrink-0 mr-1">
           Suggestions:
         </span>
@@ -225,7 +231,7 @@ export function AiConciergeTab({
             type="button"
             onClick={() => handleSelectPreset(vibe)}
             disabled={isGenerating || cooldownSeconds > 0}
-            className="px-3 py-1.5 rounded-full text-xs font-medium bg-bg-surface border border-border-subtle hover:border-brand-violet/40 hover:bg-bg-elevated text-text-secondary hover:text-text-main whitespace-nowrap transition-colors disabled:opacity-50 cursor-pointer"
+            className="min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-medium bg-bg-surface border border-border-subtle hover:border-brand-violet/40 hover:bg-bg-elevated text-text-secondary hover:text-text-main whitespace-nowrap transition-colors disabled:opacity-50 cursor-pointer"
           >
             {vibe}
           </button>
@@ -245,13 +251,15 @@ export function AiConciergeTab({
           placeholder="Ask the Movie Concierge (e.g., 'Late 90s heist comedies' or 'Cozy studio ghibli vibe')..."
           maxLength={500}
           disabled={isGenerating}
-          className="flex-1 px-4 py-3 rounded-2xl bg-bg-card border border-border-subtle focus:border-brand-violet/60 focus:outline-none text-sm text-text-main placeholder:text-text-muted transition-colors shadow-inner"
+          aria-label="Ask Movie Concierge"
+          className="flex-1 px-4 py-3 rounded-2xl bg-bg-card border border-border-subtle focus:border-brand-violet/60 focus:outline-none text-base sm:text-sm text-text-main placeholder:text-text-muted transition-colors shadow-inner"
         />
 
         <button
           type="submit"
           disabled={!prompt.trim() || isGenerating || cooldownSeconds > 0}
-          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-indigo to-brand-violet hover:from-brand-indigo/90 hover:to-brand-violet/90 text-white font-semibold text-sm transition-all shadow-md shadow-brand-indigo/25 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          aria-label={isGenerating ? "Asking AI" : "Ask AI"}
+          className="min-h-[44px] px-4 sm:px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-indigo to-brand-violet hover:from-brand-indigo/90 hover:to-brand-violet/90 text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-brand-indigo/25 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
         >
           {isGenerating ? (
             <>

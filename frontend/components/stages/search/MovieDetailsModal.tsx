@@ -22,6 +22,7 @@ import { ModalBackdropHeader } from "./modal/ModalBackdropHeader";
 import { ModalCastSection } from "./modal/ModalCastSection";
 import { ModalMetadataGrid } from "./modal/ModalMetadataGrid";
 import { ModalStreamingSection } from "./modal/ModalStreamingSection";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { MovieDto, MovieSubmissionDto, MovieDetailsDto } from "@/types";
 
 export type ModalMovie = MovieDto | MovieSubmissionDto;
@@ -48,6 +49,7 @@ export const MovieDetailsModal = React.memo(function MovieDetailsModal({
   const [mounted, setMounted] = React.useState(false);
   const [detailedData, setDetailedData] = React.useState<MovieDetailsDto | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = React.useState<boolean>(false);
+  const trapRef = useFocusTrap({ isOpen, autoFocusFirst: true });
 
   React.useEffect(() => {
     setMounted(true);
@@ -166,6 +168,7 @@ export const MovieDetailsModal = React.memo(function MovieDetailsModal({
       aria-labelledby="movie-details-title"
     >
       <div
+        ref={trapRef}
         onClick={(e) => e.stopPropagation()}
         className="relative flex flex-col w-full max-w-xl max-h-[88vh] sm:max-h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-border-highlight bg-bg-card shadow-2xl shadow-black/90 pb-[env(safe-area-inset-bottom)] animate-scale-in"
       >

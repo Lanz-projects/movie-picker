@@ -24,7 +24,7 @@
     /* Typography Colors */
     --text-main: #f8fafc;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #8e9db2;
 
     /* Global Fallbacks */
     --background: var(--bg-base);
@@ -35,6 +35,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--brand-violet);
+    outline-offset: 2px;
   }
 
   body {
@@ -179,6 +184,21 @@
   animation: stampPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+/* Safe Area Inset Support */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-safe {
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Scroll Fade Mask for Horizontal Scroll Trays */
+.scroll-mask-right {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
 /* Custom Scrollbar for drawers / trays */
 ::-webkit-scrollbar {
   width: 6px;
@@ -196,4 +216,26 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-stage-in,
+  .animate-bounce,
+  .animate-pulse,
+  .animate-spin,
+  .stamp-like,
+  .stamp-pass,
+  .stamp-superlike {
+    animation: none !important;
+  }
 }
