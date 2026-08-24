@@ -55,7 +55,7 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Skip (Space)"
           title="Skip movie (Space / ↓)"
-          className="group relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           <FastForward className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-0.5 text-text-muted group-hover:text-text-main" />
         </button>
@@ -100,7 +100,7 @@ export const SwipeActions = React.memo(function SwipeActions({
           disabled={disabled}
           aria-label="Movie Info (i)"
           title="Inspect details (i / Enter)"
-          className="group relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-surface text-text-secondary shadow-md transition-all duration-150 hover:scale-110 hover:border-white/20 hover:bg-bg-elevated active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           <Info className="h-4 w-4 sm:h-5 sm:w-5 text-brand-indigo group-hover:text-brand-violet transition-colors" />
         </button>

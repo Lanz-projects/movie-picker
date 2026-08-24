@@ -183,7 +183,7 @@ export const RoomUsersDropdown = React.memo(function RoomUsersDropdown({
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-2xl border border-border-subtle bg-bg-surface/95 p-3.5 shadow-2xl shadow-black/80 backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border-subtle bg-bg-surface/95 p-3.5 shadow-2xl shadow-black/80 backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Mobile Room Code & Nickname Card */}
           {roomCode && (

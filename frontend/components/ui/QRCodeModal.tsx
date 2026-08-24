@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import QRCode from "qrcode";
 import { X, Copy, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export interface QRCodeModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function QRCodeModal({ isOpen, roomCode, onClose }: QRCodeModalProps) {
   const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [copied, setCopied] = React.useState(false);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const trapRef = useFocusTrap({ isOpen, autoFocusFirst: true });
 
   const inviteUrl = React.useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -80,6 +82,7 @@ export function QRCodeModal({ isOpen, roomCode, onClose }: QRCodeModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
     >
       <div
+        ref={trapRef}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-sm overflow-hidden rounded-3xl bg-bg-surface border border-brand-violet/30 shadow-2xl shadow-brand-violet/10 p-6 sm:p-7 text-center relative flex flex-col items-center gap-4 animate-scale-up"
       >

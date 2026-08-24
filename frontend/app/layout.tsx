@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
 import { SessionProvider } from "@/context/SessionContext";
+import { AriaLiveRegion } from "@/components/layout/AriaLiveRegion";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -48,7 +49,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col cinema-ambient-bg text-text-main bg-bg-base font-sans selection:bg-brand-indigo/30 selection:text-white"
       >
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <AriaLiveRegion />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

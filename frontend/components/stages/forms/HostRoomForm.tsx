@@ -116,15 +116,15 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
             <span>Max Players</span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-2 sm:gap-2">
             <button
               type="button"
               aria-label="Decrease max players"
               onClick={() => setMaxUsers((prev) => Math.max(2, (Number(prev) || 10) - 1))}
               disabled={isLoading || currentMaxUsers <= 2}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
+              className="flex min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
             >
-              <Minus className="h-3.5 w-3.5" />
+              <Minus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </button>
             <input
               type="number"
@@ -137,16 +137,16 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
               max={20}
               disabled={isLoading}
               suppressHydrationWarning
-              className="w-12 h-8 text-center text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
+              className="w-12 h-10 sm:h-8 text-center text-sm sm:text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
             />
             <button
               type="button"
               aria-label="Increase max players"
               onClick={() => setMaxUsers((prev) => Math.min(20, (Number(prev) || 10) + 1))}
               disabled={isLoading || currentMaxUsers >= 20}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
+              className="flex min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </button>
           </div>
         </div>
@@ -158,15 +158,15 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
             <span>Movies per Player</span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-2 sm:gap-2">
             <button
               type="button"
               aria-label="Decrease movies per player"
               onClick={() => setMaxSuggestions((prev) => Math.max(1, (Number(prev) || 5) - 1))}
               disabled={isLoading || currentMaxSuggestions <= 1}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
+              className="flex min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
             >
-              <Minus className="h-3.5 w-3.5" />
+              <Minus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </button>
             <input
               type="number"
@@ -179,16 +179,16 @@ export function HostRoomForm({ onSubmit, isLoading = false }: HostRoomFormProps)
               max={10}
               disabled={isLoading}
               suppressHydrationWarning
-              className="w-12 h-8 text-center text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
+              className="w-12 h-10 sm:h-8 text-center text-sm sm:text-xs font-bold text-text-main bg-bg-surface border border-border-subtle rounded-lg focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all cursor-text"
             />
             <button
               type="button"
               aria-label="Increase movies per player"
               onClick={() => setMaxSuggestions((prev) => Math.min(10, (Number(prev) || 5) + 1))}
               disabled={isLoading || currentMaxSuggestions >= 10}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
+              className="flex min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-muted hover:text-white hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all active:scale-90"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </button>
           </div>
         </div>

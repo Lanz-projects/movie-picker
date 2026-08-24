@@ -278,7 +278,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
       </div>
 
       {/* Floating Collapsible Bottom Selection Rack */}
-      <div className="fixed inset-x-0 bottom-3 sm:bottom-4 z-40 px-3 sm:px-4 pointer-events-none flex justify-center">
+      <div className="fixed inset-x-0 bottom-safe z-40 px-3 sm:px-4 pointer-events-none flex justify-center">
         <div className="w-full max-w-4xl pointer-events-auto">
           <SelectionRack
             selectedMovies={myDeckSelection}

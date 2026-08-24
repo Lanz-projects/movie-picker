@@ -168,7 +168,7 @@ export function SwiperScreen({
               className="w-full shrink-0"
             />
 
-            <div className="relative w-full max-w-[360px] sm:max-w-[440px] h-[440px] sm:h-[520px] max-h-[58vh] sm:max-h-none flex items-center justify-center">
+            <div className="relative w-full max-w-[360px] sm:max-w-[440px] h-[52vh] min-h-[340px] max-h-[460px] sm:h-[520px] sm:max-h-none flex items-center justify-center">
               {currentIndex + 2 < totalMovies && (
                 <SwipeCard
                   key={`back-2-${movieDeck[currentIndex + 2].id}`}

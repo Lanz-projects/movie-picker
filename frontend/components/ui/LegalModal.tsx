@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { X, ShieldCheck, Film, Sparkles, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export interface LegalModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const emptySubscribe = () => () => {};
 
 export function LegalModal({ isOpen, onClose }: LegalModalProps) {
   const mounted = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const trapRef = useFocusTrap({ isOpen, autoFocusFirst: true });
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -43,7 +45,10 @@ export function LegalModal({ isOpen, onClose }: LegalModalProps) {
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-white/10 bg-bg-surface p-6 sm:p-8 shadow-2xl shadow-black/80 animate-scale-up">
+      <div
+        ref={trapRef}
+        className="relative z-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-white/10 bg-bg-surface p-6 sm:p-8 shadow-2xl shadow-black/80 animate-scale-up"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
           <div className="flex items-center gap-3">

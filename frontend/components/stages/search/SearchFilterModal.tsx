@@ -3,6 +3,7 @@
 import * as React from "react";
 import { X, RotateCcw, Check, SlidersHorizontal, Tv, Calendar, Star, Clock, Globe, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export interface FilterState {
   provider: string | null;
@@ -101,6 +102,7 @@ export function SearchFilterModal({
 }: SearchFilterModalProps) {
   const [prevFilters, setPrevFilters] = React.useState<FilterState>(filters);
   const [draft, setDraft] = React.useState<FilterState>(filters);
+  const trapRef = useFocusTrap({ isOpen, autoFocusFirst: true });
 
   // Sync draft when parent filters change without extra render cycle
   if (filters !== prevFilters) {
@@ -141,6 +143,7 @@ export function SearchFilterModal({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div
+        ref={trapRef}
         className="relative flex flex-col w-full max-w-2xl max-h-[85vh] rounded-t-3xl sm:rounded-3xl border-t sm:border border-border-subtle bg-bg-surface shadow-2xl shadow-black/80 overflow-hidden pb-[env(safe-area-inset-bottom)]"
       >
         {/* Mobile Grab Handle */}

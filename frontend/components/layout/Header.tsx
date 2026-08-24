@@ -138,7 +138,8 @@ export const Header = React.memo(function Header({
                 <button
                   onClick={onLeaveRoom}
                   title="Leave Room"
-                  className="p-1.5 rounded-lg text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
+                  aria-label="Leave Room"
+                  className="min-h-[38px] min-w-[38px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-2 rounded-xl text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -157,7 +158,7 @@ export const Header = React.memo(function Header({
             title={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
             aria-label={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
             className={cn(
-              "p-1.5 rounded-lg transition-colors cursor-pointer",
+              "min-h-[38px] min-w-[38px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-2 rounded-xl transition-colors cursor-pointer",
               muted
                 ? "text-text-muted/60 hover:text-text-muted hover:bg-bg-surface"
                 : "text-brand-violet hover:text-brand-indigo hover:bg-brand-violet/10"
