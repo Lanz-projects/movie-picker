@@ -155,7 +155,7 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
   return (
     <StageContainer
       maxWidth="xl"
-      className="pb-56 sm:pb-64"
+      className={activeTab === "ai" ? "pb-20 sm:pb-24" : "pb-24 sm:pb-28"}
     >
       <div className="flex flex-col items-center gap-5 w-full">
         {/* Stage Header */}
@@ -272,9 +272,6 @@ export function SearchScreen({ debounceMs = 350 }: SearchScreenProps = {}) {
             isDeckFull={isDeckFull}
           />
         </div>
-
-        {/* Extra Bottom Spacer for Scroll Clearance */}
-        <div className="h-20 sm:h-24 w-full pointer-events-none" aria-hidden="true" />
       </div>
 
       {/* Floating Collapsible Bottom Selection Rack */}

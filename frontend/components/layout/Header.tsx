@@ -61,9 +61,9 @@ export const Header = React.memo(function Header({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-bg-base/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 w-full max-w-275 items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-275 items-center justify-between px-3 sm:px-6">
         {/* Brand Logo & Current Player Identity */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-linear-to-tr from-brand-indigo to-brand-violet text-white shadow-md shadow-brand-indigo/30 shrink-0">
             <Clapperboard className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
@@ -89,7 +89,7 @@ export const Header = React.memo(function Header({
         </div>
 
         {/* Dynamic Room & Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2.5">
           {roomCode ? (
             <>
               {/* Room Code Badge with Copy (Desktop) */}
@@ -139,7 +139,7 @@ export const Header = React.memo(function Header({
                   onClick={onLeaveRoom}
                   title="Leave Room"
                   aria-label="Leave Room"
-                  className="min-h-[38px] min-w-[38px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-2 rounded-xl text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
+                  className="min-h-[34px] min-w-[34px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-1.5 rounded-xl text-text-muted hover:text-brand-coral hover:bg-brand-coral/10 transition-colors cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -158,7 +158,7 @@ export const Header = React.memo(function Header({
             title={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
             aria-label={muted ? "Unmute Sound Effects" : "Mute Sound Effects"}
             className={cn(
-              "min-h-[38px] min-w-[38px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-2 rounded-xl transition-colors cursor-pointer",
+              "min-h-[34px] min-w-[34px] sm:min-h-[32px] sm:min-w-[32px] flex items-center justify-center p-1.5 rounded-xl transition-colors cursor-pointer",
               muted
                 ? "text-text-muted/60 hover:text-text-muted hover:bg-bg-surface"
                 : "text-brand-violet hover:text-brand-indigo hover:bg-brand-violet/10"

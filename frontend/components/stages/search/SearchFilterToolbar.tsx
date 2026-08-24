@@ -117,13 +117,13 @@ export function SearchFilterToolbar({
       </div>
 
       {/* Section Heading with Dynamic Title & Reset Action */}
-      <div className="w-full flex items-center justify-between border-b border-border-subtle pb-2 px-1">
-        <div className="flex items-center gap-2">
+      <div className="w-full flex items-center justify-between flex-wrap gap-2 border-b border-border-subtle pb-2 px-1">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           <h2 className="font-display text-sm sm:text-base font-bold text-text-main">
             {sectionTitle}
           </h2>
           {totalResults > 0 ? (
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-bg-surface border border-border-subtle text-text-muted">
+            <span className="inline-flex items-center justify-center text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 rounded-full bg-bg-surface border border-border-subtle text-text-secondary whitespace-nowrap shrink-0 shadow-xs">
               {currentResultsCount} of {totalResults}
             </span>
           ) : null}
@@ -133,7 +133,7 @@ export function SearchFilterToolbar({
           <button
             type="button"
             onClick={onClearFilters}
-            className="flex items-center gap-1.5 text-xs text-brand-cyan hover:text-brand-cyan/80 font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-brand-cyan hover:text-brand-cyan/80 font-medium transition-colors cursor-pointer shrink-0 ml-auto"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Back to Trending</span>
