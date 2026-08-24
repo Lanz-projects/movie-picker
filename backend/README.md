@@ -151,7 +151,7 @@ Sample Response:
 
 ## Testing
 
-The backend includes a comprehensive automated test suite (173 tests) covering controllers, services, repositories, security filters, rate limiting, and circuit breakers.
+The backend includes a comprehensive automated test suite (174 tests) covering controllers, services, repositories, security filters, rate limiting, and circuit breakers.
 
 ### Run All Tests
 ```bash

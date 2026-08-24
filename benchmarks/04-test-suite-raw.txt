@@ -1,0 +1,1188 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.moviepicker:backend >-----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 103 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ backend ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 34 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.moviepicker.backend.actuator.ActuatorHealthTest
+17:47:00.621 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.moviepicker.backend.actuator.ActuatorHealthTest]: ActuatorHealthTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:47:00.758 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.actuator.ActuatorHealthTest
+17:47:00.867 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.moviepicker.backend.actuator.ActuatorHealthTest]: ActuatorHealthTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:47:00.870 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.actuator.ActuatorHealthTest
+17:47:00.966 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:01.284 [main] [] INFO  c.m.b.actuator.ActuatorHealthTest - Starting ActuatorHealthTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:01.285 [main] [] INFO  c.m.b.actuator.ActuatorHealthTest - The following 1 profile is active: "test"
+2026-08-23 17:47:02.447 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:02.543 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 82 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:03.487 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:03.573 [main] [] INFO  org.hibernate.orm.core - HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-08-23 17:47:04.235 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:04.279 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-23 17:47:04.558 [main] [] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-08-23 17:47:04.560 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-23 17:47:04.594 [main] [] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-23 17:47:04.624 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:05.987 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists movie_suggestion_nominators cascade 
+Hibernate: drop table if exists movie_suggestions cascade 
+Hibernate: drop table if exists session_banned_users cascade 
+Hibernate: drop table if exists session_kick_counts cascade 
+Hibernate: drop table if exists session_round_kicked_users cascade 
+Hibernate: drop table if exists sessions cascade 
+Hibernate: drop table if exists users cascade 
+Hibernate: drop table if exists votes cascade 
+Hibernate: create table movie_suggestion_nominators (movie_suggestion_id bigint not null, user_id bigint not null, primary key (movie_suggestion_id, user_id))
+Hibernate: create table movie_suggestions (release_year integer, id bigint generated by default as identity, session_id bigint not null, suggested_at timestamp(6) not null, tmdb_id bigint not null, user_id bigint, poster_path varchar(500), overview TEXT, title varchar(255) not null, primary key (id), constraint uk_session_tmdb unique (session_id, tmdb_id))
+Hibernate: create table session_banned_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table session_kick_counts (kick_count integer, session_id bigint not null, display_name varchar(255) not null, primary key (session_id, display_name))
+Hibernate: create table session_round_kicked_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table sessions (max_suggestions_per_user integer not null, max_users integer not null, created_at timestamp(6) not null, id bigint generated by default as identity, version bigint not null, room_code varchar(10) not null unique, host_name varchar(255) not null, status enum ('COMPLETED','SUGGESTING','VOTING','WAITING') not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, joined_at timestamp(6) not null, session_id bigint not null, session_token varchar(64), display_name varchar(100) not null, primary key (id))
+Hibernate: create table votes (id bigint generated by default as identity, movie_suggestion_id bigint not null, session_id bigint not null, user_id bigint not null, voted_at timestamp(6) not null, vote_type enum ('LIKE','NO','PASS','SKIP','SUPERLIKE','YES') not null, primary key (id), constraint uk_user_movie_vote unique (user_id, movie_suggestion_id))
+Hibernate: create index idx_movie_suggestions_session_id on movie_suggestions (session_id)
+Hibernate: create index idx_movie_suggestions_session_user on movie_suggestions (session_id, user_id)
+Hibernate: create index idx_users_session_id on users (session_id)
+Hibernate: create index idx_votes_session_id on votes (session_id)
+Hibernate: create index idx_votes_session_movie on votes (session_id, movie_suggestion_id)
+Hibernate: create index idx_votes_session_user on votes (session_id, user_id)
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FK94vq2w0wtltk9rrdnd6gcd821 foreign key (user_id) references users
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FKf8s01f6o1rf9rawriv2tan7vo foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists movie_suggestions add constraint FKjqibpqdhqh6dvlyq62xieb2wa foreign key (session_id) references sessions
+Hibernate: alter table if exists movie_suggestions add constraint FK3xb9yk0ongqka5ewiwdgumhn foreign key (user_id) references users
+Hibernate: alter table if exists session_banned_users add constraint FKlin1phdnpd41wufgoknoiftr foreign key (session_id) references sessions
+Hibernate: alter table if exists session_kick_counts add constraint FKfv0h7sqwjkbrq1v78fdobmbpc foreign key (session_id) references sessions
+Hibernate: alter table if exists session_round_kicked_users add constraint FK1oaoncxwxwe6xspl3j00bggmt foreign key (session_id) references sessions
+Hibernate: alter table if exists users add constraint FKkey9plrprsm59yb151h56qe42 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FK9ct2nxen4miod34dpknhpygq9 foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists votes add constraint FKl0x9u7v2jc893vxceqj2nqk90 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925e foreign key (user_id) references users
+2026-08-23 17:47:06.061 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:07.005 [main] [] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-23 17:47:10.347 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:10.347 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:10.361 [main] [] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-23 17:47:10.376 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 29 ms
+2026-08-23 17:47:10.466 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:10.466 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@39f326d6]]
+2026-08-23 17:47:10.467 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-08-23 17:47:10.474 [main] [] INFO  c.m.b.actuator.ActuatorHealthTest - Started ActuatorHealthTest in 9.522 seconds (process running for 11.044)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.74 s -- in com.moviepicker.backend.actuator.ActuatorHealthTest
+[INFO] Running com.moviepicker.backend.BackendApplicationTests
+2026-08-23 17:47:11.125 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.BackendApplicationTests]: BackendApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:11.140 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.BackendApplicationTests
+2026-08-23 17:47:11.141 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.BackendApplicationTests]: BackendApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:11.142 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.BackendApplicationTests
+2026-08-23 17:47:11.146 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:11.146 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@39f326d6]]
+2026-08-23 17:47:11.146 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:11.150 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:11.180 [main] [] INFO  c.m.backend.BackendApplicationTests - Starting BackendApplicationTests using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:11.180 [main] [] INFO  c.m.backend.BackendApplicationTests - The following 1 profile is active: "test"
+2026-08-23 17:47:11.591 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:11.623 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 30 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:11.793 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:11.814 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:11.816 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-23 17:47:11.817 [main] [] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:testdb user=SA
+2026-08-23 17:47:11.817 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-23 17:47:11.819 [main] [] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-23 17:47:11.819 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:11.908 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists movie_suggestion_nominators cascade 
+Hibernate: drop table if exists movie_suggestions cascade 
+Hibernate: drop table if exists session_banned_users cascade 
+Hibernate: drop table if exists session_kick_counts cascade 
+Hibernate: drop table if exists session_round_kicked_users cascade 
+Hibernate: drop table if exists sessions cascade 
+Hibernate: drop table if exists users cascade 
+Hibernate: drop table if exists votes cascade 
+Hibernate: create table movie_suggestion_nominators (movie_suggestion_id bigint not null, user_id bigint not null, primary key (movie_suggestion_id, user_id))
+Hibernate: create table movie_suggestions (release_year integer, id bigint generated by default as identity, session_id bigint not null, suggested_at timestamp(6) not null, tmdb_id bigint not null, user_id bigint, poster_path varchar(500), overview TEXT, title varchar(255) not null, primary key (id), constraint uk_session_tmdb unique (session_id, tmdb_id))
+Hibernate: create table session_banned_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table session_kick_counts (kick_count integer, session_id bigint not null, display_name varchar(255) not null, primary key (session_id, display_name))
+Hibernate: create table session_round_kicked_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table sessions (max_suggestions_per_user integer not null, max_users integer not null, created_at timestamp(6) not null, id bigint generated by default as identity, version bigint not null, room_code varchar(10) not null unique, host_name varchar(255) not null, status enum ('COMPLETED','SUGGESTING','VOTING','WAITING') not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, joined_at timestamp(6) not null, session_id bigint not null, session_token varchar(64), display_name varchar(100) not null, primary key (id))
+Hibernate: create table votes (id bigint generated by default as identity, movie_suggestion_id bigint not null, session_id bigint not null, user_id bigint not null, voted_at timestamp(6) not null, vote_type enum ('LIKE','NO','PASS','SKIP','SUPERLIKE','YES') not null, primary key (id), constraint uk_user_movie_vote unique (user_id, movie_suggestion_id))
+Hibernate: create index idx_movie_suggestions_session_id on movie_suggestions (session_id)
+Hibernate: create index idx_movie_suggestions_session_user on movie_suggestions (session_id, user_id)
+Hibernate: create index idx_users_session_id on users (session_id)
+Hibernate: create index idx_votes_session_id on votes (session_id)
+Hibernate: create index idx_votes_session_movie on votes (session_id, movie_suggestion_id)
+Hibernate: create index idx_votes_session_user on votes (session_id, user_id)
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FK94vq2w0wtltk9rrdnd6gcd821 foreign key (user_id) references users
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FKf8s01f6o1rf9rawriv2tan7vo foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists movie_suggestions add constraint FKjqibpqdhqh6dvlyq62xieb2wa foreign key (session_id) references sessions
+Hibernate: alter table if exists movie_suggestions add constraint FK3xb9yk0ongqka5ewiwdgumhn foreign key (user_id) references users
+Hibernate: alter table if exists session_banned_users add constraint FKlin1phdnpd41wufgoknoiftr foreign key (session_id) references sessions
+Hibernate: alter table if exists session_kick_counts add constraint FKfv0h7sqwjkbrq1v78fdobmbpc foreign key (session_id) references sessions
+Hibernate: alter table if exists session_round_kicked_users add constraint FK1oaoncxwxwe6xspl3j00bggmt foreign key (session_id) references sessions
+Hibernate: alter table if exists users add constraint FKkey9plrprsm59yb151h56qe42 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FK9ct2nxen4miod34dpknhpygq9 foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists votes add constraint FKl0x9u7v2jc893vxceqj2nqk90 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925e foreign key (user_id) references users
+2026-08-23 17:47:11.934 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:13.323 [main] [] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-23 17:47:13.343 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:13.343 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@61e2e5e2]]
+2026-08-23 17:47:13.343 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-08-23 17:47:13.345 [main] [] INFO  c.m.backend.BackendApplicationTests - Started BackendApplicationTests in 2.195 seconds (process running for 13.915)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.226 s -- in com.moviepicker.backend.BackendApplicationTests
+[INFO] Running com.moviepicker.backend.client.GeminiClientTest
+2026-08-23 17:47:13.516 [main] [] WARN  c.m.backend.client.GeminiClientImpl - Gemini API ping fallback triggered. Reason: Simulated upstream outage
+2026-08-23 17:47:13.520 [main] [] WARN  c.m.backend.client.GeminiClientImpl - Gemini API circuit breaker/retry fallback triggered for prompt='sci-fi'. Reason: Simulated upstream outage
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.174 s -- in com.moviepicker.backend.client.GeminiClientTest
+[INFO] Running com.moviepicker.backend.client.TmdbClientTest
+2026-08-23 17:47:13.530 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_message":"Invalid API key"}
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in com.moviepicker.backend.client.TmdbClientTest
+[INFO] Running com.moviepicker.backend.config.DotenvLoaderTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in com.moviepicker.backend.config.DotenvLoaderTest
+[INFO] Running com.moviepicker.backend.config.WebSocketConfigTest
+2026-08-23 17:47:13.628 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.config.WebSocketConfigTest]: WebSocketConfigTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:13.646 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.config.WebSocketConfigTest
+2026-08-23 17:47:13.647 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.config.WebSocketConfigTest]: WebSocketConfigTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:13.648 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.config.WebSocketConfigTest
+2026-08-23 17:47:13.649 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:13.649 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@61e2e5e2]]
+2026-08-23 17:47:13.650 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:13.651 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:13.677 [main] [] INFO  c.m.b.config.WebSocketConfigTest - Starting WebSocketConfigTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:13.678 [main] [] INFO  c.m.b.config.WebSocketConfigTest - The following 1 profile is active: "test"
+2026-08-23 17:47:14.012 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:14.037 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 24 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:14.293 [main] [] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2026-08-23 17:47:14.307 [main] [] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-08-23 17:47:14.307 [main] [] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-08-23 17:47:14.371 [main] [] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 692 ms
+2026-08-23 17:47:14.567 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:14.584 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:14.586 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-08-23 17:47:14.586 [main] [] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:testdb user=SA
+2026-08-23 17:47:14.587 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-08-23 17:47:14.587 [main] [] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-23 17:47:14.587 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:14.657 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists movie_suggestion_nominators cascade 
+Hibernate: drop table if exists movie_suggestions cascade 
+Hibernate: drop table if exists session_banned_users cascade 
+Hibernate: drop table if exists session_kick_counts cascade 
+Hibernate: drop table if exists session_round_kicked_users cascade 
+Hibernate: drop table if exists sessions cascade 
+Hibernate: drop table if exists users cascade 
+Hibernate: drop table if exists votes cascade 
+Hibernate: create table movie_suggestion_nominators (movie_suggestion_id bigint not null, user_id bigint not null, primary key (movie_suggestion_id, user_id))
+Hibernate: create table movie_suggestions (release_year integer, id bigint generated by default as identity, session_id bigint not null, suggested_at timestamp(6) not null, tmdb_id bigint not null, user_id bigint, poster_path varchar(500), overview TEXT, title varchar(255) not null, primary key (id), constraint uk_session_tmdb unique (session_id, tmdb_id))
+Hibernate: create table session_banned_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table session_kick_counts (kick_count integer, session_id bigint not null, display_name varchar(255) not null, primary key (session_id, display_name))
+Hibernate: create table session_round_kicked_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table sessions (max_suggestions_per_user integer not null, max_users integer not null, created_at timestamp(6) not null, id bigint generated by default as identity, version bigint not null, room_code varchar(10) not null unique, host_name varchar(255) not null, status enum ('COMPLETED','SUGGESTING','VOTING','WAITING') not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, joined_at timestamp(6) not null, session_id bigint not null, session_token varchar(64), display_name varchar(100) not null, primary key (id))
+Hibernate: create table votes (id bigint generated by default as identity, movie_suggestion_id bigint not null, session_id bigint not null, user_id bigint not null, voted_at timestamp(6) not null, vote_type enum ('LIKE','NO','PASS','SKIP','SUPERLIKE','YES') not null, primary key (id), constraint uk_user_movie_vote unique (user_id, movie_suggestion_id))
+Hibernate: create index idx_movie_suggestions_session_id on movie_suggestions (session_id)
+Hibernate: create index idx_movie_suggestions_session_user on movie_suggestions (session_id, user_id)
+Hibernate: create index idx_users_session_id on users (session_id)
+Hibernate: create index idx_votes_session_id on votes (session_id)
+Hibernate: create index idx_votes_session_movie on votes (session_id, movie_suggestion_id)
+Hibernate: create index idx_votes_session_user on votes (session_id, user_id)
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FK94vq2w0wtltk9rrdnd6gcd821 foreign key (user_id) references users
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FKf8s01f6o1rf9rawriv2tan7vo foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists movie_suggestions add constraint FKjqibpqdhqh6dvlyq62xieb2wa foreign key (session_id) references sessions
+Hibernate: alter table if exists movie_suggestions add constraint FK3xb9yk0ongqka5ewiwdgumhn foreign key (user_id) references users
+Hibernate: alter table if exists session_banned_users add constraint FKlin1phdnpd41wufgoknoiftr foreign key (session_id) references sessions
+Hibernate: alter table if exists session_kick_counts add constraint FKfv0h7sqwjkbrq1v78fdobmbpc foreign key (session_id) references sessions
+Hibernate: alter table if exists session_round_kicked_users add constraint FK1oaoncxwxwe6xspl3j00bggmt foreign key (session_id) references sessions
+Hibernate: alter table if exists users add constraint FKkey9plrprsm59yb151h56qe42 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FK9ct2nxen4miod34dpknhpygq9 foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists votes add constraint FKl0x9u7v2jc893vxceqj2nqk90 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925e foreign key (user_id) references users
+2026-08-23 17:47:14.676 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:15.672 [main] [] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-23 17:47:15.690 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:15.690 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:15.690 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-08-23 17:47:15.700 [main] [] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 58952 (http) with context path '/'
+2026-08-23 17:47:15.704 [main] [] INFO  c.m.b.config.WebSocketConfigTest - Started WebSocketConfigTest in 2.053 seconds (process running for 16.274)
+2026-08-23 17:47:15.808 [http-nio-auto-1-exec-1] [] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-23 17:47:15.808 [http-nio-auto-1-exec-1] [] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-08-23 17:47:15.808 [http-nio-auto-1-exec-1] [] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.344 s -- in com.moviepicker.backend.config.WebSocketConfigTest
+[INFO] Running com.moviepicker.backend.controller.AiRecommendationControllerTest
+2026-08-23 17:47:15.977 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.AiRecommendationControllerTest]: AiRecommendationControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:16.009 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.AiRecommendationControllerTest
+2026-08-23 17:47:16.010 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.AiRecommendationControllerTest]: AiRecommendationControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:16.016 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.AiRecommendationControllerTest
+2026-08-23 17:47:16.019 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:16.019 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:16.019 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:16.021 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:16.042 [main] [] INFO  c.m.b.c.AiRecommendationControllerTest - Starting AiRecommendationControllerTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:16.042 [main] [] INFO  c.m.b.c.AiRecommendationControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:16.703 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:16.705 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:16.706 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-23 17:47:16.721 [main] [] INFO  c.m.b.c.AiRecommendationControllerTest - Started AiRecommendationControllerTest in 0.7 seconds (process running for 17.291)
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.117 s -- in com.moviepicker.backend.controller.AiRecommendationControllerTest
+[INFO] Running com.moviepicker.backend.controller.ConsensusControllerTest
+2026-08-23 17:47:17.099 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.ConsensusControllerTest]: ConsensusControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:17.110 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.ConsensusControllerTest
+2026-08-23 17:47:17.110 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.ConsensusControllerTest]: ConsensusControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:17.119 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.ConsensusControllerTest
+2026-08-23 17:47:17.125 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:17.154 [main] [] INFO  c.m.b.c.ConsensusControllerTest - Starting ConsensusControllerTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:17.155 [main] [] INFO  c.m.b.c.ConsensusControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:17.869 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:17.869 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:17.872 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-23 17:47:17.880 [main] [] INFO  c.m.b.c.ConsensusControllerTest - Started ConsensusControllerTest in 0.756 seconds (process running for 18.45)
+2026-08-23 17:47:17.902 [main] [82668827-c950-4f2e-bcc0-e9d2df8f9e38] INFO  c.m.b.controller.ConsensusController - Broadcasted consensus results to destination='/topic/room/WINNER/results'
+2026-08-23 17:47:17.923 [main] [1f6cea0b-99da-436a-9667-9112716ef7e8] INFO  c.m.b.controller.ConsensusController - Broadcasted consensus results to destination='/topic/room/WINNER/results'
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.847 s -- in com.moviepicker.backend.controller.ConsensusControllerTest
+[INFO] Running com.moviepicker.backend.controller.ConsensusWebSocketTest
+2026-08-23 17:47:17.945 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.ConsensusWebSocketTest]: ConsensusWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:17.946 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.ConsensusWebSocketTest
+2026-08-23 17:47:17.949 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.ConsensusWebSocketTest]: ConsensusWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:17.950 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.ConsensusWebSocketTest
+2026-08-23 17:47:17.953 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:17.953 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:17.954 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+2026-08-23 17:47:18.592 [clientInboundChannel-25] [] INFO  c.m.b.c.VoteMessageController - Received WebSocket vote message for roomCode='AUTOWIN', user=1, movie=1
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.id=?
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0 where ms1_0.id=?
+Hibernate: select v1_0.id from votes v1_0 where v1_0.user_id=? and v1_0.movie_suggestion_id=? fetch first ? rows only
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+2026-08-23 17:47:18.686 [clientInboundChannel-25] [] INFO  c.m.backend.service.VoteServiceImpl - Vote recorded: user='Alice', movie='Fight Club', voteType=YES
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0 where ms1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select v1_0.user_id,count(v1_0.id) from votes v1_0 where v1_0.session_id=? group by v1_0.user_id
+2026-08-23 17:47:18.726 [clientInboundChannel-25] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/AUTOWIN': RoomProgressEvent(eventType=ALL_VOTING_COMPLETED, roomCode=AUTOWIN, userId=1, kickedUserId=null, userDisplayName=Alice, hostName=null, sessionStatus=null, users=null, submittedUserCount=null, totalUserCount=null, message=null, movieSuggestionId=1, tmdbId=550, movieTitle=Fight Club, voteType=YES, progress=VotingProgressResponse(sessionId=1, roomCode=AUTOWIN, totalMovies=1, totalUsers=1, completedUserCount=1, allUsersCompleted=true, users=[UserVotingProgressDto(userId=1, displayName=Alice, votedCount=1, completed=true)]))
+Hibernate: select distinct ms1_0.id,n1_0.movie_suggestion_id,n1_1.id,n1_1.display_name,n1_1.joined_at,n1_1.session_id,n1_1.session_token,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from movie_suggestions ms1_0 left join users u1_0 on u1_0.id=ms1_0.user_id left join movie_suggestion_nominators n1_0 on ms1_0.id=n1_0.movie_suggestion_id left join users n1_1 on n1_1.id=n1_0.user_id where ms1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id,v1_0.session_id,v1_0.user_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token,v1_0.vote_type,v1_0.voted_at from votes v1_0 left join users u1_0 on u1_0.id=v1_0.user_id left join movie_suggestions ms1_0 on ms1_0.id=v1_0.movie_suggestion_id where v1_0.session_id=?
+2026-08-23 17:47:18.763 [clientInboundChannel-25] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=1 status transitioned to COMPLETED. Winner: 'Fight Club'
+2026-08-23 17:47:18.768 [clientInboundChannel-25] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted winning results to destination='/topic/room/AUTOWIN/results' (Winner: 'Fight Club')
+Hibernate: update sessions set host_name=?,max_suggestions_per_user=?,max_users=?,room_code=?,status=?,version=? where id=? and version=?
+Hibernate: select s1_0.id,bdn1_0.session_id,bdn1_0.display_name,s1_0.created_at,s1_0.host_name,kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,rkdn1_0.session_id,rkdn1_0.display_name,s1_0.status,s1_0.version from sessions s1_0 left join session_banned_users bdn1_0 on s1_0.id=bdn1_0.session_id left join session_kick_counts kc1_0 on s1_0.id=kc1_0.session_id left join session_round_kicked_users rkdn1_0 on s1_0.id=rkdn1_0.session_id where s1_0.id=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: delete from votes where id=?
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: delete from movie_suggestion_nominators where movie_suggestion_id=?
+Hibernate: delete from movie_suggestions where id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: select s1_0.id,bdn1_0.session_id,bdn1_0.display_name,s1_0.created_at,s1_0.host_name,kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,rkdn1_0.session_id,rkdn1_0.display_name,s1_0.status,s1_0.version from sessions s1_0 left join session_banned_users bdn1_0 on s1_0.id=bdn1_0.session_id left join session_kick_counts kc1_0 on s1_0.id=kc1_0.session_id left join session_round_kicked_users rkdn1_0 on s1_0.id=rkdn1_0.session_id where s1_0.id=?
+Hibernate: select distinct ms1_0.id,n1_0.movie_suggestion_id,n1_1.id,n1_1.display_name,n1_1.joined_at,n1_1.session_id,n1_1.session_token,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from movie_suggestions ms1_0 left join users u1_0 on u1_0.id=ms1_0.user_id left join movie_suggestion_nominators n1_0 on ms1_0.id=n1_0.movie_suggestion_id left join users n1_1 on n1_1.id=n1_0.user_id where ms1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id,v1_0.session_id,v1_0.user_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token,v1_0.vote_type,v1_0.voted_at from votes v1_0 left join users u1_0 on u1_0.id=v1_0.user_id left join movie_suggestions ms1_0 on ms1_0.id=v1_0.movie_suggestion_id where v1_0.session_id=?
+2026-08-23 17:47:19.163 [main] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=2 status transitioned to COMPLETED. Winner: 'Fight Club'
+Hibernate: update sessions set host_name=?,max_suggestions_per_user=?,max_users=?,room_code=?,status=?,version=? where id=? and version=?
+2026-08-23 17:47:19.165 [main] [] INFO  c.m.b.controller.ConsensusController - Broadcasted consensus results to destination='/topic/room/AUTOWIN/results'
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: delete from movie_suggestion_nominators where movie_suggestion_id=?
+Hibernate: delete from movie_suggestions where id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.245 s -- in com.moviepicker.backend.controller.ConsensusWebSocketTest
+[INFO] Running com.moviepicker.backend.controller.MovieControllerTest
+2026-08-23 17:47:19.193 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.MovieControllerTest]: MovieControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:19.201 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.MovieControllerTest
+2026-08-23 17:47:19.201 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.MovieControllerTest]: MovieControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:19.208 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.MovieControllerTest
+2026-08-23 17:47:19.211 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:19.211 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:19.211 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:19.213 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:19.239 [main] [] INFO  c.m.b.controller.MovieControllerTest - Starting MovieControllerTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:19.240 [main] [] INFO  c.m.b.controller.MovieControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:19.613 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:19.614 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:19.614 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:19.619 [main] [] INFO  c.m.b.controller.MovieControllerTest - Started MovieControllerTest in 0.407 seconds (process running for 20.189)
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.524 s -- in com.moviepicker.backend.controller.MovieControllerTest
+[INFO] Running com.moviepicker.backend.controller.MovieSubmissionControllerTest
+2026-08-23 17:47:19.718 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.MovieSubmissionControllerTest]: MovieSubmissionControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:19.725 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.MovieSubmissionControllerTest
+2026-08-23 17:47:19.726 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.MovieSubmissionControllerTest]: MovieSubmissionControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:19.730 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.MovieSubmissionControllerTest
+2026-08-23 17:47:19.736 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:19.759 [main] [] INFO  c.m.b.c.MovieSubmissionControllerTest - Starting MovieSubmissionControllerTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:19.759 [main] [] INFO  c.m.b.c.MovieSubmissionControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:20.112 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:20.112 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:20.113 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-23 17:47:20.116 [main] [] INFO  c.m.b.c.MovieSubmissionControllerTest - Started MovieSubmissionControllerTest in 0.382 seconds (process running for 20.687)
+2026-08-23 17:47:20.159 [main] [d3138f7a-9710-41fe-b9a6-ced5634e2584] WARN  o.h.v.i.m.a.CascadingMetaDataBuilder - HV000271: Using `@Valid` on a container (java.util.List) is deprecated. You should apply the annotation on the type argument(s). Affected element: movies
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.502 s -- in com.moviepicker.backend.controller.MovieSubmissionControllerTest
+[INFO] Running com.moviepicker.backend.controller.RoomLifecycleWebSocketTest
+2026-08-23 17:47:20.219 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.RoomLifecycleWebSocketTest]: RoomLifecycleWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:20.222 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.RoomLifecycleWebSocketTest
+2026-08-23 17:47:20.222 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.RoomLifecycleWebSocketTest]: RoomLifecycleWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:20.223 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.RoomLifecycleWebSocketTest
+2026-08-23 17:47:20.225 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:20.226 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:20.226 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+2026-08-23 17:47:20.568 [main] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/ROOM99': RoomProgressEvent(eventType=STAGE_CHANGED, roomCode=ROOM99, userId=null, kickedUserId=null, userDisplayName=null, hostName=null, sessionStatus=VOTING, users=[UserResponse(id=3, displayName=Alice, sessionToken=06746507-86a0-4c56-bfbb-eb5eb7ea3da5, joinedAt=2026-08-23T17:47:20.243802, kickCount=0)], submittedUserCount=null, totalUserCount=null, message=Session stage advanced to VOTING, movieSuggestionId=null, tmdbId=null, movieTitle=null, voteType=null, progress=null)
+Hibernate: update sessions set host_name=?,max_suggestions_per_user=?,max_users=?,room_code=?,status=?,version=? where id=? and version=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+2026-08-23 17:47:20.936 [main] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/ROOM99': RoomProgressEvent(eventType=USER_JOINED, roomCode=ROOM99, userId=5, kickedUserId=null, userDisplayName=Bob, hostName=Alice, sessionStatus=WAITING, users=[UserResponse(id=4, displayName=Alice, sessionToken=e40a221d-715e-4afa-9851-9bd0e9287e50, joinedAt=2026-08-23T17:47:20.611903, kickCount=0), UserResponse(id=5, displayName=Bob, sessionToken=bc207f43-b203-47d2-b7c3-4a8c4f1b5a01, joinedAt=2026-08-23T17:47:20.932518900, kickCount=0)], submittedUserCount=null, totalUserCount=null, message=Bob joined the room., movieSuggestionId=null, tmdbId=null, movieTitle=null, voteType=null, progress=null)
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select s1_0.id,bdn1_0.session_id,bdn1_0.display_name,s1_0.created_at,s1_0.host_name,kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,rkdn1_0.session_id,rkdn1_0.display_name,s1_0.status,s1_0.version from sessions s1_0 left join session_banned_users bdn1_0 on s1_0.id=bdn1_0.session_id left join session_kick_counts kc1_0 on s1_0.id=kc1_0.session_id left join session_round_kicked_users rkdn1_0 on s1_0.id=rkdn1_0.session_id where s1_0.id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.id=?
+Hibernate: select count(ms1_0.id) from movie_suggestions ms1_0 where ms1_0.session_id=? and ms1_0.user_id=?
+Hibernate: select ms1_0.tmdb_id from movie_suggestions ms1_0 where ms1_0.session_id=?
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: insert into movie_suggestion_nominators (movie_suggestion_id,user_id) values (?,?)
+Hibernate: select distinct ms1_0.id,n1_0.movie_suggestion_id,n1_1.id,n1_1.display_name,n1_1.joined_at,n1_1.session_id,n1_1.session_token,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from movie_suggestions ms1_0 left join users u1_0 on u1_0.id=ms1_0.user_id left join movie_suggestion_nominators n1_0 on ms1_0.id=n1_0.movie_suggestion_id left join users n1_1 on n1_1.id=n1_0.user_id where ms1_0.session_id=?
+2026-08-23 17:47:21.300 [main] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/ROOM99': RoomProgressEvent(eventType=DECK_SUBMITTED, roomCode=ROOM99, userId=6, kickedUserId=null, userDisplayName=Alice, hostName=null, sessionStatus=null, users=null, submittedUserCount=1, totalUserCount=1, message=Alice submitted their movie deck., movieSuggestionId=null, tmdbId=null, movieTitle=null, voteType=null, progress=null)
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: delete from movie_suggestion_nominators where movie_suggestion_id=?
+Hibernate: delete from movie_suggestions where id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select s1_0.id from sessions s1_0 where s1_0.room_code=? fetch first ? rows only
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select s1_0.id,bdn1_0.session_id,bdn1_0.display_name,s1_0.created_at,s1_0.host_name,kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,rkdn1_0.session_id,rkdn1_0.display_name,s1_0.status,s1_0.version from sessions s1_0 left join session_banned_users bdn1_0 on s1_0.id=bdn1_0.session_id left join session_kick_counts kc1_0 on s1_0.id=kc1_0.session_id left join session_round_kicked_users rkdn1_0 on s1_0.id=rkdn1_0.session_id where s1_0.id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+2026-08-23 17:47:21.362 [main] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/ROOM99': RoomProgressEvent(eventType=USER_JOINED, roomCode=ROOM99, userId=9, kickedUserId=null, userDisplayName=Charlie, hostName=Alice, sessionStatus=WAITING, users=[UserResponse(id=7, displayName=Alice, sessionToken=6372f3b9-2632-4f86-b58c-8fd098b78448, joinedAt=2026-08-23T17:47:21.334445, kickCount=0), UserResponse(id=9, displayName=Charlie, sessionToken=a8a74b4e-b6ec-4d45-888f-7bab22e39517, joinedAt=2026-08-23T17:47:21.359633400, kickCount=0)], submittedUserCount=null, totalUserCount=null, message=Charlie joined the room., movieSuggestionId=null, tmdbId=null, movieTitle=null, voteType=null, progress=null)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+2026-08-23 17:47:21.406 [clientInboundChannel-22] [] INFO  c.m.b.c.WebSocketPresenceController - Registered WebSocket presence: user 'Charlie' (id=9) in room 'ROOM99' (sessionId=5d8302bd-d306-4bcc-8a92-e02c106a207e)
+2026-08-23 17:47:21.802 [http-nio-auto-1-exec-10] [] INFO  c.m.b.config.WebSocketEventListener - WebSocket disconnected for user 'Charlie' (id=9) in room 'ROOM99'. Starting 5s reconnect grace period...
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.id=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: delete from users where id=?
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+Hibernate: delete from sessions where id=? and version=?
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.999 s -- in com.moviepicker.backend.controller.RoomLifecycleWebSocketTest
+[INFO] Running com.moviepicker.backend.controller.SessionControllerTest
+2026-08-23 17:47:22.344 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.344 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.344 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.364 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.364 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.364 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.380 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.381 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.381 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.391 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.391 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.391 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.403 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.403 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.403 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.419 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.419 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.419 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.433 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.433 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.434 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-23 17:47:22.444 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.444 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.444 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.458 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.458 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.459 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.473 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.473 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.474 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-23 17:47:22.487 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.488 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.488 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.501 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.501 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.501 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:22.515 [main] [] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:22.515 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:22.515 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.297 s -- in com.moviepicker.backend.controller.SessionControllerTest
+[INFO] Running com.moviepicker.backend.controller.VoteControllerTest
+2026-08-23 17:47:22.523 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.VoteControllerTest]: VoteControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:22.530 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.VoteControllerTest
+2026-08-23 17:47:22.530 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.VoteControllerTest]: VoteControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:22.536 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.VoteControllerTest
+2026-08-23 17:47:22.538 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:22.539 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:22.539 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:22.540 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:22.556 [main] [] INFO  c.m.b.controller.VoteControllerTest - Starting VoteControllerTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:22.556 [main] [] INFO  c.m.b.controller.VoteControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:23.187 [main] [] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-23 17:47:23.188 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-23 17:47:23.188 [main] [] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-08-23 17:47:23.194 [main] [] INFO  c.m.b.controller.VoteControllerTest - Started VoteControllerTest in 0.654 seconds (process running for 23.763)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.722 s -- in com.moviepicker.backend.controller.VoteControllerTest
+[INFO] Running com.moviepicker.backend.controller.VoteWebSocketTest
+2026-08-23 17:47:23.246 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.VoteWebSocketTest]: VoteWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.247 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.VoteWebSocketTest
+2026-08-23 17:47:23.247 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.controller.VoteWebSocketTest]: VoteWebSocketTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.248 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.controller.VoteWebSocketTest
+2026-08-23 17:47:23.250 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:23.250 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:23.250 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+2026-08-23 17:47:23.579 [clientInboundChannel-6] [] INFO  c.m.b.c.VoteMessageController - Received WebSocket vote message for roomCode='WSTEST', user=10, movie=4
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.id=?
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0 where ms1_0.id=?
+Hibernate: select v1_0.id from votes v1_0 where v1_0.user_id=? and v1_0.movie_suggestion_id=? fetch first ? rows only
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+2026-08-23 17:47:23.585 [clientInboundChannel-6] [] INFO  c.m.backend.service.VoteServiceImpl - Vote recorded: user='Alice', movie='Fight Club', voteType=YES
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0 where ms1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select v1_0.user_id,count(v1_0.id) from votes v1_0 where v1_0.session_id=? group by v1_0.user_id
+2026-08-23 17:47:23.590 [clientInboundChannel-6] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted room event to destination='/topic/room/WSTEST': RoomProgressEvent(eventType=ALL_VOTING_COMPLETED, roomCode=WSTEST, userId=10, kickedUserId=null, userDisplayName=Alice, hostName=null, sessionStatus=null, users=null, submittedUserCount=null, totalUserCount=null, message=null, movieSuggestionId=4, tmdbId=550, movieTitle=Fight Club, voteType=YES, progress=VotingProgressResponse(sessionId=8, roomCode=WSTEST, totalMovies=1, totalUsers=1, completedUserCount=1, allUsersCompleted=true, users=[UserVotingProgressDto(userId=10, displayName=Alice, votedCount=1, completed=true)]))
+Hibernate: select distinct ms1_0.id,n1_0.movie_suggestion_id,n1_1.id,n1_1.display_name,n1_1.joined_at,n1_1.session_id,n1_1.session_token,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from movie_suggestions ms1_0 left join users u1_0 on u1_0.id=ms1_0.user_id left join movie_suggestion_nominators n1_0 on ms1_0.id=n1_0.movie_suggestion_id left join users n1_1 on n1_1.id=n1_0.user_id where ms1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id,v1_0.session_id,v1_0.user_id,u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token,v1_0.vote_type,v1_0.voted_at from votes v1_0 left join users u1_0 on u1_0.id=v1_0.user_id left join movie_suggestions ms1_0 on ms1_0.id=v1_0.movie_suggestion_id where v1_0.session_id=?
+2026-08-23 17:47:23.596 [clientInboundChannel-6] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=8 status transitioned to COMPLETED. Winner: 'Fight Club'
+2026-08-23 17:47:23.596 [clientInboundChannel-6] [] INFO  c.m.b.service.RoomEventPublisherImpl - Broadcasted winning results to destination='/topic/room/WSTEST/results' (Winner: 'Fight Club')
+Hibernate: update sessions set host_name=?,max_suggestions_per_user=?,max_users=?,room_code=?,status=?,version=? where id=? and version=?
+Hibernate: select v1_0.id from votes v1_0 where v1_0.user_id=? and v1_0.movie_suggestion_id=? fetch first ? rows only
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0
+Hibernate: delete from votes where id=?
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0
+Hibernate: delete from movie_suggestion_nominators where movie_suggestion_id=?
+Hibernate: delete from movie_suggestions where id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0
+Hibernate: delete from users where id=?
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0
+Hibernate: select rkdn1_0.session_id,rkdn1_0.display_name from session_round_kicked_users rkdn1_0 where rkdn1_0.session_id=?
+Hibernate: select kc1_0.session_id,kc1_0.display_name,kc1_0.kick_count from session_kick_counts kc1_0 where kc1_0.session_id=?
+Hibernate: select bdn1_0.session_id,bdn1_0.display_name from session_banned_users bdn1_0 where bdn1_0.session_id=?
+Hibernate: delete from sessions where id=? and version=?
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.487 s -- in com.moviepicker.backend.controller.VoteWebSocketTest
+[INFO] Running com.moviepicker.backend.exception.GlobalExceptionHandlerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.moviepicker.backend.exception.GlobalExceptionHandlerTest
+[INFO] Running com.moviepicker.backend.logging.CorrelationIdChannelInterceptorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in com.moviepicker.backend.logging.CorrelationIdChannelInterceptorTest
+[INFO] Running com.moviepicker.backend.logging.CorrelationIdFilterTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.moviepicker.backend.logging.CorrelationIdFilterTest
+[INFO] Running com.moviepicker.backend.repository.MovieSuggestionRepositoryTest
+2026-08-23 17:47:23.835 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.MovieSuggestionRepositoryTest]: MovieSuggestionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.850 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.MovieSuggestionRepositoryTest
+2026-08-23 17:47:23.852 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.MovieSuggestionRepositoryTest]: MovieSuggestionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.853 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.MovieSuggestionRepositoryTest
+2026-08-23 17:47:23.854 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:23.854 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@55b3da15]]
+2026-08-23 17:47:23.854 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:23.855 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:23.855 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@61e2e5e2]]
+2026-08-23 17:47:23.855 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: select count(ms1_0.id) from movie_suggestions ms1_0 where ms1_0.session_id=? and ms1_0.user_id=?
+Hibernate: select count(ms1_0.id) from movie_suggestions ms1_0 where ms1_0.session_id=? and ms1_0.user_id=?
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: select ms1_0.id,ms1_0.overview,ms1_0.poster_path,ms1_0.release_year,ms1_0.session_id,ms1_0.suggested_at,ms1_0.title,ms1_0.tmdb_id,ms1_0.user_id from movie_suggestions ms1_0 where ms1_0.session_id=?
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: select ms1_0.id from movie_suggestions ms1_0 where ms1_0.session_id=? and ms1_0.tmdb_id=? fetch first ? rows only
+Hibernate: select ms1_0.id from movie_suggestions ms1_0 where ms1_0.session_id=? and ms1_0.tmdb_id=? fetch first ? rows only
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.085 s -- in com.moviepicker.backend.repository.MovieSuggestionRepositoryTest
+[INFO] Running com.moviepicker.backend.repository.SessionRepositoryTest
+2026-08-23 17:47:23.922 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.SessionRepositoryTest]: SessionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.923 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.SessionRepositoryTest
+2026-08-23 17:47:23.924 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.SessionRepositoryTest]: SessionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.925 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.SessionRepositoryTest
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: select s1_0.id,s1_0.created_at,s1_0.host_name,s1_0.max_suggestions_per_user,s1_0.max_users,s1_0.room_code,s1_0.status,s1_0.version from sessions s1_0 where s1_0.room_code=?
+Hibernate: select s1_0.id from sessions s1_0 where s1_0.room_code=? fetch first ? rows only
+Hibernate: select s1_0.id from sessions s1_0 where s1_0.room_code=? fetch first ? rows only
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: update sessions set host_name=?,max_suggestions_per_user=?,max_users=?,room_code=?,status=?,version=? where id=? and version=?
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 where u1_0.session_id=?
+Hibernate: select u1_0.id,u1_0.display_name,u1_0.joined_at,u1_0.session_id,u1_0.session_token from users u1_0 left join sessions s1_0 on s1_0.id=u1_0.session_id where s1_0.room_code=?
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in com.moviepicker.backend.repository.SessionRepositoryTest
+[INFO] Running com.moviepicker.backend.repository.VoteRepositoryTest
+2026-08-23 17:47:23.980 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.VoteRepositoryTest]: VoteRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:23.994 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.VoteRepositoryTest
+2026-08-23 17:47:23.996 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.repository.VoteRepositoryTest]: VoteRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:24.005 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.repository.VoteRepositoryTest
+2026-08-23 17:47:24.007 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:24.007 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@61e2e5e2]]
+2026-08-23 17:47:24.007 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:24.008 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:24.027 [main] [] INFO  c.m.b.repository.VoteRepositoryTest - Starting VoteRepositoryTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:24.027 [main] [] INFO  c.m.b.repository.VoteRepositoryTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:24.212 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:24.249 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 36 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:24.258 [main] [] INFO  o.s.b.j.t.a.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-08-23 17:47:24.278 [main] [] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:8e1c9bd1-dbbf-4acb-85fc-fb108ece0fb7;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-08-23 17:47:24.297 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:24.318 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:24.347 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:8e1c9bd1-dbbf-4acb-85fc-fb108ece0fb7]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: 8E1C9BD1-DBBF-4ACB-85FC-FB108ECE0FB7/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:24.428 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table movie_suggestion_nominators (movie_suggestion_id bigint not null, user_id bigint not null, primary key (movie_suggestion_id, user_id))
+Hibernate: create table movie_suggestions (id bigint generated by default as identity, overview TEXT, poster_path varchar(500), release_year integer, suggested_at timestamp(6) not null, title varchar(255) not null, tmdb_id bigint not null, session_id bigint not null, user_id bigint, primary key (id))
+Hibernate: create table session_banned_users (session_id bigint not null, display_name varchar(255))
+Hibernate: create table session_kick_counts (session_id bigint not null, kick_count integer, display_name varchar(255) not null, primary key (session_id, display_name))
+Hibernate: create table session_round_kicked_users (session_id bigint not null, display_name varchar(255))
+Hibernate: create table sessions (id bigint generated by default as identity, created_at timestamp(6) not null, host_name varchar(255) not null, max_suggestions_per_user integer not null, max_users integer not null, room_code varchar(10) not null, status enum ('COMPLETED','SUGGESTING','VOTING','WAITING') not null, version bigint not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, display_name varchar(100) not null, joined_at timestamp(6) not null, session_token varchar(64), session_id bigint not null, primary key (id))
+Hibernate: create table votes (id bigint generated by default as identity, vote_type enum ('LIKE','NO','PASS','SKIP','SUPERLIKE','YES') not null, voted_at timestamp(6) not null, movie_suggestion_id bigint not null, session_id bigint not null, user_id bigint not null, primary key (id))
+Hibernate: create index idx_movie_suggestions_session_id on movie_suggestions (session_id)
+Hibernate: create index idx_movie_suggestions_session_user on movie_suggestions (session_id, user_id)
+Hibernate: alter table if exists movie_suggestions drop constraint if exists uk_session_tmdb
+Hibernate: alter table if exists movie_suggestions add constraint uk_session_tmdb unique (session_id, tmdb_id)
+Hibernate: alter table if exists session_banned_users drop constraint if exists UKnn96g11twbhtq58njavqy6lmv
+Hibernate: alter table if exists session_banned_users add constraint UKnn96g11twbhtq58njavqy6lmv unique (session_id, display_name)
+Hibernate: alter table if exists session_round_kicked_users drop constraint if exists UKnn96g11twbhtq58njavqy6lmv
+Hibernate: alter table if exists session_round_kicked_users add constraint UKnn96g11twbhtq58njavqy6lmv unique (session_id, display_name)
+Hibernate: alter table if exists sessions drop constraint if exists idx_sessions_room_code
+Hibernate: alter table if exists sessions add constraint idx_sessions_room_code unique (room_code)
+Hibernate: create index idx_users_session_id on users (session_id)
+Hibernate: create index idx_votes_session_id on votes (session_id)
+Hibernate: create index idx_votes_session_movie on votes (session_id, movie_suggestion_id)
+Hibernate: create index idx_votes_session_user on votes (session_id, user_id)
+Hibernate: alter table if exists votes drop constraint if exists uk_user_movie_vote
+Hibernate: alter table if exists votes add constraint uk_user_movie_vote unique (user_id, movie_suggestion_id)
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FK94vq2w0wtltk9rrdnd6gcd821 foreign key (user_id) references users
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FKf8s01f6o1rf9rawriv2tan7vo foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists movie_suggestions add constraint FKjqibpqdhqh6dvlyq62xieb2wa foreign key (session_id) references sessions
+Hibernate: alter table if exists movie_suggestions add constraint FK3xb9yk0ongqka5ewiwdgumhn foreign key (user_id) references users
+Hibernate: alter table if exists session_banned_users add constraint FKlin1phdnpd41wufgoknoiftr foreign key (session_id) references sessions
+Hibernate: alter table if exists session_kick_counts add constraint FKfv0h7sqwjkbrq1v78fdobmbpc foreign key (session_id) references sessions
+Hibernate: alter table if exists session_round_kicked_users add constraint FK1oaoncxwxwe6xspl3j00bggmt foreign key (session_id) references sessions
+Hibernate: alter table if exists users add constraint FKkey9plrprsm59yb151h56qe42 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FK9ct2nxen4miod34dpknhpygq9 foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists votes add constraint FKl0x9u7v2jc893vxceqj2nqk90 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925e foreign key (user_id) references users
+2026-08-23 17:47:24.466 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:24.548 [main] [] INFO  c.m.b.repository.VoteRepositoryTest - Started VoteRepositoryTest in 0.54 seconds (process running for 25.118)
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+Hibernate: select count(v1_0.id) from votes v1_0 where v1_0.session_id=? and v1_0.user_id=?
+Hibernate: select count(v1_0.id) from votes v1_0 where v1_0.session_id=? and v1_0.user_id=?
+Hibernate: select count(v1_0.id) from votes v1_0 where v1_0.session_id=? and v1_0.movie_suggestion_id=? and v1_0.vote_type=?
+Hibernate: select count(v1_0.id) from votes v1_0 where v1_0.session_id=? and v1_0.movie_suggestion_id=? and v1_0.vote_type=?
+Hibernate: select v1_0.id from votes v1_0 where v1_0.user_id=? and v1_0.movie_suggestion_id=? fetch first ? rows only
+Hibernate: select v1_0.id from votes v1_0 where v1_0.user_id=? and v1_0.movie_suggestion_id=? fetch first ? rows only
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+2026-08-23 17:47:24.598 [main] [] WARN  org.hibernate.orm.jdbc.error - HHH000247: ErrorCode: 23505, SQLState: 23505
+2026-08-23 17:47:24.598 [main] [] WARN  org.hibernate.orm.jdbc.error - Unique index or primary key violation: "PUBLIC.UK_USER_MOVIE_VOTE INDEX PUBLIC.UK_USER_MOVIE_VOTE_INDEX_4 ON PUBLIC.VOTES(USER_ID NULLS FIRST, MOVIE_SUGGESTION_ID NULLS FIRST) VALUES ( /* key:4 */ CAST(3 AS BIGINT), CAST(3 AS BIGINT))"; SQL statement:
+insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default) [23505-240]
+Hibernate: insert into sessions (created_at,host_name,max_suggestions_per_user,max_users,room_code,status,version,id) values (?,?,?,?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into users (display_name,joined_at,session_id,session_token,id) values (?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into movie_suggestions (overview,poster_path,release_year,session_id,suggested_at,title,tmdb_id,user_id,id) values (?,?,?,?,?,?,?,?,default)
+Hibernate: insert into votes (movie_suggestion_id,session_id,user_id,vote_type,voted_at,id) values (?,?,?,?,?,default)
+Hibernate: select v1_0.id,v1_0.movie_suggestion_id,v1_0.session_id,v1_0.user_id,v1_0.vote_type,v1_0.voted_at from votes v1_0 where v1_0.session_id=?
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.655 s -- in com.moviepicker.backend.repository.VoteRepositoryTest
+[INFO] Running com.moviepicker.backend.security.auth.SessionSecurityServiceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.126 s -- in com.moviepicker.backend.security.auth.SessionSecurityServiceTest
+[INFO] Running com.moviepicker.backend.security.ratelimit.RateLimiterServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in com.moviepicker.backend.security.ratelimit.RateLimiterServiceTest
+[INFO] Running com.moviepicker.backend.security.ratelimit.RateLimitingFilterTest
+2026-08-23 17:47:24.780 [main] [] WARN  c.m.b.s.ratelimit.RateLimitingFilter - Rate limit exceeded for IP 192.168.1.51 on POST /api/v1/sessions. Retry after 30 seconds
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in com.moviepicker.backend.security.ratelimit.RateLimitingFilterTest
+[INFO] Running com.moviepicker.backend.security.ratelimit.TokenBucketTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.054 s -- in com.moviepicker.backend.security.ratelimit.TokenBucketTest
+[INFO] Running com.moviepicker.backend.service.AiRecommendationServiceTest
+2026-08-23 17:47:26.121 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='VIBE12', prompt='90s sci fi'
+2026-08-23 17:47:26.125 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='VIBE12', prompt='90s sci fi'
+2026-08-23 17:47:26.127 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='null', prompt='   '
+2026-08-23 17:47:26.129 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='null', prompt='popular movies'
+2026-08-23 17:47:26.129 [main] [] WARN  c.m.b.s.AiRecommendationServiceImpl - Gemini API call failed or rate-limited: Resource exhausted (quota limit)
+2026-08-23 17:47:26.133 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='null', prompt='Solve 2+2'
+2026-08-23 17:47:26.136 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='null', prompt='give me a python script'
+2026-08-23 17:47:26.139 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='BADCODE', prompt='any prompt'
+2026-08-23 17:47:26.142 [main] [] INFO  c.m.b.s.AiRecommendationServiceImpl - Generating AI recommendations for roomCode='null', prompt='obscure film'
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.305 s -- in com.moviepicker.backend.service.AiRecommendationServiceTest
+[INFO] Running com.moviepicker.backend.service.ConsensusServiceTest
+2026-08-23 17:47:26.249 [main] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=1 status transitioned to COMPLETED. Winner: 'Fight Club'
+2026-08-23 17:47:26.252 [main] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=1 status transitioned to COMPLETED. Winner: 'Fight Club'
+2026-08-23 17:47:26.261 [main] [] INFO  c.m.b.service.ConsensusServiceImpl - Session id=1 status transitioned to COMPLETED. Winner: 'Fight Club'
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.117 s -- in com.moviepicker.backend.service.ConsensusServiceTest
+[INFO] Running com.moviepicker.backend.service.MovieCacheBenchmarkTest
+2026-08-23 17:47:26.263 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.service.MovieCacheBenchmarkTest]: MovieCacheBenchmarkTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:26.284 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.service.MovieCacheBenchmarkTest
+2026-08-23 17:47:26.284 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.service.MovieCacheBenchmarkTest]: MovieCacheBenchmarkTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:26.284 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.service.MovieCacheBenchmarkTest
+2026-08-23 17:47:26.288 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:26.302 [main] [] INFO  c.m.b.s.MovieCacheBenchmarkTest - Starting MovieCacheBenchmarkTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:26.302 [main] [] INFO  c.m.b.s.MovieCacheBenchmarkTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-23 17:47:26.564 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:26.589 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 22 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:26.750 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:26.767 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:26.768 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-08-23 17:47:26.769 [main] [] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn36: url=jdbc:h2:mem:moviepicker user=SA
+2026-08-23 17:47:26.769 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-08-23 17:47:26.770 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:moviepicker]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: MOVIEPICKER/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:26.839 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-23 17:47:26.852 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:28.391 [main] [] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-23 17:47:28.419 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:28.421 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@6265ff7]]
+2026-08-23 17:47:28.421 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-08-23 17:47:28.425 [main] [] INFO  c.m.b.s.MovieCacheBenchmarkTest - Started MovieCacheBenchmarkTest in 2.137 seconds (process running for 28.995)
+Executing JVM & HTTP connection pool warm-up call (discarded)...
+2026-08-23 17:47:28.480 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='warmup-test-init', page=1
+2026-08-23 17:47:28.758 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+2026-08-23 17:47:28.764 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='warmup-test-init', page=1. Cause: TMDB API returned status 401 UNAUTHORIZED: {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+=================================================
+   TMDB CACHE BENCHMARK (5 MISSES vs 5 HITS)     
+=================================================
+2026-08-23 17:47:28.766 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Inception', page=1
+2026-08-23 17:47:28.814 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+2026-08-23 17:47:28.815 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Inception', page=1. Cause: TMDB API returned status 401 UNAUTHORIZED: {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+Cache MISS [1/5] (Query: 'Inception') -> 49 ms (Results: 0)
+2026-08-23 17:47:28.815 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Interstellar', page=1
+2026-08-23 17:47:28.849 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+2026-08-23 17:47:28.849 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Interstellar', page=1. Cause: TMDB API returned status 401 UNAUTHORIZED: {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+Cache MISS [2/5] (Query: 'Interstellar') -> 34 ms (Results: 0)
+2026-08-23 17:47:28.850 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Gladiator', page=1
+2026-08-23 17:47:28.886 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+2026-08-23 17:47:28.887 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Gladiator', page=1. Cause: TMDB API returned status 401 UNAUTHORIZED: {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+Cache MISS [3/5] (Query: 'Gladiator') -> 37 ms (Results: 0)
+2026-08-23 17:47:28.887 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Matrix', page=1
+2026-08-23 17:47:28.926 [main] [] ERROR c.m.backend.client.TmdbClientImpl - TMDB API returned error status: 401 UNAUTHORIZED - {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+2026-08-23 17:47:28.929 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Matrix', page=1. Cause: TMDB API returned status 401 UNAUTHORIZED: {"status_code":7,"status_message":"Invalid API key: You must be granted a valid key.","success":false}
+
+Cache MISS [4/5] (Query: 'Matrix') -> 42 ms (Results: 0)
+2026-08-23 17:47:28.929 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Alien', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache MISS [5/5] (Query: 'Alien') -> 0 ms (Results: 0)
+2026-08-23 17:47:28.929 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+2026-08-23 17:47:28.929 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache HIT  [1/5] (Query: 'The Godfather') -> 0 ms
+2026-08-23 17:47:28.931 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache HIT  [2/5] (Query: 'The Godfather') -> 0 ms
+2026-08-23 17:47:28.931 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache HIT  [3/5] (Query: 'The Godfather') -> 0 ms
+2026-08-23 17:47:28.931 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache HIT  [4/5] (Query: 'The Godfather') -> 0 ms
+2026-08-23 17:47:28.931 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='The Godfather', page=1. Cause: CircuitBreaker 'tmdbApi' is OPEN and does not permit further calls
+Cache HIT  [5/5] (Query: 'The Godfather') -> 0 ms
+-------------------------------------------------
+CACHE MISS STATS (5 Unique Queries): Avg = 32.40 ms | Min = 0 ms | Max = 49 ms
+CACHE HIT STATS  (5 In-Memory Hits): Avg = 0.00 ms | Min = 0 ms | Max = 0 ms
+=================================================
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.674 s -- in com.moviepicker.backend.service.MovieCacheBenchmarkTest
+[INFO] Running com.moviepicker.backend.service.MovieSearchCacheTest
+2026-08-23 17:47:28.940 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.service.MovieSearchCacheTest]: MovieSearchCacheTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:28.943 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.service.MovieSearchCacheTest
+2026-08-23 17:47:28.944 [main] [] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.moviepicker.backend.service.MovieSearchCacheTest]: MovieSearchCacheTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-23 17:47:28.946 [main] [] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.moviepicker.backend.BackendApplication for test class com.moviepicker.backend.service.MovieSearchCacheTest
+2026-08-23 17:47:28.948 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-08-23 17:47:28.948 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@6265ff7]]
+2026-08-23 17:47:28.948 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-08-23 17:47:28.950 [main] [] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-23 17:47:28.972 [main] [] INFO  c.m.b.service.MovieSearchCacheTest - Starting MovieSearchCacheTest using Java 26.0.2 with PID 12820 (started by LanzProd in C:\Users\Lanz Prod\Documents\Programming\movie-picker\backend)
+2026-08-23 17:47:28.972 [main] [] INFO  c.m.b.service.MovieSearchCacheTest - The following 1 profile is active: "test"
+2026-08-23 17:47:29.258 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-23 17:47:29.281 [main] [] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 21 ms. Found 4 JPA repository interfaces.
+2026-08-23 17:47:29.499 [main] [] INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-23 17:47:29.522 [main] [] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-23 17:47:29.523 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-08-23 17:47:29.524 [main] [] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection conn46: url=jdbc:h2:mem:testdb user=SA
+2026-08-23 17:47:29.524 [main] [] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-08-23 17:47:29.524 [main] [] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-23 17:47:29.524 [main] [] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-23 17:47:29.586 [main] [] INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists movie_suggestion_nominators cascade 
+Hibernate: drop table if exists movie_suggestions cascade 
+Hibernate: drop table if exists session_banned_users cascade 
+Hibernate: drop table if exists session_kick_counts cascade 
+Hibernate: drop table if exists session_round_kicked_users cascade 
+Hibernate: drop table if exists sessions cascade 
+Hibernate: drop table if exists users cascade 
+Hibernate: drop table if exists votes cascade 
+Hibernate: create table movie_suggestion_nominators (movie_suggestion_id bigint not null, user_id bigint not null, primary key (movie_suggestion_id, user_id))
+Hibernate: create table movie_suggestions (release_year integer, id bigint generated by default as identity, session_id bigint not null, suggested_at timestamp(6) not null, tmdb_id bigint not null, user_id bigint, poster_path varchar(500), overview TEXT, title varchar(255) not null, primary key (id), constraint uk_session_tmdb unique (session_id, tmdb_id))
+Hibernate: create table session_banned_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table session_kick_counts (kick_count integer, session_id bigint not null, display_name varchar(255) not null, primary key (session_id, display_name))
+Hibernate: create table session_round_kicked_users (session_id bigint not null, display_name varchar(255), unique (session_id, display_name))
+Hibernate: create table sessions (max_suggestions_per_user integer not null, max_users integer not null, created_at timestamp(6) not null, id bigint generated by default as identity, version bigint not null, room_code varchar(10) not null unique, host_name varchar(255) not null, status enum ('COMPLETED','SUGGESTING','VOTING','WAITING') not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, joined_at timestamp(6) not null, session_id bigint not null, session_token varchar(64), display_name varchar(100) not null, primary key (id))
+Hibernate: create table votes (id bigint generated by default as identity, movie_suggestion_id bigint not null, session_id bigint not null, user_id bigint not null, voted_at timestamp(6) not null, vote_type enum ('LIKE','NO','PASS','SKIP','SUPERLIKE','YES') not null, primary key (id), constraint uk_user_movie_vote unique (user_id, movie_suggestion_id))
+Hibernate: create index idx_movie_suggestions_session_id on movie_suggestions (session_id)
+Hibernate: create index idx_movie_suggestions_session_user on movie_suggestions (session_id, user_id)
+Hibernate: create index idx_users_session_id on users (session_id)
+Hibernate: create index idx_votes_session_id on votes (session_id)
+Hibernate: create index idx_votes_session_movie on votes (session_id, movie_suggestion_id)
+Hibernate: create index idx_votes_session_user on votes (session_id, user_id)
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FK94vq2w0wtltk9rrdnd6gcd821 foreign key (user_id) references users
+Hibernate: alter table if exists movie_suggestion_nominators add constraint FKf8s01f6o1rf9rawriv2tan7vo foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists movie_suggestions add constraint FKjqibpqdhqh6dvlyq62xieb2wa foreign key (session_id) references sessions
+Hibernate: alter table if exists movie_suggestions add constraint FK3xb9yk0ongqka5ewiwdgumhn foreign key (user_id) references users
+Hibernate: alter table if exists session_banned_users add constraint FKlin1phdnpd41wufgoknoiftr foreign key (session_id) references sessions
+Hibernate: alter table if exists session_kick_counts add constraint FKfv0h7sqwjkbrq1v78fdobmbpc foreign key (session_id) references sessions
+Hibernate: alter table if exists session_round_kicked_users add constraint FK1oaoncxwxwe6xspl3j00bggmt foreign key (session_id) references sessions
+Hibernate: alter table if exists users add constraint FKkey9plrprsm59yb151h56qe42 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FK9ct2nxen4miod34dpknhpygq9 foreign key (movie_suggestion_id) references movie_suggestions
+Hibernate: alter table if exists votes add constraint FKl0x9u7v2jc893vxceqj2nqk90 foreign key (session_id) references sessions
+Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925e foreign key (user_id) references users
+2026-08-23 17:47:29.601 [main] [] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-23 17:47:30.660 [main] [] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-23 17:47:30.678 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-08-23 17:47:30.678 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@33286e3b]]
+2026-08-23 17:47:30.678 [main] [] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-08-23 17:47:30.679 [main] [] INFO  c.m.b.service.MovieSearchCacheTest - Started MovieSearchCacheTest in 1.729 seconds (process running for 31.25)
+2026-08-23 17:47:30.686 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='interstellar', page=1
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.753 s -- in com.moviepicker.backend.service.MovieSearchCacheTest
+[INFO] Running com.moviepicker.backend.service.MovieSearchServiceTest
+2026-08-23 17:47:30.693 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Inception', page=1
+2026-08-23 17:47:30.696 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB trending fallback triggered for page=2. Cause: TMDB 429 rate limit
+2026-08-23 17:47:30.697 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='Unknown', page=1
+2026-08-23 17:47:30.699 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB movie details fallback triggered for id=550. Cause: TMDB unavailable
+2026-08-23 17:47:30.699 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB discover fallback triggered. Cause: TMDB network timeout
+2026-08-23 17:47:30.701 [main] [] WARN  c.m.b.service.MovieSearchServiceImpl - TMDB search fallback triggered for query='Inception', page=1. Cause: TMDB 500 error
+2026-08-23 17:47:30.703 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB discover: genre='Action', provider='Netflix', decade='90s', minRating=7.0, runtime=90-120, lang='en', sortBy='popularity.desc', page=1
+2026-08-23 17:47:30.707 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB trending movies for page=1
+2026-08-23 17:47:30.710 [main] [] INFO  c.m.b.service.MovieSearchServiceImpl - Executing TMDB search for query='   ', page=1
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in com.moviepicker.backend.service.MovieSearchServiceTest
+[INFO] Running com.moviepicker.backend.service.MovieSubmissionServiceTest
+2026-08-23 17:47:30.729 [main] [] INFO  c.m.b.s.MovieSubmissionServiceImpl - Movie tmdbId=550 already exists in session id=1, adding user id=10 to nominators
+2026-08-23 17:47:30.733 [main] [] INFO  c.m.b.s.MovieSubmissionServiceImpl - Movie tmdbId=550 already exists in session id=1, adding user id=10 to nominators
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in com.moviepicker.backend.service.MovieSubmissionServiceTest
+[INFO] Running com.moviepicker.backend.service.SessionServiceTest
+2026-08-23 17:47:30.843 [main] [] INFO  c.m.b.service.SessionServiceImpl - Session id=1 is now empty after user departure, status set to COMPLETED
+2026-08-23 17:47:30.847 [main] [] INFO  c.m.b.service.SessionServiceImpl - Session id=1 is now empty after user departure, status set to COMPLETED
+2026-08-23 17:47:30.857 [main] [] INFO  c.m.b.service.SessionServiceImpl - User 'Bob' left session id=1
+2026-08-23 17:47:30.862 [main] [] INFO  c.m.b.service.SessionServiceImpl - Host left session id=1, new host is 'Bob'
+2026-08-23 17:47:30.868 [main] [] INFO  c.m.b.service.SessionServiceImpl - User 'Bob' (id=20) was kicked from round in session id=1 (roomCode=ROOM12, kickCount=1) by host 'Alice'
+2026-08-23 17:47:30.882 [main] [] INFO  c.m.b.service.SessionServiceImpl - User 'Bob' (id=20) was kicked from round in session id=1 (roomCode=ROOM12, kickCount=1) by host 'Alice'
+2026-08-23 17:47:30.887 [main] [] INFO  c.m.b.service.SessionServiceImpl - User 'Bob' (id=20) was permanently banned from session id=1 (roomCode=ROOM12) by host 'Alice'
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.165 s -- in com.moviepicker.backend.service.SessionServiceTest
+[INFO] Running com.moviepicker.backend.service.VoteServiceTest
+2026-08-23 17:47:30.909 [main] [] INFO  c.m.backend.service.VoteServiceImpl - Vote recorded: user='Alice', movie='Fight Club', voteType=SKIP
+2026-08-23 17:47:30.914 [main] [] INFO  c.m.backend.service.VoteServiceImpl - Vote recorded: user='Alice', movie='Fight Club', voteType=YES
+2026-08-23 17:47:30.921 [main] [] INFO  c.m.backend.service.VoteServiceImpl - Vote recorded: user='Alice', movie='Fight Club', voteType=YES
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in com.moviepicker.backend.service.VoteServiceTest
+[INFO] Running com.moviepicker.backend.util.RoomCodeGeneratorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.moviepicker.backend.util.RoomCodeGeneratorTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 174, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  42.085 s
+[INFO] Finished at: 2026-08-23T17:47:31-05:00
+[INFO] ------------------------------------------------------------------------
+
+> frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/Lanz Prod/Documents/Programming/movie-picker/frontend
+
+ ✓ __tests__/components/RoomUsersDropdown.test.tsx (4 tests) 273ms
+ ✓ __tests__/components/SelectionRack.test.tsx (8 tests) 395ms
+ ✓ __tests__/components/MovieDetailsModal.test.tsx (7 tests) 459ms
+ ✓ __tests__/components/SwipeActions.test.tsx (3 tests) 416ms
+ ✓ __tests__/components/SearchFilterModal.test.tsx (5 tests) 448ms
+ ✓ __tests__/components/AiConciergeTab.test.tsx (5 tests) 582ms
+ ✓ __tests__/components/SearchFilterToolbar.test.tsx (4 tests) 481ms
+ ✓ __tests__/components/VibeMatcherModal.test.tsx (9 tests) 690ms
+ ✓ __tests__/components/WinnerCard.test.tsx (7 tests) 409ms
+ ✓ __tests__/context/SessionContext.test.tsx (31 tests) 775ms
+ ✓ __tests__/stages/WinnerScreen.test.tsx (4 tests) 566ms
+ ✓ __tests__/stages/SwiperScreen.test.tsx (5 tests) 887ms
+ ✓ __tests__/stages/LobbyScreen.test.tsx (11 tests) 1538ms
+ ✓ __tests__/stages/SetupScreen.test.tsx (8 tests) 1826ms
+     ✓ allows directly typing numbers into max players and suggestions inputs  387ms
+ ✓ __tests__/components/Button.test.tsx (4 tests) 142ms
+ ✓ __tests__/components/MovieCard.test.tsx (7 tests) 233ms
+ ✓ __tests__/components/GenreFilterChips.test.tsx (4 tests) 242ms
+ ✓ __tests__/components/SwipeCard.test.tsx (7 tests) 222ms
+ ✓ __tests__/stages/SearchScreen.test.tsx (8 tests) 3493ms
+     ✓ renders stage header, search input, genre chips, and default trending movies  468ms
+     ✓ opens Vibe Matcher modal when Match the Vibe button is clicked  415ms
+     ✓ performs movie search and renders result cards  407ms
+     ✓ allows nominating and removing movies into the selection rack  483ms
+     ✓ opens movie details modal on clicking movie card and closes on Escape/Close  498ms
+     ✓ submits deck nominations and displays submitted status  462ms
+     ✓ renders 'Start Voting Phase' CTA for Host and invokes startVoting  478ms
+ ✓ __tests__/components/Header.test.tsx (3 tests) 205ms
+ ✓ __tests__/components/QRCodeModal.test.tsx (5 tests) 285ms
+ ✓ __tests__/components/LeaderboardRow.test.tsx (4 tests) 223ms
+ ✓ __tests__/components/MovieGrid.test.tsx (6 tests) 275ms
+ ✓ __tests__/components/LeaderboardList.test.tsx (3 tests) 310ms
+ ✓ __tests__/components/LegalModal.test.tsx (4 tests) 185ms
+ ✓ __tests__/components/StreamingFilterBar.test.tsx (3 tests) 228ms
+ ✓ __tests__/components/ScrollNavFab.test.tsx (5 tests) 231ms
+ ✓ __tests__/components/SearchBar.test.tsx (5 tests) 208ms
+ ✓ __tests__/components/NominationsReadinessPill.test.tsx (3 tests) 178ms
+ ✓ __tests__/components/Badge.test.tsx (3 tests) 87ms
+ ✓ __tests__/hooks/useMovieSearch.test.ts (6 tests) 98ms
+ ✓ __tests__/components/VotingProgressHeader.test.tsx (1 test) 88ms
+ ✓ __tests__/components/SwiperFinishedView.test.tsx (1 test) 115ms
+ ✓ __tests__/hooks/useKeyboardSwipe.test.ts (2 tests) 49ms
+ ✓ __tests__/api/session.test.ts (9 tests) 38ms
+ ✓ __tests__/websocket/websocket.test.ts (6 tests) 29ms
+ ✓ __tests__/components/ConfettiCelebration.test.tsx (3 tests) 70ms
+ ✓ __tests__/api/movie.test.ts (5 tests) 24ms
+ ✓ __tests__/api/ai.test.ts (3 tests) 23ms
+ ✓ __tests__/storage/sessionStorage.test.ts (9 tests) 20ms
+ ✓ __tests__/api/vote.test.ts (2 tests) 10ms
+ ✓ __tests__/api/consensus.test.ts (4 tests) 14ms
+ ✓ __tests__/audio/sounds.test.ts (5 tests) 9ms
+
+ Test Files  43 passed (43)
+      Tests  241 passed (241)
+   Start at  17:47:32
+   Duration  12.02s (transform 6.75s, setup 39.53s, import 20.54s, tests 17.08s, environment 63.83s)
+

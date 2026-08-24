@@ -312,7 +312,7 @@ Every HTTP request generates or accepts an `X-Correlation-ID` header, which is i
 
 ## Testing & Quality Assurance
 
-### Run Backend Tests (173 Tests)
+### Run Backend Tests (174 Tests)
 ```bash
 cd backend
 ./mvnw clean test
