@@ -1,0 +1,17 @@
+﻿
+movie-picker-backend:bench        504MB     2026-08-23 17:46:03 
+-0500 CDT
+movie-picker-backend:optimized    504MB     2026-08-23 17:46:03 
+-0500 CDT
+movie-picker-frontend:optimized   288MB     2026-08-23 17:43:42 
+-0500 CDT
+movie-picker-frontend:naive       3.18GB    2026-08-23 17:42:39 
+-0500 CDT
+movie-picker-backend:naive        1.09GB    2026-08-23 17:41:11 
+-0500 CDT
+movie-picker-frontend:latest      288MB     2026-08-23 16:56:28 
+-0500 CDT
+movie-picker-backend:latest       504MB     2026-08-23 16:24:45 
+-0500 CDT
+
+

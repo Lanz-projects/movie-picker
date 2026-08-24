@@ -1,0 +1,17 @@
+=== DOCKER BUILD TIME BENCHMARKS ===
+COLD BUILDS (No Cache):
+Cold Run 1: 30.68 s
+Cold Run 2: 30.97 s
+Cold Run 3: 52.86 s
+Cold Average: 38.17 s
+
+WARM INCREMENTAL BUILDS (Application Layer Invalidation):
+Warm Run 1 (timestamp 1787532658428): 16.64 s
+Warm Run 2 (timestamp 1787532675091): 15.09 s
+Warm Run 3 (timestamp 1787532690184): 14.90 s
+Warm Incremental Average: 15.69 s
+
+SUMMARY:
+Cold Compilation Average: 38.17 s
+Incremental Layer-Cached Rebuild Average: 15.69 s
+Rebuild Speedup: 58.9% Faster CI/CD Builds

@@ -1,26 +1,241 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Surface Hierarchy */
+    --bg-base: #0a0d14;
+    --bg-card: #131722;
+    --bg-surface: #1a2030;
+    --bg-elevated: #222a3f;
+
+    /* Borders & Overlays */
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(139, 92, 246, 0.3);
+    --card-gradient: linear-gradient(180deg, transparent 45%, rgba(10, 13, 20, 0.75) 75%, rgba(10, 13, 20, 0.98) 100%);
+
+    /* Brand & Action Accents */
+    --brand-indigo: #6366f1;
+    --brand-violet: #8b5cf6;
+    --brand-coral: #f43f5e;
+    --brand-emerald: #10b981;
+    --brand-amber: #f59e0b;
+    --brand-cyan: #06b6d4;
+
+    /* Typography Colors */
+    --text-main: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #8e9db2;
+
+    /* Global Fallbacks */
+    --background: var(--bg-base);
+    --foreground: var(--text-main);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--brand-violet);
+    outline-offset: 2px;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit), var(--font-inter), system-ui, sans-serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tailwind v4 Theme Tokens */
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-card: var(--bg-card);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-highlight: var(--border-highlight);
+
+  --color-brand-indigo: var(--brand-indigo);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-coral: var(--brand-coral);
+  --color-brand-emerald: var(--brand-emerald);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-cyan: var(--brand-cyan);
+
+  --color-text-main: var(--text-main);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --font-display: var(--font-outfit), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+}
+
+/* Custom Micro-Animations */
+@keyframes viewSlideIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes stampPop {
+  0% {
+    transform: scale(0.8) rotate(var(--stamp-rotation, 0deg));
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(var(--stamp-rotation, 0deg));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(var(--stamp-rotation, 0deg));
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Utility Classes */
+.animate-stage-in {
+  animation: viewSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cinema-ambient-bg {
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+}
+
+.glass-panel {
+  background: rgba(19, 23, 34, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.card-gradient-overlay {
+  background: var(--card-gradient);
+}
+
+/* Swiper Stamp Overlays */
+.stamp-like {
+  --stamp-rotation: 14deg;
+  border: 3px solid var(--brand-emerald);
+  color: var(--brand-emerald);
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transform: rotate(var(--stamp-rotation));
+  animation: stampPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.stamp-pass {
+  --stamp-rotation: -14deg;
+  border: 3px solid var(--brand-coral);
+  color: var(--brand-coral);
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transform: rotate(var(--stamp-rotation));
+  animation: stampPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.stamp-superlike {
+  --stamp-rotation: 0deg;
+  border: 3px solid var(--brand-amber);
+  color: var(--brand-amber);
+  background: rgba(0, 0, 0, 0.6);
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: stampPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Safe Area Inset Support */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-safe {
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Scroll Fade Mask for Horizontal Scroll Trays */
+.scroll-mask-right {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+/* Custom Scrollbar for drawers / trays */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-stage-in,
+  .animate-bounce,
+  .animate-pulse,
+  .animate-spin,
+  .stamp-like,
+  .stamp-pass,
+  .stamp-superlike {
+    animation: none !important;
+  }
 }
