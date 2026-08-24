@@ -26,7 +26,7 @@ Pop-Location
 
 Write-Host "  -> Running Next.js Vitest test suite..."
 Push-Location "frontend"
-npm test -- --run | Out-File -FilePath $testSuiteOut -Append -Encoding utf8
+npm test -- --run --no-color | Out-File -FilePath $testSuiteOut -Append -Encoding utf8
 Pop-Location
 Write-Host "  OK: Test suite evidence saved to benchmarks/04-test-suite-raw.txt" -ForegroundColor Green
 Write-Host ""

@@ -1127,62 +1127,62 @@ Hibernate: alter table if exists votes add constraint FKli4uj3ic2vypf5pialchj925
 > vitest run
 
 
-[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mC:/Users/Lanz Prod/Documents/Programming/movie-picker/frontend[39m
+ RUN  v4.1.10 C:/Users/Lanz Prod/Documents/Programming/movie-picker/frontend
 
- [32mΓ£ô[39m __tests__/components/RoomUsersDropdown.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 273[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SelectionRack.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 395[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/MovieDetailsModal.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 459[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SwipeActions.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 416[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SearchFilterModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 448[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/AiConciergeTab.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 582[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SearchFilterToolbar.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 481[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/VibeMatcherModal.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 690[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/WinnerCard.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 409[2mms[22m[39m
- [32mΓ£ô[39m __tests__/context/SessionContext.test.tsx [2m([22m[2m31 tests[22m[2m)[22m[33m 775[2mms[22m[39m
- [32mΓ£ô[39m __tests__/stages/WinnerScreen.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 566[2mms[22m[39m
- [32mΓ£ô[39m __tests__/stages/SwiperScreen.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 887[2mms[22m[39m
- [32mΓ£ô[39m __tests__/stages/LobbyScreen.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1538[2mms[22m[39m
- [32mΓ£ô[39m __tests__/stages/SetupScreen.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1826[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m allows directly typing numbers into max players and suggestions inputs [33m 387[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/Button.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 142[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/MovieCard.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 233[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/GenreFilterChips.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 242[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SwipeCard.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 222[2mms[22m[39m
- [32mΓ£ô[39m __tests__/stages/SearchScreen.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 3493[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m renders stage header, search input, genre chips, and default trending movies [33m 468[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m opens Vibe Matcher modal when Match the Vibe button is clicked [33m 415[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m performs movie search and renders result cards [33m 407[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m allows nominating and removing movies into the selection rack [33m 483[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m opens movie details modal on clicking movie card and closes on Escape/Close [33m 498[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m submits deck nominations and displays submitted status [33m 462[2mms[22m[39m
-     [33m[2mΓ£ô[22m[39m renders 'Start Voting Phase' CTA for Host and invokes startVoting [33m 478[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/Header.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 205[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/QRCodeModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 285[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/LeaderboardRow.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 223[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/MovieGrid.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 275[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/LeaderboardList.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 310[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/LegalModal.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 185[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/StreamingFilterBar.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 228[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/ScrollNavFab.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 231[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SearchBar.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 208[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/NominationsReadinessPill.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 178[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/Badge.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 87[2mms[22m[39m
- [32mΓ£ô[39m __tests__/hooks/useMovieSearch.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 98[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/VotingProgressHeader.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 88[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/SwiperFinishedView.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 115[2mms[22m[39m
- [32mΓ£ô[39m __tests__/hooks/useKeyboardSwipe.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 49[2mms[22m[39m
- [32mΓ£ô[39m __tests__/api/session.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 38[2mms[22m[39m
- [32mΓ£ô[39m __tests__/websocket/websocket.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 29[2mms[22m[39m
- [32mΓ£ô[39m __tests__/components/ConfettiCelebration.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 70[2mms[22m[39m
- [32mΓ£ô[39m __tests__/api/movie.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 24[2mms[22m[39m
- [32mΓ£ô[39m __tests__/api/ai.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
- [32mΓ£ô[39m __tests__/storage/sessionStorage.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 20[2mms[22m[39m
- [32mΓ£ô[39m __tests__/api/vote.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
- [32mΓ£ô[39m __tests__/api/consensus.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
- [32mΓ£ô[39m __tests__/audio/sounds.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ ✓ __tests__/components/RoomUsersDropdown.test.tsx (4 tests) 273ms
+ ✓ __tests__/components/SelectionRack.test.tsx (8 tests) 395ms
+ ✓ __tests__/components/MovieDetailsModal.test.tsx (7 tests) 459ms
+ ✓ __tests__/components/SwipeActions.test.tsx (3 tests) 416ms
+ ✓ __tests__/components/SearchFilterModal.test.tsx (5 tests) 448ms
+ ✓ __tests__/components/AiConciergeTab.test.tsx (5 tests) 582ms
+ ✓ __tests__/components/SearchFilterToolbar.test.tsx (4 tests) 481ms
+ ✓ __tests__/components/VibeMatcherModal.test.tsx (9 tests) 690ms
+ ✓ __tests__/components/WinnerCard.test.tsx (7 tests) 409ms
+ ✓ __tests__/context/SessionContext.test.tsx (31 tests) 775ms
+ ✓ __tests__/stages/WinnerScreen.test.tsx (4 tests) 566ms
+ ✓ __tests__/stages/SwiperScreen.test.tsx (5 tests) 887ms
+ ✓ __tests__/stages/LobbyScreen.test.tsx (11 tests) 1538ms
+ ✓ __tests__/stages/SetupScreen.test.tsx (8 tests) 1826ms
+     ✓ allows directly typing numbers into max players and suggestions inputs  387ms
+ ✓ __tests__/components/Button.test.tsx (4 tests) 142ms
+ ✓ __tests__/components/MovieCard.test.tsx (7 tests) 233ms
+ ✓ __tests__/components/GenreFilterChips.test.tsx (4 tests) 242ms
+ ✓ __tests__/components/SwipeCard.test.tsx (7 tests) 222ms
+ ✓ __tests__/stages/SearchScreen.test.tsx (8 tests) 3493ms
+     ✓ renders stage header, search input, genre chips, and default trending movies  468ms
+     ✓ opens Vibe Matcher modal when Match the Vibe button is clicked  415ms
+     ✓ performs movie search and renders result cards  407ms
+     ✓ allows nominating and removing movies into the selection rack  483ms
+     ✓ opens movie details modal on clicking movie card and closes on Escape/Close  498ms
+     ✓ submits deck nominations and displays submitted status  462ms
+     ✓ renders 'Start Voting Phase' CTA for Host and invokes startVoting  478ms
+ ✓ __tests__/components/Header.test.tsx (3 tests) 205ms
+ ✓ __tests__/components/QRCodeModal.test.tsx (5 tests) 285ms
+ ✓ __tests__/components/LeaderboardRow.test.tsx (4 tests) 223ms
+ ✓ __tests__/components/MovieGrid.test.tsx (6 tests) 275ms
+ ✓ __tests__/components/LeaderboardList.test.tsx (3 tests) 310ms
+ ✓ __tests__/components/LegalModal.test.tsx (4 tests) 185ms
+ ✓ __tests__/components/StreamingFilterBar.test.tsx (3 tests) 228ms
+ ✓ __tests__/components/ScrollNavFab.test.tsx (5 tests) 231ms
+ ✓ __tests__/components/SearchBar.test.tsx (5 tests) 208ms
+ ✓ __tests__/components/NominationsReadinessPill.test.tsx (3 tests) 178ms
+ ✓ __tests__/components/Badge.test.tsx (3 tests) 87ms
+ ✓ __tests__/hooks/useMovieSearch.test.ts (6 tests) 98ms
+ ✓ __tests__/components/VotingProgressHeader.test.tsx (1 test) 88ms
+ ✓ __tests__/components/SwiperFinishedView.test.tsx (1 test) 115ms
+ ✓ __tests__/hooks/useKeyboardSwipe.test.ts (2 tests) 49ms
+ ✓ __tests__/api/session.test.ts (9 tests) 38ms
+ ✓ __tests__/websocket/websocket.test.ts (6 tests) 29ms
+ ✓ __tests__/components/ConfettiCelebration.test.tsx (3 tests) 70ms
+ ✓ __tests__/api/movie.test.ts (5 tests) 24ms
+ ✓ __tests__/api/ai.test.ts (3 tests) 23ms
+ ✓ __tests__/storage/sessionStorage.test.ts (9 tests) 20ms
+ ✓ __tests__/api/vote.test.ts (2 tests) 10ms
+ ✓ __tests__/api/consensus.test.ts (4 tests) 14ms
+ ✓ __tests__/audio/sounds.test.ts (5 tests) 9ms
 
-[2m Test Files [22m [1m[32m43 passed[39m[22m[90m (43)[39m
-[2m      Tests [22m [1m[32m241 passed[39m[22m[90m (241)[39m
-[2m   Start at [22m 17:47:32
-[2m   Duration [22m 12.02s[2m (transform 6.75s, setup 39.53s, import 20.54s, tests 17.08s, environment 63.83s)[22m
+ Test Files  43 passed (43)
+      Tests  241 passed (241)
+   Start at  17:47:32
+   Duration  12.02s (transform 6.75s, setup 39.53s, import 20.54s, tests 17.08s, environment 63.83s)
 

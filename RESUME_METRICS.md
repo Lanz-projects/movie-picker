@@ -17,7 +17,7 @@ Curated engineering metrics, recruiter-tested bullet points, mathematical proofs
 - **Engineered an enterprise fault-tolerance pipeline using Resilience4j circuit breakers (sliding window of 10, 50% failure rate threshold) and exponential backoff retries (3 attempts, 500ms initial wait)**, guaranteeing zero server thread lockups and graceful degraded fallbacks during upstream TMDB and Gemini AI rate limits or outages.
 - **Optimized production container architecture via multi-stage Docker builds and Spring Boot `layertools` layer extraction**, slashing frontend image size by **90.9% (288MB vs. 3.18GB naive)** and backend image size by **53.8% (504MB vs. 1.09GB naive)** with **58.9% faster incremental CI/CD rebuilds (15.7s vs. 38.2s cold)**.
 - **Integrated Google Gemini LLM and in-memory Spring Cache to deliver a multi-turn conversational AI Concierge**, reducing repeat catalog query latency by **99.6% (from 53.2ms outbound HTTPS to 0.2ms JVM in-memory lookup)** with strict structured JSON schema validation.
-- **Authored a 414-test automated test suite (173 Spring Boot JUnit/MockMvc + 241 Vitest/React Testing Library)**, maintaining a **100% pass rate** across multi-user room lifecycles, race conditions, and weighted consensus scoring logic.
+- **Authored a 415-test automated test suite (174 Spring Boot JUnit/MockMvc + 241 Vitest/React Testing Library)**, maintaining a **100% pass rate** across multi-user room lifecycles, race conditions, and weighted consensus scoring logic.
 
 ---
 
@@ -29,7 +29,7 @@ Curated engineering metrics, recruiter-tested bullet points, mathematical proofs
 | **Backend Container Size** | 1.09 GB (single-stage Debian JDK) | **504 MB** (Temurin JRE 17 Alpine layered) | **53.8% Size Reduction** | [01-docker-sizes-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/01-docker-sizes-raw.txt) |
 | **Incremental Docker Rebuild** | 38.17 s (cold build average) | **15.69 s** (warm layer cache hit) | **58.9% Faster Builds** | [02-docker-build-times-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/02-docker-build-times-raw.txt) |
 | **TMDB Catalog Query Latency** | 53.20 ms (5-query outbound HTTPS avg) | **0.20 ms** (5-query in-memory heap avg) | **99.6% Latency Reduction** | [03-cache-timing-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/03-cache-timing-raw.txt) |
-| **Automated Test Suite** | 0 tests | **414 total tests** (173 BE + 241 FE) | **100% Pass Rate (0 failures)** | [04-test-suite-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/04-test-suite-raw.txt) |
+| **Automated Test Suite** | 0 tests | **415 total tests** (174 BE + 241 FE) | **100% Pass Rate (0 failures)** | [04-test-suite-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/04-test-suite-raw.txt) |
 | **WebSocket Architecture** | Periodic HTTP polling ($O(N)$ pull) | Event-driven STOMP over SockJS | Eliminates redundant HTTP traffic | [05-websocket-framing-notes.md](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/05-websocket-framing-notes.md) |
 
 ---
@@ -65,9 +65,9 @@ Curated engineering metrics, recruiter-tested bullet points, mathematical proofs
 ---
 
 ### 3.4 Automated Test Suite Verification
-* **Backend Suite**: `cd backend && .\mvnw.cmd test` $\rightarrow$ **173 tests passed** (0 failures, 0 errors, 0 skipped).
+* **Backend Suite**: `cd backend && .\mvnw.cmd test` $\rightarrow$ **174 tests passed** (0 failures, 0 errors, 0 skipped).
 * **Frontend Suite**: `cd frontend && npm test -- --run` $\rightarrow$ **241 tests passed** across 43 test files.
-* **Combined Total**: **414 passed automated tests with 100% pass rate**.
+* **Combined Total**: **415 passed automated tests with 100% pass rate**.
 * **Evidence File**: [benchmarks/04-test-suite-raw.txt](file:///c:/Users/Lanz%20Prod/Documents/Programming/movie-picker/benchmarks/04-test-suite-raw.txt)
 
 ---

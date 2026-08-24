@@ -136,7 +136,7 @@ After running the benchmarks, your `/benchmarks/` directory will contain:
 | `benchmarks/01-docker-sizes-raw.txt` | Raw table of Docker image sizes (`naive` vs `optimized`) |
 | `benchmarks/02-docker-build-times-raw.txt` | Timings for 3 cold builds and 3 incremental rebuilds |
 | `benchmarks/03-cache-timing-raw.txt` | Real execution times for 5 TMDB cache misses and 5 in-memory hits |
-| `benchmarks/04-test-suite-raw.txt` | Complete terminal logs from `mvn test` (173) and `npm test` (241) |
+| `benchmarks/04-test-suite-raw.txt` | Complete terminal logs from `mvn test` (174) and `npm test` (241) |
 | `benchmarks/05-websocket-framing-notes.md` | Architectural decision writeup and interview scripts |
 
 ---
