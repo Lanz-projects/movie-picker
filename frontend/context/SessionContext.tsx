@@ -156,20 +156,28 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
               if (!isMounted) return;
 
+              const rejoinedUser = rejoined.users?.find(
+                (u) => u.displayName === stored.displayName.trim()
+              );
+
+              if (!rejoinedUser) {
+                console.warn("[SessionContext] Rejoined user missing from session");
+                clearSessionAuth();
+                return;
+              }
+
               effectiveSession = rejoined;
-              effectiveMe =
-                rejoined.users.find((u) => u.displayName === stored.displayName.trim()) || {
-                  id: rejoined.users[rejoined.users.length - 1]?.id || 2,
-                  displayName: stored.displayName.trim(),
-                  isHost: false,
-                  joinedAt: new Date().toISOString(),
-                };
+              effectiveMe = rejoinedUser;
 
               saveSessionAuth({
                 roomCode: rejoined.roomCode,
                 userId: effectiveMe.id,
                 displayName: effectiveMe.displayName,
                 isHost: effectiveMe.isHost ?? false,
+                sessionToken:
+                  rejoined.currentSessionToken ||
+                  effectiveMe.sessionToken ||
+                  stored.sessionToken,
                 savedAt: Date.now(),
               });
             } catch (rejoinErr) {
@@ -457,13 +465,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           maxSuggestionsPerUser: maxSuggestions,
         });
 
-        const me =
-          newSession.users.find((u) => u.displayName === hostName.trim()) || {
-            id: newSession.users[0]?.id || 1,
-            displayName: hostName.trim(),
-            isHost: true,
-            joinedAt: new Date().toISOString(),
-          };
+        const hostUser = newSession.users?.find(
+          (u) => u.displayName === hostName.trim()
+        );
+
+        if (!hostUser) {
+          throw new Error("Created room, but host details were not found in the session.");
+        }
+
+        const me = hostUser;
 
         setSession(newSession);
         setCurrentUser(me);
@@ -500,13 +510,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           displayName: displayName.trim(),
         });
 
-        const me =
-          joinedSession.users.find((u) => u.displayName === displayName.trim()) || {
-            id: joinedSession.users[joinedSession.users.length - 1]?.id || 2,
-            displayName: displayName.trim(),
-            isHost: false,
-            joinedAt: new Date().toISOString(),
-          };
+        const joinedUser = joinedSession.users?.find(
+          (u) => u.displayName === displayName.trim()
+        );
+
+        if (!joinedUser) {
+          throw new Error("Joined room, but user details were not found in the session.");
+        }
+
+        const me = joinedUser;
 
         setSession(joinedSession);
         setCurrentUser(me);

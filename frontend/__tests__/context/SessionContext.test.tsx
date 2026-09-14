@@ -116,6 +116,64 @@ describe("SessionContext & useSession Hook", () => {
     expect(result.current.stage).toBe("LOBBY");
   });
 
+  it("joinRoom throws error and sets error state if joined user is missing from session users", async () => {
+    const mockSessionWithoutUser: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [{ id: 10, displayName: "Alice", joinedAt: "2026-08-14T00:00:00" }],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.joinSession).mockResolvedValue(mockSessionWithoutUser);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await expect(result.current.joinRoom("MVE8", "Bob")).rejects.toThrow(
+        "Joined room, but user details were not found in the session."
+      );
+    });
+
+    expect(result.current.error).toBe(
+      "Joined room, but user details were not found in the session."
+    );
+    expect(result.current.currentUser).toBeNull();
+    expect(result.current.stage).toBe("SETUP");
+  });
+
+  it("createRoom throws error and sets error state if host is missing from session users", async () => {
+    const mockSessionWithoutHost: SessionResponse = {
+      id: 1,
+      roomCode: "MVE8",
+      hostName: "Alice",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    vi.mocked(api.createSession).mockResolvedValue(mockSessionWithoutHost);
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await act(async () => {
+      await expect(result.current.createRoom("Alice")).rejects.toThrow(
+        "Created room, but host details were not found in the session."
+      );
+    });
+
+    expect(result.current.error).toBe(
+      "Created room, but host details were not found in the session."
+    );
+    expect(result.current.currentUser).toBeNull();
+    expect(result.current.stage).toBe("SETUP");
+  });
+
   it("leaveRoom calls leave API, disconnects websocket, and resets to SETUP", async () => {
     const mockSession: SessionResponse = {
       id: 1,
@@ -1209,6 +1267,61 @@ describe("SessionContext & useSession Hook", () => {
     });
     expect(result.current.currentUser?.displayName).toBe("Alice");
     expect(result.current.isHost).toBe(false);
+  });
+
+  it("clears auth and stays in SETUP if auto-rejoin succeeds but user is missing from session users", async () => {
+    const mockActiveSession: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Bob",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 11, displayName: "Bob", isHost: true, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    const mockRejoinedSessionWithoutUser: SessionResponse = {
+      id: 1,
+      roomCode: "MVE892",
+      hostName: "Bob",
+      status: "WAITING",
+      maxUsers: 10,
+      maxSuggestionsPerUser: 5,
+      users: [
+        { id: 11, displayName: "Bob", isHost: true, joinedAt: "2026-08-14T00:01:00" },
+      ],
+      createdAt: "2026-08-14T00:00:00",
+    };
+
+    sessionStorage.setItem(
+      "movie_picker_session_auth",
+      JSON.stringify({
+        roomCode: "MVE892",
+        userId: 10,
+        displayName: "Alice",
+        isHost: false,
+        savedAt: Date.now(),
+      })
+    );
+
+    vi.mocked(api.getSessionByRoomCode).mockResolvedValue(mockActiveSession);
+    vi.mocked(api.joinSession).mockResolvedValue(mockRejoinedSessionWithoutUser);
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem("movie_picker_session_auth")).toBeNull();
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith("[SessionContext] Rejoined user missing from session");
+    expect(result.current.stage).toBe("SETUP");
+    expect(result.current.currentUser).toBeNull();
+    warnSpy.mockRestore();
   });
 
   it("clears sessionStorage and remains in SETUP if session is expired or user not in room", async () => {
